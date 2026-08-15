@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>113年 導遊執業法規</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f5f5f5;color:#333}
+.header{position:sticky;top:0;background:#2c5f8a;color:#fff;padding:10px 16px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header h1{font-size:1rem;font-weight:700}
+.header .meta{font-size:.8rem;opacity:.85;margin-top:2px}
+.timer{display:inline-block;background:rgba(255,255,255,.2);padding:2px 10px;border-radius:12px;font-weight:700;font-size:.95rem}
+.timer.warn{background:#f39c12}
+.timer.danger{background:#e74c3c;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.5}}
+.progress-wrap{background:#1a4a70;padding:8px 16px}
+.dots{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:.2s}
+.dot.answered{background:#4fc3f7}
+.container{max-width:860px;margin:0 auto;padding:12px 16px 40px}
+.question-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);border-left:4px solid #2c5f8a}
+.question-card.correct{border-left-color:#27ae60}
+.question-card.wrong{border-left-color:#e74c3c}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:12px;white-space:pre-wrap}
+.options{display:flex;flex-direction:column;gap:6px}
+.opt-label{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.9rem;line-height:1.5}
+.opt-label:hover{border-color:#2c5f8a;background:#f0f7ff}
+.opt-label input{margin-top:3px;flex-shrink:0;accent-color:#2c5f8a}
+.opt-label.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt-label.correct-ans{border-color:#27ae60!important;background:#e8f5e9!important}
+.opt-label.wrong-ans{border-color:#e74c3c!important;background:#ffebee!important}
+.result-mark{float:right;font-size:1.1rem}
+.correct-hint{font-size:.82rem;color:#27ae60;margin-top:6px;font-weight:600}
+.submit-wrap{text-align:center;margin:20px 0}
+.btn{padding:12px 32px;border:none;border-radius:24px;font-size:1rem;cursor:pointer;font-family:inherit;font-weight:700;transition:.2s}
+.btn-submit{background:#2c5f8a;color:#fff}
+.btn-submit:hover{background:#1a4a70}
+.btn-reset{background:#27ae60;color:#fff}
+.btn-reset:hover{background:#1e8449}
+.score-panel{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.12);text-align:center}
+.score-big{font-size:3rem;font-weight:700;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.excellent{color:#27ae60}
+.grade.pass{color:#2c5f8a}
+.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:12px;font-size:.9rem}
+.stat-item{text-align:center}
+.stat-num{font-size:1.4rem;font-weight:700}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border:2px solid #2c5f8a;border-radius:20px;background:#fff;color:#2c5f8a;cursor:pointer;font-size:.85rem;font-family:inherit;font-weight:600}
+.filter-btn.active{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h1>113年 導遊執業法規</h1>
+      <div class="meta">華語導遊人員｜共 <span id="totalQ">0</span> 題</div>
+    </div>
+    <div class="timer" id="timer">60:00</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="dots" id="dots"></div>
+</div>
+<div class="container">
+  <div id="quiz-area"></div>
+  <div class="submit-wrap" id="submit-wrap">
+    <button class="btn btn-submit" onclick="submitQuiz()">📋 交卷</button>
+  </div>
+  <div id="score-panel" class="hidden"></div>
+  <div id="filter-bar" class="filter-bar hidden">
+    <button class="filter-btn active" onclick="filterQ('all',this)">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong',this)">只看錯題</button>
+    <button class="filter-btn" onclick="filterQ('correct',this)">只看對題</button>
+  </div>
+  <div id="result-area"></div>
+  <div id="reset-wrap" class="submit-wrap hidden">
+    <button class="btn btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+</div>
+<script>
+const QUESTIONS=[
+{"q": "《2030臺灣觀光政策白皮書》對臺灣未來觀光發展的願景為何？", "opts": ["觀光之島", "觀光主流化", "觀光立國", "觀光大國"], "ans": 2},
+{"q": "依導遊人員管理規則規定，下列何者正確？ ①職前訓練測驗成績不及格者，應於7日內補行測驗一次 ②經華語導遊人員評量測驗及格且訓練合格者，爾後參加外語導遊人員評量測驗及格者，免再參加職前訓練 ③經廢止導遊人員執業證未逾5年者，不得充任導遊人員 ④外語導遊人員類科專用制評量測驗及格人員僅得為該推薦旅行業執行導遊業務，並可受政府機關、團體 之招請執行導遊業務 ⑤在職訓練期間由他人冒名頂替參加訓練者，應予退訓，經退訓後2年內不得參加訓練 ⑥執業證有效期期滿前1年內應向交通部觀光署或其委託之團體申請換發", "opts": ["①②③④⑤⑥", "①③④⑤⑥", "①②③⑥", "②③④⑤"], "ans": 2},
+{"q": "旅行業執行業務時，該旅行業及其所派遣之隨團服務人員，均應遵守規定，下列何者正確？", "opts": ["有正當理由時，可以於旅遊途中離開團體或將旅客解散", "旅遊途中因應旅客請求可以變更旅程", "遊覽車以搭載所屬觀光團體旅客為限，沿途不得搭載其他旅客", "因恐旅客遺失證照，隨團服務人員可代為保管旅客證照至行程結束"], "ans": 2},
+{"q": "交通部觀光署目前已在海外設立下列那些辦事處？①釜山 ②西雅圖 ③紐約 ④羅馬 ⑤胡志明 ⑥倫敦 ⑦雪梨 ⑧大阪", "opts": ["①③⑤⑥⑧", "①③④⑤⑧", "③④⑤⑦⑧", "②③⑤⑥⑦⑧"], "ans": 0},
+{"q": "入境臺灣的國際觀光客欲將其身上攜帶的 300 美元鈔票向臺灣銀行兌換成新臺幣，其匯率兌換要依下列 那一項銀行之公告牌價？", "opts": ["現金買匯", "現金賣匯", "即期買匯", "即期賣匯"], "ans": 0},
+{"q": "旅行業已取得經中央主管機關認可足以保障旅客權益之觀光公益法人會員資格者，其履約保證保險應投 保最低金額為新臺幣多少元，下列何者正確？", "opts": ["綜合旅行業3,000萬元", "甲種旅行業500萬元", "乙種旅行業300萬元", "甲種旅行業每增設分公司1家，應增加200萬元"], "ans": 1},
+{"q": "有關旅行業設置營業處所之規範，下列何者正確？", "opts": ["網路旅行社無需設有固定營業處所", "營業處所得與其他營利事業共同使用", "營業處所面積至少應有30平方公尺", "分公司營業處所至少應有20平方公尺"], "ans": 1},
+{"q": "依發展觀光條例規定，經中央主管機關會商各目的事業主管機關同意後指定供觀光旅客遊覽之風景、名 勝、古蹟、博物館、展覽場所及其他可供觀光之地區，所定義名稱為何？", "opts": ["遊樂地區", "名勝地區", "觀光地區", "風景地區"], "ans": 2},
+{"q": "我國為加強機場服務及設施，發展觀光產業，得收取出境航空旅客之機場服務費；其收費繳納等相關作業 之辦法，下列何者正確？①機場服務費新臺幣 500 元 ②領隊免費票免收 ③未滿 2 足歲之兒童免收 ④65歲以上免收 ⑤由航空公司隨票代收 ⑥入境參加由觀光主管機關規劃提供半日遊程之過境旅客免收", "opts": ["①②③⑤", "①②④⑥", "①③⑤⑥", "①④⑤⑥"], "ans": 2},
+{"q": "依動物傳染病防治條例規定，為防範非洲豬瘟，保護臺灣豬隻健康，旅客違規攜帶肉製品入境，將處新臺 幣多少元之罰鍰？", "opts": ["1萬元以上，100萬元以下", "5萬元以上，25萬元以下", "10萬元以上，50萬元以下", "20萬元以上，100萬元以下"], "ans": 0},
+{"q": "依民宿管理辦法規定，民宿之經營規模，客房數為八間以下，且客房總樓地板面積為何？", "opts": ["240平方公尺以下", "320平方公尺以下", "400平方公尺以下", "480平方公尺以下"], "ans": 0},
+{"q": "交通部觀光署的英文名稱為何？", "opts": ["TourismAdministration,MOTC", "TourismBureau,MOTC", "TourismAgency,MOTC", "TourismDepartment,MOTC"], "ans": 1},
+{"q": "北海岸、野柳是外國觀光客喜愛的觀光景點，目前的行銷品牌為何？", "opts": ["黃金海岸（GoldCoast）", "皇冠海岸（CrownCoast）", "寶島之冠（CrownofFormosa）", "浪漫海岸（RomanticCoast）"], "ans": 1},
+{"q": "經營同種類旅行業，最近二年未受停業處分，且保證金未被強制執行，並取得經中央主管機關認可足以保 障旅客權益之觀光公益法人會員資格者，得按原保證金金額十分之一繳納。下列何者為所指的觀光公益 法人？", "opts": ["中華民國旅行業經理人協會", "中華民國旅行業品質保障協會", "台灣國際觀光產業發展協會", "中華民國旅行商業同業公會全國聯合會"], "ans": 2},
+{"q": "依發展觀光條例，國際觀光旅館、一般觀光旅館、旅館業、民宿等之主管機關，下列何者正確？", "opts": ["國際觀光旅館、一般觀光旅館、旅館業主管單位為交通部觀光署", "民宿主管單位為農業部林業及自然保育署", "國際觀光旅館、非直轄市一般觀光旅館主管單位為交通部觀光署", "觀光旅館、旅館業、民宿主管單位為地方政府"], "ans": 1},
+{"q": "泰國於2023年11月10日開放臺灣人赴泰國免簽證，臺灣人在泰國可停留幾天？另臺灣目前亦開放泰國 人來臺灣免簽證，泰國人在臺灣可停留幾天？", "opts": ["20天、15天", "30天、14天", "30天、30天", "90天、90天"], "ans": 0},
+{"q": "旅行業無力支付辦理旅遊所需一部或全部費用，致其安排之旅遊活動一部或全部無法完成時，在何種情況 下，履約保證保險在保險金額範圍內，應給付旅客費用？", "opts": ["旅行業因財務困難，未能繼續經營", "旅行業股東自行解散，未能繼續經營", "旅行業違反法規被裁罰，自行停業，未能繼續經營", "旅行業被主管單位勒令停業，未能繼續經營"], "ans": 3},
+{"q": "目前中華民國的各國家公園警察分隊隸屬於下列那一個單位管轄範圍？", "opts": ["內政部國家公園署", "交通部觀光署", "內政部營建署", "內政部警政署"], "ans": 0},
+{"q": "申報義務人出具委託書，委託他人辦理新臺幣結匯申報時，對於所申報事項，應由何人負責？", "opts": ["由委託人負責", "由受託人負責", "由委託人及受託人共同負責", "由外匯指定銀行負責"], "ans": 3},
+{"q": "依發展觀光條例規定，為加強國際觀光宣傳推廣，公司組織之觀光產業，得在下列何項用途項下支出部分 金額，抵減當年度應繳納營利事業所得稅額？", "opts": ["配合政府推動生態旅遊", "配合政府發展文創產業", "配合政府發展外籍青年來臺打工", "配合政府推廣會議旅遊"], "ans": 3},
+{"q": "在風景特定區或觀光地區內如有強行向旅客推銷物品或是其他騷擾旅客或影響旅客安全之行為，將由目 的事業主管機關處以罰鍰，下列金額何者正確？", "opts": ["新臺幣1,000元以上，5,000元以下", "新臺幣3,000元以上，1萬5,000元以下", "新臺幣5,000元以上，1萬5,000元以下", "新臺幣1萬元以上，5萬元以下"], "ans": 2},
+{"q": "參加導遊人員職前訓練報名繳費後，開訓前7日得取消報名並申請退還幾成訓練費用，逾期不予退還？", "opts": ["退還5成訓練費用", "退還6成訓練費用", "退還7成訓練費用", "退還8成訓練費用"], "ans": 3},
+{"q": "依發展觀光條例規定，導遊人員如於帶團期間有詐騙旅客、妨害善良風俗、玷辱國家榮譽或損害國家利益 之行為者將給予裁罰，下列何者正確？①處新臺幣 3,000 元以上，1 萬 5,000 元以下罰鍰 ②處新臺幣 1萬元以上，5萬元以下罰鍰 ③情節重大者，處新臺幣5萬元以上，30萬元以下罰鍰 ④情節重大者， 處新臺幣15萬元以上，50萬元以下罰鍰 ⑤禁止執行導遊業務", "opts": ["①③④", "②③⑤", "①④⑤", "②③"], "ans": 3},
+{"q": "於我國風景特定區或觀光地區內有下列那些行為者，由其目的事業主管機關處新臺幣5,000元以上，10萬 元以下罰鍰？①擅自經營固定或流動攤販 ②擅自設置指示標誌、廣告物 ③任意拋棄、焚燒垃圾或廢棄 物 ④擅入管理機關公告禁止進入之地區 ⑤將車輛停放於禁止停車之地區 ⑥破壞生態、污染環境", "opts": ["①②③④⑤⑥", "①②③④⑤", "①②③④", "③④⑤"], "ans": 1},
+{"q": "導遊人員規避、妨礙或拒絕主管機關或警察機關之檢查，或不提供、提示必要之文書、資料或物品之處罰 範圍為何？", "opts": ["處新臺幣1,000元以上，5,000元以下罰鍰", "處新臺幣3,000元以上，1萬5,000元以下罰鍰", "處新臺幣5,000元以上，2萬5,000元以下罰鍰", "處新臺幣1萬元以上，5萬元以下罰鍰"], "ans": 1},
+{"q": "目前持有下列那些國家護照入境臺灣可以免簽證停留最多90天？①捷克 ②義大利 ③立陶宛 ④馬來 西亞 ⑤韓國 ⑥新加坡 ⑦泰國 ⑧智利 ⑨多明尼加 ⑩以色列", "opts": ["②③④⑤⑥⑧", "①②③⑤⑧⑩", "②④⑤⑥⑦⑨", "①②⑤⑥⑧⑩"], "ans": 0},
+{"q": "有甲乙兩位日本人來臺觀光，甲從日本搭郵輪來旅遊後搭機返回，反之乙則搭機來旅遊後搭郵輪返回日 本，請問我國可以向他們收到的機場服務費各為新臺幣多少元？", "opts": ["甲500元，乙0元", "甲乙均為500元", "甲1,000元，乙500元", "甲乙均為1,000元"], "ans": 1},
+{"q": "從臺灣出境的旅客攜帶動植物及其相關產品數量限額規定，下列何者正確？①犬貓兔各 3 隻以下 ②動物產品 5 公斤以下 ③植物及其他植物產品 6 公斤以下 ④種子 1 公斤以下 ⑤種球 3 公斤以下 ⑥新鮮水果不得隨身攜帶 ⑦農畜水產品限量6公斤 ⑧茶葉限量1公斤", "opts": ["①③⑤⑦", "①②④⑤", "④⑤⑦⑧", "④⑤⑥⑦"], "ans": 2},
+{"q": "交通部觀光署為活絡國民旅遊，捲動觀光產業發展，集客及帶動旅客重遊，創造經濟效益而遴選全國級及 國際級活動品牌名稱為何？", "opts": ["臺灣活動嘉年華", "臺灣觀光節慶節", "臺灣觀光雙年曆", "臺灣觀光活動節"], "ans": 1},
+{"q": "大陸地區人民來臺觀光進行團體旅遊，應先透過臺灣旅行社協助向我國內政部移民署申辦入出境許可證。 請問入出境許可證之申辦方式為何？", "opts": ["全面臨櫃辦理", "全面線上辦理", "臨櫃或線上辦理", "郵寄或線上辦理"], "ans": 1},
+{"q": "依臺灣地區與大陸地區人民關係條例，臺灣地區之人民、法人、團體或其他機構，非經各該主管機關許 可，不得從事之行為，下列何者錯誤？", "opts": ["與大陸地區黨務、軍事、行政、具政治性機關（構）、團體或涉及對臺政治工作、影響國家安全或利益 之機關（構）、團體為任何形式之合作行為", "與大陸地區人民、法人、團體或其他機構，為商業及營利事業合作之行為", "與大陸地區人民、法人、團體或其他機構，為涉及政治性內容之合作行為", "與大陸地區人民、法人、團體或其他機構聯合設立政治性法人、團體或其他機構"], "ans": 0},
+{"q": "依大陸地區人民來臺從事觀光活動許可辦法之規定，下列何者錯誤？", "opts": ["大陸地區人民經許可來臺從事觀光活動之停留期間，自入境之次日起，不得逾30日", "除大陸地區帶團領隊外，大陸地區人民經許可來臺從事觀光活動，每年總停留期間不得逾120日", "大陸地區人民，因疾病住院、災變或其他特殊事故，未能依限出境者，應於停留期間屆滿前，由代申請 之旅行業或申請人向內政部移民署申請延期，每次不得逾7日", "在大陸地區公務機關（構）任職涉及旅遊業務者，若因大陸地區人民遇事故而必須臨時入境協助，得由 旅行業向交通部觀光署通報後，代向內政部移民署申請許可"], "ans": 2},
+{"q": "我國那一年開放國人赴大陸探親？", "opts": ["民國56年", "民國66年", "民國76年", "民國86年"], "ans": 1},
+{"q": "依臺灣地區與大陸地區人民關係條例，大陸地區人民在臺灣地區設有戶籍滿幾年，才得登記為公職候選 人、擔任公教或公營事業機關（構）人員及組織政黨？", "opts": ["6年", "10年", "12年", "20年"], "ans": 0},
+{"q": "依大陸地區人民來臺從事觀光活動許可辦法之規定，下列敘述何者尚未列入規定？", "opts": ["應依大陸地區人民來臺從事觀光活動許可辦法申報購買物品之品項、價格以及數量，超過新臺幣10萬 元以上之貨品應於繳納相關稅費後始得出境", "應依旅行業安排之行程旅遊，不得擅自脫團", "因傷病、探訪親友或其他緊急事故需離團者，應向隨團導遊人員依法申報，並由導遊人員向交通部觀光 署通報", "違反大陸地區人民來臺從事觀光活動許可辦法之規定者，治安機關得依法逕行強制出境"], "ans": 0},
+{"q": "外籍旅客持有效簽證或免簽方式入國之有效護照，可向下列那一個機關提出查驗許可入國後，取得停留、 居留許可？", "opts": ["內政部移民署", "交通部觀光署", "內政部警政署", "外交部領事事務局"], "ans": 3},
+{"q": "一般而言，持用外國護照入境我國之時，護照所餘效期至少應有多久？", "opts": ["1個月", "2個月", "3個月", "6個月"], "ans": 3},
+{"q": "陸客自由行乃是容許大陸地區人民持臺灣地區入出境許可證及大陸地區人民往來臺灣通行證，以個人旅 遊的方式前往中華民國臺灣地區旅遊的計畫。只要在計畫範圍內的大陸城市居民，可經簡單的簽註手續前 往臺灣旅遊。來臺停留期間自入境翌日起算，最多可停留幾天？除領隊外，每年總停留期間不得逾多少 天？", "opts": ["20天；150天", "20天；120天", "15天；150天", "15天；120天"], "ans": 1},
+{"q": "旅行業辦理接待大陸地區人民來臺觀光團體業務，應確保所接待之大陸旅客已投保包含旅遊傷害、突發疾 病醫療及善後處理費用之保險，其每人因意外事故死亡最低保險金額須為新臺幣多少元？", "opts": ["100萬元", "250萬元", "300萬元", "400萬元"], "ans": 3},
+{"q": "臺灣地區與大陸地區人民關係條例以規範涉及兩岸人民往來交流有關之權利義務事項為原則，下列何者 是該條例所規範處理項目？①大陸地區人民在臺灣地區設有戶籍後取得公職工作之規定 ②大陸地區人 民在臺灣地區設有戶籍後參選民意代表之國籍等憲政層次 ③規範臺灣地區與大陸地區人民之往來，並 處理衍生之法律事件 ④兩岸定位議題", "opts": ["①②", "①③", "②③", "②④"], "ans": 0},
+{"q": "度假打工簽證係發給以旅遊度假為主，以打工為輔而申請之簽證，主要在促進與其他國家間青年之互動交 流與瞭解，目前已與我國簽署相關協定並已生效之國家不包含下列那一國？", "opts": ["紐西蘭", "澳洲", "日本", "美國"], "ans": 3},
+{"q": "外國學者擬來臺申請短期停留簽證並參加國際學術研討會議。請問停留簽證係指擬在臺停留時間是幾天 以內？", "opts": ["6個月", "8個月", "9個月", "1年"], "ans": 0},
+{"q": "下列那一種類別之人員可申請使用入出國自動查驗通關系統（E-Gate）？", "opts": ["依法受有禁止入、出國（境）處分之人員", "行動不便而無法自行操作之人員", "役男、涉及國家安全出國未經核准之人員", "具外交官員或國際機構官員身分之外國人"], "ans": 3},
+{"q": "開放大陸地區人民來臺觀光為我國政府政策，為與大陸方面進行溝通聯繫及協助安排協商等工作，我國宣 布成立以下何項協會，作為與大陸「海峽兩岸旅遊交流協會」之對口單位？", "opts": ["財團法人台灣海峽兩岸觀光旅遊協會", "臺灣旅遊交流協會", "中華兩岸交流協會", "海峽兩岸關係協會"], "ans": 1},
+{"q": "下列何者入境檢查之時可走綠線檯通關？", "opts": ["行李物品總價值新臺幣3萬元者", "攜帶烈酒2瓶總計1.5公升者", "攜帶雪茄50支者", "攜帶鑽石總價值新臺幣30萬元者"], "ans": 3},
+{"q": "志明剛年滿18歲，父母帶著他與大他三歲的姊姊來臺旅遊。請問下列何種狀況志明一家必須經由紅線檯 申報通關？", "opts": ["合計攜帶捲菸600支、酒類4公升", "合計攜帶捲菸800支、酒類3公升", "合計攜帶雪茄50支、酒類3公升", "合計攜帶菸絲2磅、酒類4公升"], "ans": 0},
+{"q": "假設美元（USD）對菲律賓披索（PHP）之匯率為1：56，美元對新臺幣（TWD）之匯率為1：32；依以 上參考數值，請問新臺幣兌換菲律賓披索之合理匯率為多少？", "opts": ["1（TWD）兌換0.57（PHP）", "1（TWD）兌換0.75（PHP）", "1（TWD）兌換1.25（PHP）", "1（TWD）兌換1.75（PHP）"], "ans": 1},
+{"q": "經核准設置之「外幣收兌處」，對持有外國護照之外國旅客，每人每次收兌外幣金額上限為多少？", "opts": ["等值3,000美元", "等值5,000美元", "等值1萬美元", "無收兌金額限制"], "ans": 1},
+{"q": "下列何者結匯外幣金額可比照我國國民辦理？", "opts": ["持外國護照者", "持外僑居留證且於證載期限一年以上之自然人", "持中華民國臺灣地區入出境許可證但無居留身分之大陸地區人民", "持中華民國臺灣地區入出境許可證但無居留身分之港澳地區居民"], "ans": 0},
+{"q": "入境旅客攜帶美元8萬元，僅向海關申報美元4萬元，後為內政部警政署航空警察局安全檢查人員查獲， 移交海關處理，請問海關會如何處理？", "opts": ["沒入美元3萬元", "沒入美元4萬元", "旅客自行封存於海關美元4萬元，出境時准予攜出", "旅客自行封存於海關美元7萬元，出境時准予攜出"], "ans": 0}
+];
+const TOTAL_TIME=3600;
+let timeLeft=TOTAL_TIME,timerInterval=null,submitted=false;
+const answers=new Array(QUESTIONS.length).fill(-1);
+
+function init(){
+  const qa=document.getElementById('quiz-area');
+  const dots=document.getElementById('dots');
+  document.getElementById('totalQ').textContent=QUESTIONS.length;
+  qa.innerHTML='';dots.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const dot=document.createElement('div');
+    dot.className='dot';dot.id='dot'+i;
+    dot.title='第'+(i+1)+'題';
+    dot.onclick=()=>document.getElementById('q'+i).scrollIntoView({behavior:'smooth',block:'center'});
+    dots.appendChild(dot);
+    const card=document.createElement('div');
+    card.className='question-card';card.id='q'+i;
+    const optsHtml=q.opts.map((o,j)=>`
+      <label class="opt-label" id="opt${i}_${j}">
+        <input type="radio" name="q${i}" value="${j}" onchange="selectAns(${i},${j})">
+        <span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span>
+      </label>`).join('');
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div>
+      <div class="q-text">${escHtml(q.q)}</div>
+      <div class="options">${optsHtml}</div>`;
+    qa.appendChild(card);
+  });
+  startTimer();
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function selectAns(qi,val){
+  answers[qi]=val;
+  document.getElementById('dot'+qi).classList.add('answered');
+  document.querySelectorAll(`#q${qi} .opt-label`).forEach((l,j)=>{
+    l.classList.toggle('selected',j===val);
+  });
+}
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    if(submitted)return;
+    timeLeft--;
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    const el=document.getElementById('timer');
+    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el.className='timer';
+    if(timeLeft<=300)el.classList.add('danger');
+    else if(timeLeft<=600)el.classList.add('warn');
+    if(timeLeft<=0){clearInterval(timerInterval);submitQuiz(true);}
+  },1000);
+}
+
+function submitQuiz(timeout=false){
+  if(submitted)return;
+  const unanswered=answers.filter(a=>a===-1).length;
+  if(!timeout&&unanswered>0){
+    if(!confirm(`還有 ${unanswered} 題未作答，確定要交卷？`))return;
+  }
+  clearInterval(timerInterval);submitted=true;
+  document.getElementById('submit-wrap').classList.add('hidden');
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
+  showResults();
+}
+
+function showResults(){
+  let correct=0,wrong=0,skip=0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===-1)skip++;
+    else if(answers[i]===q.ans)correct++;
+    else wrong++;
+  });
+  const score=Math.round(correct/QUESTIONS.length*100);
+  const timeTaken=TOTAL_TIME-timeLeft;
+  const tm=Math.floor(timeTaken/60),ts=timeTaken%60;
+  let grade='',gradeClass='';
+  if(score>=80){grade='優秀';gradeClass='excellent'}
+  else if(score>=60){grade='及格';gradeClass='pass'}
+  else{grade='未及格';gradeClass='fail'}
+
+  document.getElementById('score-panel').innerHTML=`
+    <div class="score-big">${score} 分</div>
+    <div class="grade ${gradeClass}">${grade}</div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num" style="color:#27ae60">${correct}</div><div>答對</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#e74c3c">${wrong}</div><div>答錯</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#888">${skip}</div><div>未作答</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#2c5f8a">${String(tm).padStart(2,'0')}:${String(ts).padStart(2,'0')}</div><div>用時</div></div>
+    </div>`;
+  document.getElementById('score-panel').classList.remove('hidden');
+  document.getElementById('filter-bar').classList.remove('hidden');
+  document.getElementById('reset-wrap').classList.remove('hidden');
+
+  const ra=document.getElementById('result-area');
+  ra.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const userAns=answers[i];
+    const isCorrect=userAns===q.ans;
+    const isSkip=userAns===-1;
+    const card=document.createElement('div');
+    card.className='question-card'+(isCorrect?' correct':isSkip?'':' wrong');
+    card.id='rq'+i;
+    const optsHtml=q.opts.map((o,j)=>{
+      let cls='opt-label';
+      if(j===q.ans)cls+=' correct-ans';
+      else if(j===userAns&&!isCorrect)cls+=' wrong-ans';
+      return `<label class="${cls}"><span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span></label>`;
+    }).join('');
+    const mark=isCorrect?'✅':isSkip?'⬜':'❌';
+    const hint=(!isCorrect&&!isSkip)?`<div class="correct-hint">✔ 正確答案：${String.fromCharCode(65+q.ans)}. ${escHtml(q.opts[q.ans])}</div>`:'';
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題 <span class="result-mark">${mark}</span></div>
+      <div class="q-text">${escHtml(q.q)}</div>
+      <div class="options">${optsHtml}</div>${hint}`;
+    ra.appendChild(card);
+  });
+}
+
+function filterQ(type,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById('rq'+i);
+    if(!card)return;
+    if(type==='all')card.classList.remove('hidden');
+    else if(type==='wrong')card.classList.toggle('hidden',answers[i]===q.ans);
+    else if(type==='correct')card.classList.toggle('hidden',answers[i]!==q.ans);
+  });
+}
+
+function resetQuiz(){
+  submitted=false;timeLeft=TOTAL_TIME;
+  answers.fill(-1);
+  document.getElementById('score-panel').classList.add('hidden');
+  document.getElementById('filter-bar').classList.add('hidden');
+  document.getElementById('reset-wrap').classList.add('hidden');
+  document.getElementById('result-area').innerHTML='';
+  init();
+  document.getElementById('submit-wrap').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+init();
+</script>
+</body>
+</html>

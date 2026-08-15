@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>113年 領隊執業實務</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f5f5f5;color:#333}
+.header{position:sticky;top:0;background:#2c5f8a;color:#fff;padding:10px 16px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header h1{font-size:1rem;font-weight:700}
+.header .meta{font-size:.8rem;opacity:.85;margin-top:2px}
+.timer{display:inline-block;background:rgba(255,255,255,.2);padding:2px 10px;border-radius:12px;font-weight:700;font-size:.95rem}
+.timer.warn{background:#f39c12}
+.timer.danger{background:#e74c3c;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.5}}
+.progress-wrap{background:#1a4a70;padding:8px 16px}
+.dots{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:.2s}
+.dot.answered{background:#4fc3f7}
+.container{max-width:860px;margin:0 auto;padding:12px 16px 40px}
+.question-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);border-left:4px solid #2c5f8a}
+.question-card.correct{border-left-color:#27ae60}
+.question-card.wrong{border-left-color:#e74c3c}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:12px;white-space:pre-wrap}
+.options{display:flex;flex-direction:column;gap:6px}
+.opt-label{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.9rem;line-height:1.5}
+.opt-label:hover{border-color:#2c5f8a;background:#f0f7ff}
+.opt-label input{margin-top:3px;flex-shrink:0;accent-color:#2c5f8a}
+.opt-label.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt-label.correct-ans{border-color:#27ae60!important;background:#e8f5e9!important}
+.opt-label.wrong-ans{border-color:#e74c3c!important;background:#ffebee!important}
+.result-mark{float:right;font-size:1.1rem}
+.correct-hint{font-size:.82rem;color:#27ae60;margin-top:6px;font-weight:600}
+.submit-wrap{text-align:center;margin:20px 0}
+.btn{padding:12px 32px;border:none;border-radius:24px;font-size:1rem;cursor:pointer;font-family:inherit;font-weight:700;transition:.2s}
+.btn-submit{background:#2c5f8a;color:#fff}
+.btn-submit:hover{background:#1a4a70}
+.btn-reset{background:#27ae60;color:#fff}
+.btn-reset:hover{background:#1e8449}
+.score-panel{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.12);text-align:center}
+.score-big{font-size:3rem;font-weight:700;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.excellent{color:#27ae60}
+.grade.pass{color:#2c5f8a}
+.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:12px;font-size:.9rem}
+.stat-item{text-align:center}
+.stat-num{font-size:1.4rem;font-weight:700}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border:2px solid #2c5f8a;border-radius:20px;background:#fff;color:#2c5f8a;cursor:pointer;font-size:.85rem;font-family:inherit;font-weight:600}
+.filter-btn.active{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h1>113年 領隊執業實務</h1>
+      <div class="meta">華語領隊人員｜共 <span id="totalQ">0</span> 題</div>
+    </div>
+    <div class="timer" id="timer">60:00</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="dots" id="dots"></div>
+</div>
+<div class="container">
+  <div id="quiz-area"></div>
+  <div class="submit-wrap" id="submit-wrap">
+    <button class="btn btn-submit" onclick="submitQuiz()">📋 交卷</button>
+  </div>
+  <div id="score-panel" class="hidden"></div>
+  <div id="filter-bar" class="filter-bar hidden">
+    <button class="filter-btn active" onclick="filterQ('all',this)">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong',this)">只看錯題</button>
+    <button class="filter-btn" onclick="filterQ('correct',this)">只看對題</button>
+  </div>
+  <div id="result-area"></div>
+  <div id="reset-wrap" class="submit-wrap hidden">
+    <button class="btn btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+</div>
+<script>
+const QUESTIONS=[
+{"q": "一位成人突然無意識、無呼吸、心跳停止，已通報當地緊急救護單位後，在等待救護人員抵達前，應執行 的急救措施，下列何者正確？", "opts": ["施行胸部心外按壓", "通知病人的緊急聯絡人", "壓上唇的人中以喚醒病人", "立即使用指尖放血"], "ans": 0},
+{"q": "旅客在登山時，不幸遭遇虎頭蜂螫傷，下列何者正確？", "opts": ["會有眼皮浮腫、呼吸困難等過敏症狀", "會有噁心、嘔吐、便秘等腸胃症狀", "過敏性休克多發生在15分鐘之後", "常常因嚴重出血導致死亡"], "ans": 0},
+{"q": "在登山的時候，團員的腳不慎被蛇咬傷，下列關於毒蛇咬傷的敘述何者錯誤？", "opts": ["若不慎被蛇類咬傷，儘可能辨認是何種蛇類有助於治療", "治療毒蛇咬傷最有效的方法，是正確的使用抗蛇毒血清", "毒蛇咬傷的患肢，包紮時應該儘量緊一些，避免毒素擴散", "冰敷對於毒蛇咬傷傷口沒有幫助"], "ans": 2},
+{"q": "在餐廳用膳時，突然有位團員吃湯圓噎到，下列何者狀況不需要立即使用哈姆立克法（HeimlichManeuver）？", "opts": ["意識逐漸喪失", "臉色發黑", "無法出聲", "用力咳嗽"], "ans": 3},
+{"q": "關於人類傳染病的防治方法，下列何者錯誤？", "opts": ["消滅病原體", "阻斷傳染途徑", "優先使用抗生素", "增加宿主免疫力"], "ans": 2},
+{"q": "旅遊中團員感染沙門氏菌導致腹瀉，有關沙門氏菌感染的防治措施，下列何者錯誤？", "opts": ["保持食品清潔", "不能食用沙拉及冷盤", "雞蛋與家禽肉類要完全煮熟", "如有腸胃道症狀及發燒病徵，應立即就醫"], "ans": 1},
+{"q": "心肺復甦術中，已不再教導民眾執行脈搏之檢查，而改以給予有效的胸部按壓，請問下列那些口訣為所謂 的有效胸部按壓？①用力壓 ②快快壓 ③莫中斷 ④胸回彈 ⑤二分換", "opts": ["①②", "①②③", "①②③④", "①②③④⑤"], "ans": 1},
+{"q": "旅遊中某人突然停止聊天，並表示胸部不舒服、肩頸不適、臉色蒼白且冒冷汗。此人曾罹患心血管疾病， 下列症狀何者為心肌梗塞的徵兆？", "opts": ["前兩天四肢痠麻，且肩頸痠痛", "胸部中央處有壓迫緊縮的痛感，且時間超過數分鐘", "左胸有一種刀割針刺的痛感，且時間僅有數秒鐘", "講話不清楚且一邊肢體無力"], "ans": 1},
+{"q": "關於世界地理的描述，下列何者正確？", "opts": ["世界最北端的首都-赫爾辛基", "世界最南端的首都-威靈頓", "人口最多的首都-新德里", "海拔最高的首都-拉薩"], "ans": 1},
+{"q": "下列國家與著名美術館配對，何者正確？", "opts": ["美國-安大略美術館", "義大利-烏菲茲美術館", "英國-維多利亞國立美術館", "加拿大-新南威爾斯美術館"], "ans": 3},
+{"q": "同學想參加旅行社所辦的出國旅遊團，透過家人同事的介紹得到旅遊資訊，並參考其旅遊經驗，請問同學 在購買的過程中歷經那一個階段？", "opts": ["方案評估階段", "購買決策階段", "問題認知階段", "資訊蒐集階段"], "ans": 3},
+{"q": "在比利時布魯塞爾市區觀光，不包含下列那個景點？", "opts": ["尿尿小童", "大廣場", "尿尿女童", "水壩廣場"], "ans": 2},
+{"q": "領團人員面對年長者與兒童的解說導覽技巧，下列何者錯誤？", "opts": ["對於年長的遊客要多付出關懷", "對年長者的遊客解說要注意調整行進速度和解說音量", "兒童的注意力時間比較長，因此解說的時間可以較平常久一些", "可以用猜謎的方式讓兒童了解或回答他們的問題"], "ans": 3},
+{"q": "領隊帶團前往英國，在旅館住宿Checkin時應該宣布的事項，下列何者錯誤？", "opts": ["早餐時間和地點", "宣布領隊房號", "說明鑰匙之使用方法", "提醒飯店大廳樓層的按鈕是1"], "ans": 2},
+{"q": "天堂之門（浮雕）（Porta del Paradiso）是佛羅倫斯聖若望洗禮堂東面的正門，請問天堂之門上的十塊浮 雕是在闡述什麼故事？", "opts": ["新約聖經裡的十個故事", "摩西的十誡", "舊約聖經裡的十個故事", "耶穌顯示神蹟的十個故事"], "ans": 2},
+{"q": "某國籍航空公司因應趨勢及環保理念，建置團體旅客自助報到平台藉以縮短作業時間，因此出國領隊人員 於臺灣團體出發48至1小時前，透過網上登入平台系統操作直到完成行李托運，試問下列較合適之流程 為何？", "opts": ["護照自動掃描--團體自助報到--刷出登機證--團體自助選位", "團體自助報到--刷出登機證--護照自動掃描--團體自助選位", "團體自助選位--護照自動掃描--團體自助報到--刷出登機證", "刷出登機證--護照自動掃描--團體自助選位--團體自助報到"], "ans": 3},
+{"q": "歐洲線領隊於國外執行團體業務時，使用國外代理商所提供之 WORKING ITINERARY 之原則，下列何 者錯誤？", "opts": ["其內容與中文行程表不相符時應以後者為主並提出修正", "應確認是否提供旅遊期間相關供應商之聯絡方式", "遇緊急情況時可先行調整行程後再立即回報代理商", "若註明不含城市稅可先行墊付後再向國外代理商請款"], "ans": 1},
+{"q": "有關電子機票狀態說明，下列何者正確？", "opts": ["VOID– 已退票", "EXCH– 已換票", "RFND– 已使用", "USED– 已作廢"], "ans": 0},
+{"q": "長榮航空公司臺北—倫敦的航班，可以載運曼谷—倫敦二地間的客、貨、郵，是由於臺灣與泰國間交換的 那一項航權協定？", "opts": ["第五航權", "第六航權", "第七航權", "第八航權"], "ans": 3},
+{"q": "某國際線機票開立遇有不同航空公司於不同航段載運同一名旅客時，其所搭乘航段及航空公司班機如下 所示： 第一航段由從臺北飛往東京並搭乘長榮航空之班機 第二航段由從東京飛往洛杉磯並搭乘日本航空之班機 試問，上述兩家航空公司若各有不同之行李運送規定，依照國際航空運輸協會（IATA）之統一規定，應 以那一家航空公司之行李運送規定為準？", "opts": ["長榮航空之行李運送規定", "日本航空之行李運送規定", "兩家航空公司之行李運送規定皆可", "由機場地勤人員自行決定"], "ans": 1},
+{"q": "未滿兩歲之嬰兒旅客在其旅行過程中，若其所開立之電子機票在尚未搭乘完畢所有航段前便已滿兩歲時， 試問下列針對該機票之使用限制何者正確？", "opts": ["該機票應辦理退票並重新開立始可繼續搭乘使用", "該機票毋須辦理退票且可無條件繼續搭乘使用", "該機票毋須辦理退票但必須重新計算票價後始可繼續搭乘使用", "該機票應依照開票航空公司所訂之相關規定來決定是否須辦理退票或是否可以原折扣票價繼續搭乘 使用"], "ans": 2},
+{"q": "依據國際航空運輸協會（IATA）規範，下列那一個城市代碼與運輸會議區之組合，何者正確？①MUC ②SFO ③BKK ④SYD", "opts": ["①②", "③④", "②③", "①④"], "ans": 1},
+{"q": "丁經理是一位旅行社旅程策劃人員，其任職公司是航空公司的代理店，因此得以申請優惠票。在他的機票 訂位狀態欄上，會註記何種狀態？", "opts": ["HK", "RQ", "SA", "NS"], "ans": 2},
+{"q": "旅客之隨身行李於運送過程受到損害，致使該位旅客損失新臺幣5萬元，依據我國民用航空法規定，航空 公司應負擔多少金額之賠償？", "opts": ["新臺幣1萬元", "新臺幣2萬元", "新臺幣3萬元", "隨身行李之損害不需賠償"], "ans": 2},
+{"q": "在一個有八個國家參與的國際會議上，需要並列懸掛各國的國旗，會議主辦國為 A 國。依據國際禮儀， 關於國旗懸掛的說法，下列何者正確？", "opts": ["A國國旗應懸掛在所有國旗的最左端，其餘國家的國旗依英文字母順序向右排列", "所有國家的國旗應依照英文字母順序排列，A國國旗不需要特別位置", "A國國旗居中央的首位，其餘國家的國旗依英文字母順序，分別位於A國國旗的左右兩側", "A國國旗應懸掛在所有國旗的最右端，其餘國家的國旗依英文字母順序向左排列"], "ans": 2},
+{"q": "在高爾夫球敘中，關於擊球順序和行為的正確做法，下列何者正確？", "opts": ["如果你是球組中距離洞口最近的球員，應該率先在球道上擊球", "你可以在前一組球員還在你擊球方向的安全距離內時進行擊球", "在果嶺上，應該避免踩踏其他球員的推球路線", "擊球時，球伴應站在你揮桿範圍內的前方或後方，以便觀察擊球情況"], "ans": 1},
+{"q": "有關西餐用餐禮儀，下列何者正確？①就座時，從椅子的左邊入座 ②用餐中暫時離席，將餐巾稍作折疊 並置於餐桌上 ③拿取左邊麵包碟上的麵包食用 ④杯子擺放自左至右依序為白酒杯、紅酒杯、水杯", "opts": ["①②", "③④", "①③", "②④"], "ans": 2},
+{"q": "男士穿著無尾晚禮服（小晚禮服）應搭配何種顏色之領結或領帶？", "opts": ["白領結", "黑領結", "黑領帶", "灰領結"], "ans": 3},
+{"q": "請問「入境問俗、入國問禁、入門問忌」，出自何書？", "opts": ["論語", "詩經", "禮記", "春秋"], "ans": 0},
+{"q": "在參加酒會、茶會或園遊會時，下列那些行為是符合國際禮儀的？①賓客在接待線上與主人進行長時間的 交談 ②主人在活動開始後會在賓客間穿梭寒暄 ③若賓客擬早退，可以直接離開，無需尋找主人告知 ④活動結束時，主人應立於出口處送客", "opts": ["①②③", "①②④", "①③④", "②③④"], "ans": 2},
+{"q": "旅客途中突發疾病時，請問下列那一項是帶團人員錯誤的緊急處理作為？", "opts": ["如旅客需住院治療，帶團人員可隨團繼續後續行程，請旅客獨自接受診治", "即刻送醫診治，若情況嚴重時，當即時呼叫救護車送醫急救", "通知公司轉知家屬，必要時協助家屬急赴當地處理", "商請當地接待旅行社或協力廠商或政府駐外單位協助安排人員照料"], "ans": 2},
+{"q": "依據外交部領事事務局編印的出國旅行安全使用手冊，下列何者錯誤？", "opts": ["出發前應查詢航空公司及入境國家地區旅客攜帶物品之規定及行李托運內容公斤數之限制", "避免替陌生人攜帶物品通關或代為看管行李，以免為犯罪集團所利用", "發生類似消費糾紛時，請立即聯繫當地警方消費者保護機構並保存相關證據，以便我國駐外館人員可介 入調解商業糾紛", "各國對免申報攜帶入境現金數額有不同規定，如因所攜帶現金逾免申報金額且未辦理申報，可能遭海關沒收"], "ans": 1},
+{"q": "就旅行社代為保管旅客之旅遊證件一事，下列何者錯誤？", "opts": ["非必要時旅行社不應代為保管旅客之旅遊證件", "旅行社有辧理通關過境之必要時可代為保管旅客之旅遊證件", "旅客主動要求旅行社代管旅客之旅遊證件，若遺失旅行社可免責", "旅行社代為保管旅客之旅遊證件時應善盡保管責任"], "ans": 3},
+{"q": "就旅行社協助旅客申請保險公司理賠之必備資料，下列何者正確？①領隊報告書 ②理賠申請書 ③醫 療費用收據正本 ④意外事故證明 ⑤旅行業履約保證保險合約", "opts": ["①②③④⑤", "①②③④", "①②④⑤", "②③④⑤"], "ans": 3},
+{"q": "在旅遊過程中，團員遇到治安問題，領隊應優先做下列何種處理？", "opts": ["向當地警察報案", "努力協助警察人員迅速破案", "即時向旅行社主管部門報告事故發生", "保護團員的安全"], "ans": 1},
+{"q": "旅客行李遺失時需要填寫何種表格？", "opts": ["報案申請書", "遺失證明表", "個人損失報表", "行李意外報告表"], "ans": 2},
+{"q": "國外旅遊糾紛頻傳，依據國外旅遊定型化契約應記載事項之規定，下列何者是屬於旅遊費用？", "opts": ["旅客給予當地導遊司機之小費", "旅客之個人費用", "旅客給予隨團領隊人員之小費", "隨團領隊人員為旅客安排服務人員之報酬"], "ans": 1},
+{"q": "有關旅行社安排團員購物之處理，下列何者錯誤？", "opts": ["旅行社如安排團員購物禮品時，應於契約所列行程中預先載明", "旅行社得於旅遊途中臨時安排購物行程", "團員購物所購物品有貨價與品質不相當或瑕疵者，可得於受領所購物品後一個月內請求旅行社協助處理", "旅行社不得以任何理由或名義要求旅客代為攜帶物品返國"], "ans": 1},
+{"q": "出國時旅客護照遺失，下列處理方式及注意事項，何者錯誤？", "opts": ["應向當地警察機關報案，取得報案文件", "聯絡駐外單位，請求協助辦理護照補發", "遺失補發之護照，依護照條例施行細則，效期以二年為限", "護照經申報遺失後尋獲者，該護照仍視為遺失"], "ans": 0},
+{"q": "領隊帶團處理緊急事件之流程（CRISIS），前四個英文字母之敘述何者錯誤？", "opts": ["Calm: 保持冷靜，思考處理步驟", "Responsibility: 領隊應於現場負起責任，積極妥善處理", "Identification: 取得各項相關證明文件，如警局報案證明", "Support: 積極尋求地接旅行社、當地使館、警局、住宿飯店等之協助"], "ans": 1},
+{"q": "依據外交部領事事務局修訂之「國外旅遊警示分級表」，下列何者錯誤？", "opts": ["黃色警示-特別注意旅遊安全並檢討應否前往", "灰色警示-若旅遊行程無法更改，應儘量縮短天數", "紅色警示-不宜前往，宜儘速離境", "橙色警示-避免非必要旅行"], "ans": 1},
+{"q": "有關各國機場安檢措施與通關，下列何者正確？", "opts": ["團員倘有攜帶液態物品，須於抵達機場後將該物品自登機行李中取出，並置於置物盤內通過安檢機", "團員若有攜帶古董或玩具槍枝入出境他國，應置放於托運行李內辦理航空公司登機程序，以免於登機行 李查驗及通關時產生困擾", "各國對免申報攜帶入境現金數額有不同的規定，倘因團員所攜帶現金逾免申報金額且未及時辦理申報， 應將財物分散放置，以免遭海關沒收", "通過管制點前，團員應穿好夾克或外套，將登機行李置於置物盤內送往安檢機後，逕行通過金屬探測安 檢門"], "ans": 2},
+{"q": "下列保險名稱與承保範圍說明何者配對正確？①旅行業責任保險 ②旅行業履約保證保險 ③飛安保險 ④承保範圍包含旅客遭受全部或部分團費損失 ⑤承保範圍包含在旅遊期間不可歸究於旅行社或旅遊團 員之因素，產生之出發行程延誤情事", "opts": ["①④", "②④", "②⑤", "③⑤"], "ans": 3},
+{"q": "出發前行程遇地震、海嘯、火山爆發等不可抗力因素，旅客要求解約時，依據國外旅遊定型化契約範本規 定，旅客應支付旅行社為處理本團體取消事宜所支出的那些特定費用？", "opts": ["已支付之必要費用（如稅捐、國外導遊取消費）", "已支付之行政規費（如護照、簽證費用）", "已支付之行政費用（如郵電費、行政手續費）", "已支付之特定費用（如服務費、作業費）"], "ans": 1},
+{"q": "旅外國人遭遇急難，經確認當事人無法立即於短時間內獲得財務濟助，且有迫切返國需要者，駐外機構提 供援助，下列何者錯誤？", "opts": ["可代購經濟艙等之返國機票", "務必請當事人簽訂急難救助借貸契約書", "可提供當事人於候機返國期間不逾300美元之基本生活費借款", "同意於立約日次日期60日內主動將借款歸還外交部"], "ans": 1},
+{"q": "有關團體旅遊人身及財物安全之敘述，下列何者正確？", "opts": ["領隊出發前應提醒團員，當迷路時應立即找路人問路，主動找到團體歸隊", "赴歐洲旅遊治安較差，遭遇偷竊或搶劫情況，應設法將歹徒抓住，以減少損失", "在國外旅遊，應將背包斜背並置於身體側邊或後邊，以避免歹徒從正面襲擊", "提醒旅客避免與陌生人接觸，錢包不外露，且不單獨行動"], "ans": 3},
+{"q": "出團旅遊時，對於具危險性、特殊性的自費行程，領隊作法下列何者正確？", "opts": ["配合當地接待旅行社的安排，全程交由當地導遊決定", "於團員報名參加前，應善盡告知其危險性或特殊性，再由旅客自行決定是否參加", "只要該行程屬合法行程，可鼓勵旅客踴躍參加", "由領隊代為判斷，那些旅客適合參加，那些旅客不適合參加"], "ans": 2},
+{"q": "旅行團於國外發生車禍，團員中有多人受傷和 1 人下肢開放性骨折，下列處理何者正確？①立即引導骨 折的團員下車到安全的地方，並聯絡救護車將患者送醫 ②報警並製作筆錄 ③通知旅行社和國外代理 旅行社協助支援 ④通報當地觀光主管機關", "opts": ["①②", "②③", "①③", "②④"], "ans": 0},
+{"q": "在國外旅途中，遭遇天災、戰亂、恐攻等不可抗力事件，請問下列何者是領隊人員錯誤的舉動？", "opts": ["應優先確保團員自身安全，避免陷入群眾恐慌狀態", "保持冷靜遵從當地政府的緊急措施", "立即與公司聯繫通報團隊平安，趕緊前往安全地區或儘速返國", "等候駐外館處的主動聯繫，駐外人員會協助安排疏散至安全地區或回國"], "ans": 0},
+{"q": "有關領隊在海外處理團員簽證遺失，下列何者正確？①查明遺失簽證的批准號碼、日期及地點 ②應向當 地交通機關報案 ③查明遺失簽證可否在當地和其他前往的國家中申請，但應考慮時效性及前往國家的 入境通關方式 ④為求團員的安全，領隊人員應儘量想辦法由陸路或空路闖關通行", "opts": ["①②", "②③", "①③", "②④"], "ans": 0}
+];
+const TOTAL_TIME=3600;
+let timeLeft=TOTAL_TIME,timerInterval=null,submitted=false;
+const answers=new Array(QUESTIONS.length).fill(-1);
+
+function init(){
+  const qa=document.getElementById('quiz-area');
+  const dots=document.getElementById('dots');
+  document.getElementById('totalQ').textContent=QUESTIONS.length;
+  qa.innerHTML='';dots.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const dot=document.createElement('div');
+    dot.className='dot';dot.id='dot'+i;
+    dot.title='第'+(i+1)+'題';
+    dot.onclick=()=>document.getElementById('q'+i).scrollIntoView({behavior:'smooth',block:'center'});
+    dots.appendChild(dot);
+    const card=document.createElement('div');
+    card.className='question-card';card.id='q'+i;
+    const optsHtml=q.opts.map((o,j)=>`
+      <label class="opt-label" id="opt${i}_${j}">
+        <input type="radio" name="q${i}" value="${j}" onchange="selectAns(${i},${j})">
+        <span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span>
+      </label>`).join('');
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div>
+      <div class="q-text">${escHtml(q.q)}</div>
+      <div class="options">${optsHtml}</div>`;
+    qa.appendChild(card);
+  });
+  startTimer();
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function selectAns(qi,val){
+  answers[qi]=val;
+  document.getElementById('dot'+qi).classList.add('answered');
+  document.querySelectorAll(`#q${qi} .opt-label`).forEach((l,j)=>{
+    l.classList.toggle('selected',j===val);
+  });
+}
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    if(submitted)return;
+    timeLeft--;
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    const el=document.getElementById('timer');
+    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el.className='timer';
+    if(timeLeft<=300)el.classList.add('danger');
+    else if(timeLeft<=600)el.classList.add('warn');
+    if(timeLeft<=0){clearInterval(timerInterval);submitQuiz(true);}
+  },1000);
+}
+
+function submitQuiz(timeout=false){
+  if(submitted)return;
+  const unanswered=answers.filter(a=>a===-1).length;
+  if(!timeout&&unanswered>0){
+    if(!confirm(`還有 ${unanswered} 題未作答，確定要交卷？`))return;
+  }
+  clearInterval(timerInterval);submitted=true;
+  document.getElementById('submit-wrap').classList.add('hidden');
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
+  showResults();
+}
+
+function showResults(){
+  let correct=0,wrong=0,skip=0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===-1)skip++;
+    else if(answers[i]===q.ans)correct++;
+    else wrong++;
+  });
+  const score=Math.round(correct/QUESTIONS.length*100);
+  const timeTaken=TOTAL_TIME-timeLeft;
+  const tm=Math.floor(timeTaken/60),ts=timeTaken%60;
+  let grade='',gradeClass='';
+  if(score>=80){grade='優秀';gradeClass='excellent'}
+  else if(score>=60){grade='及格';gradeClass='pass'}
+  else{grade='未及格';gradeClass='fail'}
+
+  document.getElementById('score-panel').innerHTML=`
+    <div class="score-big">${score} 分</div>
+    <div class="grade ${gradeClass}">${grade}</div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num" style="color:#27ae60">${correct}</div><div>答對</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#e74c3c">${wrong}</div><div>答錯</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#888">${skip}</div><div>未作答</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#2c5f8a">${String(tm).padStart(2,'0')}:${String(ts).padStart(2,'0')}</div><div>用時</div></div>
+    </div>`;
+  document.getElementById('score-panel').classList.remove('hidden');
+  document.getElementById('filter-bar').classList.remove('hidden');
+  document.getElementById('reset-wrap').classList.remove('hidden');
+
+  const ra=document.getElementById('result-area');
+  ra.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const userAns=answers[i];
+    const isCorrect=userAns===q.ans;
+    const isSkip=userAns===-1;
+    const card=document.createElement('div');
+    card.className='question-card'+(isCorrect?' correct':isSkip?'':' wrong');
+    card.id='rq'+i;
+    const optsHtml=q.opts.map((o,j)=>{
+      let cls='opt-label';
+      if(j===q.ans)cls+=' correct-ans';
+      else if(j===userAns&&!isCorrect)cls+=' wrong-ans';
+      return `<label class="${cls}"><span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span></label>`;
+    }).join('');
+    const mark=isCorrect?'✅':isSkip?'⬜':'❌';
+    const hint=(!isCorrect&&!isSkip)?`<div class="correct-hint">✔ 正確答案：${String.fromCharCode(65+q.ans)}. ${escHtml(q.opts[q.ans])}</div>`:'';
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題 <span class="result-mark">${mark}</span></div>
+      <div class="q-text">${escHtml(q.q)}</div>
+      <div class="options">${optsHtml}</div>${hint}`;
+    ra.appendChild(card);
+  });
+}
+
+function filterQ(type,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById('rq'+i);
+    if(!card)return;
+    if(type==='all')card.classList.remove('hidden');
+    else if(type==='wrong')card.classList.toggle('hidden',answers[i]===q.ans);
+    else if(type==='correct')card.classList.toggle('hidden',answers[i]!==q.ans);
+  });
+}
+
+function resetQuiz(){
+  submitted=false;timeLeft=TOTAL_TIME;
+  answers.fill(-1);
+  document.getElementById('score-panel').classList.add('hidden');
+  document.getElementById('filter-bar').classList.add('hidden');
+  document.getElementById('reset-wrap').classList.add('hidden');
+  document.getElementById('result-area').innerHTML='';
+  init();
+  document.getElementById('submit-wrap').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+init();
+</script>
+</body>
+</html>
