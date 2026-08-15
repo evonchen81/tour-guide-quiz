@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>114年 領隊觀光資源概要</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f5f5f5;color:#333}
+.header{position:sticky;top:0;background:#2c5f8a;color:#fff;padding:10px 16px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header h1{font-size:1rem;font-weight:700}
+.header .meta{font-size:.8rem;opacity:.85;margin-top:2px}
+.timer{display:inline-block;background:rgba(255,255,255,.2);padding:2px 10px;border-radius:12px;font-weight:700;font-size:.95rem}
+.timer.warn{background:#f39c12}
+.timer.danger{background:#e74c3c;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.5}}
+.progress-wrap{background:#1a4a70;padding:8px 16px}
+.dots{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:.2s}
+.dot.answered{background:#4fc3f7}
+.container{max-width:860px;margin:0 auto;padding:12px 16px 40px}
+.question-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);border-left:4px solid #2c5f8a}
+.question-card.correct{border-left-color:#27ae60}
+.question-card.wrong{border-left-color:#e74c3c}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:12px;white-space:pre-wrap}
+.options{display:flex;flex-direction:column;gap:6px}
+.opt-label{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.9rem;line-height:1.5}
+.opt-label:hover{border-color:#2c5f8a;background:#f0f7ff}
+.opt-label input{margin-top:3px;flex-shrink:0;accent-color:#2c5f8a}
+.opt-label.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt-label.correct-ans{border-color:#27ae60!important;background:#e8f5e9!important}
+.opt-label.wrong-ans{border-color:#e74c3c!important;background:#ffebee!important}
+.result-mark{float:right;font-size:1.1rem}
+.correct-hint{font-size:.82rem;color:#27ae60;margin-top:6px;font-weight:600}
+.submit-wrap{text-align:center;margin:20px 0}
+.btn{padding:12px 32px;border:none;border-radius:24px;font-size:1rem;cursor:pointer;font-family:inherit;font-weight:700;transition:.2s}
+.btn-submit{background:#2c5f8a;color:#fff}
+.btn-submit:hover{background:#1a4a70}
+.btn-reset{background:#27ae60;color:#fff}
+.btn-reset:hover{background:#1e8449}
+.score-panel{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.12);text-align:center}
+.score-big{font-size:3rem;font-weight:700;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.excellent{color:#27ae60}
+.grade.pass{color:#2c5f8a}
+.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:12px;font-size:.9rem}
+.stat-item{text-align:center}
+.stat-num{font-size:1.4rem;font-weight:700}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border:2px solid #2c5f8a;border-radius:20px;background:#fff;color:#2c5f8a;cursor:pointer;font-size:.85rem;font-family:inherit;font-weight:600}
+.filter-btn.active{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h1>114年 領隊觀光資源概要</h1>
+      <div class="meta">華語領隊人員｜共 <span id="totalQ">0</span> 題</div>
+    </div>
+    <div class="timer" id="timer">60:00</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="dots" id="dots"></div>
+</div>
+<div class="container">
+  <div id="quiz-area"></div>
+  <div class="submit-wrap" id="submit-wrap">
+    <button class="btn btn-submit" onclick="submitQuiz()">📋 交卷</button>
+  </div>
+  <div id="score-panel" class="hidden"></div>
+  <div id="filter-bar" class="filter-bar hidden">
+    <button class="filter-btn active" onclick="filterQ('all',this)">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong',this)">只看錯題</button>
+    <button class="filter-btn" onclick="filterQ('correct',this)">只看對題</button>
+  </div>
+  <div id="result-area"></div>
+  <div id="reset-wrap" class="submit-wrap hidden">
+    <button class="btn btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+</div>
+<script>
+const QUESTIONS=[
+{"q": "哥倫布在那一年到達美洲？", "opts": ["1462年", "1472年", "1482年", "1492年"], "ans": 3},
+{"q": "德國對那一國家的侵略行為，導致 1939 年第二次世界大戰的歐洲戰場正式開戰？", "opts": ["波蘭", "法國", "捷克", "英國"], "ans": 0},
+{"q": "基督教文明是構成西方文明的重要元素，請問基督教在歐洲從非法走向合法化，是那一個帝王的政策？", "opts": ["奧古斯都", "君士坦丁", "迪奧多西", "查理曼"], "ans": 1},
+{"q": "日本在持續 200多年的鎖國期間仍持續吸收歐洲科學革命的成果，奠下日本早期的科學根基。此時期日 本是透過那一國家的人接收西學？", "opts": ["葡萄牙", "西班牙", "荷蘭", "英國"], "ans": 2},
+{"q": "下列何種物產是從美洲「新世界」傳至歐、亞、非等洲？", "opts": ["大蒜", "菸草", "咖啡", "香蕉"], "ans": 1},
+{"q": "朝鮮半島歷史上那一個政權曾強調「以佛立國」，是朝鮮半島佛教藝術的全盛期？", "opts": ["新羅", "百濟", "高麗", "朝鮮"], "ans": 2},
+{"q": "英國清教徒搭乘「五月花號」在那一年抵達北美大陸？", "opts": ["1620年", "1660年", "1720年", "1760年"], "ans": 0},
+{"q": "土耳其國父凱末爾（Atatürk）在第一次世界大戰後領導土耳其民族運動。請問他對土耳其最主要的貢獻是 什麼？", "opts": ["建立鄂圖曼土耳其帝國", "推動現代化與世俗化改革", "申請加入歐盟", "建立政教合一的蘇丹制"], "ans": 1},
+{"q": "20 世紀初日本移民大規模前往巴西，這一移民潮的主要原因是什麼？", "opts": ["日本與巴西簽訂條約，共同開發農業資源", "日本政府為宣揚文化，派遣移民拓展影響力", "巴西需要技術工人，吸引日本移民參與工業化", "日本人口壓力增大，尋求海外生存空間"], "ans": 3},
+{"q": "英國 1688年「光榮革命」對英國最重要的意義為何？", "opts": ["廢除君主制，確立了英國的共和體制", "促使英國走向強盛，成為日不落國", "確立了國會至上的原則，限制了王權", "確立英國採取孤立主義的外交政策"], "ans": 2},
+{"q": "在 15 世紀末，隨著航海技術的進步和殖民擴張的需求，那個歐洲國家率先開始積極向非洲進行殖民探 索？", "opts": ["西班牙", "荷蘭", "法國", "葡萄牙"], "ans": 3},
+{"q": "1403 年明朝冊封室町幕府將軍足利義滿為日本國王，賜給他金印和一百枚「勘合符」。室町幕府則成功 地將在東亞沿海地方猖獗的走私貿易納入幕府統治之下，日明貿易也成為幕府的重要收入來源。請問「勘 合符」是指什麼？", "opts": ["貿易許可證", "通商感謝函", "交易的收據", "通商邀請函"], "ans": 0},
+{"q": "自15世紀以來，琉球王國與明清中國和江戶幕府之間的互動日漸頻繁。明清中國冊封琉球國王，確立其 政權的合法性。而在1609年，江戶時期那個藩派兵入侵琉球，使得琉球王國的貿易等對外關係受到該藩 控制，呈現「兩屬」的情況？", "opts": ["長州藩", "薩摩藩", "對馬藩", "松前藩"], "ans": 1},
+{"q": "南韓電影《華麗的假期》、《1987：黎明到來的那一天》以及《我只是個計程車司機 》，都是描述發生在 1980 年 5 月的光州事件（亦稱五一八光州民主化運動）。請問光州事件後，南韓政府對事件的回應是什 麼？", "opts": ["全面改革軍事政府，實行多黨制選舉", "發起大規模的調查，對軍事政府進行審判", "嚴格封鎖信息，並進行武力鎮壓", "將所有抗議者釋放並道歉，允諾民主化改革"], "ans": 3},
+{"q": "1871年1月18日普法戰爭結束後，普魯士統一德意志諸邦並在下列何處宣告創建德意志帝國？", "opts": ["羅浮宮", "忘憂宮", "美景宮", "凡爾賽宮"], "ans": 1},
+{"q": "下列那一個北部非洲區域或國家曾有超過百年的時間是被劃為法國的一個省行政區，準備被歸化為法國 國土的一部分？", "opts": ["摩洛哥", "阿爾及利亞", "利比亞", "埃及"], "ans": 3},
+{"q": "中南美洲國家在19世紀初期陸續揭竿而起，掙脫西方國家的殖民統治並獲得獨立。下列那一個國家第一 個完成獨立運動？", "opts": ["巴拉圭", "哥斯大黎加", "巴拿馬", "海地"], "ans": 0},
+{"q": "下列那一位義大利文藝復興時期的奇才創造了梵蒂岡聖彼得大教堂裡的雕塑作品 《聖殤 Pietà 》？", "opts": ["米開朗基羅", "拉斐爾", "達文西", "貝尼尼"], "ans": 3},
+{"q": "1898 年美西戰爭中美國擊敗西班牙，西班牙結束對菲律賓長達 300 多年的殖民統治，這對菲律賓局勢造 成何種影響？", "opts": ["脫離西班牙殖民統治後，立刻獨立建國", "菲律賓得以民族自決，成為美國殖民地", "菲律賓被美國管理，成為美國的自治州", "被美國殖民統治，至二戰後才成功獨立"], "ans": 1},
+{"q": "1864-1870 年，巴拉圭與南美洲三國爆發三國同盟戰爭，請問下列那國非三國同盟成員？", "opts": ["巴西", "智利", "烏拉圭", "阿根廷"], "ans": 0},
+{"q": "波西米亞叛變為歐洲歷史上「三十年戰爭」主要導火線，這是新教勢力與天主教舊勢力的一次爆炸性對 峙，來自哈布斯堡君王的兩位天主教使者抵達波西米亞，在談判還未開啟前就被從布拉格宮殿的17公尺 高窗戶往中庭扔出去，澈底激怒了哈布斯堡朝廷。請問這些叛變當時針對的是那一位即將接任王位的哈布 斯堡王室成員？", "opts": ["斐迪南二世", "菲利普二世", "魯道爾夫二世", "馬丁五世"], "ans": 2},
+{"q": "南美著名的觀光景點「的的喀喀湖」位於那兩國邊境上？", "opts": ["智利與阿根廷", "智利與秘魯", "秘魯與玻利維亞", "玻利維亞與智利"], "ans": 0},
+{"q": "美國太空總署曾比對德國中部 1980 年代末期和 2020 年的衛星影像，展現地景的顯著變化，並形容該區 為「從礦區變湖區（FromMineDistricttoLakeDistrict）」，這些湖泊的深度可達百公尺，面積可達20平 方公里。這些人工湖泊主要是開採那種礦產的結果？", "opts": ["煤", "鐵", "石油", "天然氣"], "ans": 3},
+{"q": "歐盟至 2024 年有 27 個會員國，但並非所有國家都使用歐元為通用貨幣。下列那個相對較晚加入歐盟的 國家已經採行歐元？", "opts": ["捷克", "波蘭", "保加利亞", "克羅埃西亞"], "ans": 1},
+{"q": "演化生物學大師達爾文（CharlesDarwin）曾於1830年代搭乘英國軍艦，穿越太平洋與印度洋，航行途中 觀察到多種形式的珊瑚礁體，如：群礁、堡礁、環礁等。達爾文認為大洋之中出現多種型態的珊瑚礁體， 主要和下列那項因素有關？", "opts": ["冰期發生次數", "熱點火山演育", "海嘯影響範圍", "颱風侵襲路徑"], "ans": 0},
+{"q": "有些南極觀光旅遊行程，會安排遊客短暫登上南極大陸，但不會規劃下列那種行程？", "opts": ["遠觀成群企鵝", "眺望海面冰山", "南極陸地健行", "欣賞絢麗極光"], "ans": 1},
+{"q": "某國首都設有「赤道位置紀念碑」，到訪遊客都喜歡留下雙腳跨越南北半球的照片，並搭電梯到紀念碑頂 端欣賞南北半球的全景。該紀念碑位於下列那個國家？", "opts": ["厄瓜多", "馬來西亞", "中非共和國", "巴布亞紐幾內亞"], "ans": 0},
+{"q": "阿拉伯聯合大公國境內的飲用水主要仰賴海水淡化方式，這是因為下列那項地理條件之限制？", "opts": ["終年日照強烈", "總降雨量太低", "河川污染嚴重", "地下水鹽度高"], "ans": 2},
+{"q": "夢幻的極光、壯闊的冰河地景與宛如外星球的火山地貌都是令旅人嚮往的絕妙景色，請問下列那個國家最 有機會看到極光、冰河與火山地貌同框的畫面？", "opts": ["冰島", "芬蘭", "格陵蘭", "瑞典 ˉ"], "ans": 3},
+{"q": "到土耳其乘坐熱氣球觀賞卡帕多奇亞壯闊的地景是許多國人熱愛的旅遊選擇之一，請問安納托利亞高原 上的凝灰岩石柱景觀分別是由那些內、外營力作用而成？", "opts": ["褶曲作用、冰河侵蝕", "斷層作用、河水沖蝕", "火山噴發、雨水侵蝕", "板塊擠壓、風力侵蝕"], "ans": 1},
+{"q": "全球暖化使冰川融化、海水體積膨脹，使得海平面逐年上升，地勢低平的島嶼國家首當其衝。請問下列那 些國家受到海平面上升的威脅最大，恐有「全國淹沒」的危機？①海地 ②冰島 ③吐瓦魯 ④馬爾地夫 ⑤吉里巴斯", "opts": ["①②③", "①③④", "②④⑤", "③④⑤"], "ans": 2},
+{"q": "除了跨年煙火之外，迎接新年曙光也是遊客追逐的焦點，請問下列那個地點可以較早看到新年的曙光？", "opts": ["馬紹爾群島", "紐西蘭南島", "復活節島", "夏威夷群島"], "ans": 3},
+{"q": "下列那個國家的國土橫跨東、西、南、北半球？", "opts": ["巴西", "剛果", "吉里巴斯", "印度尼西亞"], "ans": 2},
+{"q": "某觀光客去臺灣銀行兌換「英鎊」作為觀光的用途，請問他可能要去那裡旅遊？①愛爾蘭 ②英格蘭 ③ 威爾斯 ④北愛爾蘭 ⑤蘇格蘭", "opts": ["①②③④", "①②③⑤", "①③④⑤", "②③④⑤"], "ans": 3},
+{"q": "「西亞古文明」是圍繞著幼發拉底河及底格里斯河而開展，故又被稱為「兩河文明」。請問兩河流域大體 位於現在那個國家境內？", "opts": ["科威特", "杜拜", "伊拉克", "亞塞拜然"], "ans": 1},
+{"q": "死海位於約旦和巴勒斯坦交界，是世界上最低的湖泊，湖面海拔負422公尺，為地球上已露出陸地的最低 點。觀光客常拜訪此地進行漂浮體驗活動。請問死海是如何形成的湖泊？", "opts": ["淡水湖、堰塞湖", "鹹水湖、冰蝕湖", "淡水湖、火山口湖", "鹹水湖、構造湖"], "ans": 0},
+{"q": "這個地方的居民生活、居住、如廁與飲水都是倚靠這條河流，也在河流上進行水上市場的交易，請問我們 是在那一個地理區看到如此的人文景觀？", "opts": ["科拉半島", "中南半島", "西奈半島", "朝鮮半島"], "ans": 2},
+{"q": "在某知名景點，你可以欣賞到藍光螢火蟲洞並搭乘船隻慢慢欣賞鐘乳石、石筍等石灰岩地形，請問這是在 那一國家可以看見的奇景？", "opts": ["紐西蘭", "英格蘭", "挪威", "馬達加斯加"], "ans": 2},
+{"q": "請問下列那些是被UNESCO所核定的鐵路世界遺產？①奧地利塞默林山岳鐵路 ②法國勃朗峰登山列車 ③瑞士阿布拉-伯爾尼納鐵道 ④印度大吉嶺喜馬拉雅鐵路", "opts": ["①②③", "①②④", "①③④", "②③④"], "ans": 3},
+{"q": "領隊告知我們即將前往的國家為黃熱病（YellowFever）高風險疫區，建議先施打黃熱病疫苗再行前往。 我們要前往的國家可能是：", "opts": ["寮國", "吉里巴斯", "巴西", "克羅埃西亞"], "ans": 0},
+{"q": "我們從芝加哥沿著美國與加拿大天然形成的地理國界、全世界最大的淡水湖區-五大湖區飽覽湖濱風光， 請問下列那些湖泊屬於五大湖區？①路易斯湖 ②休倫湖 ③蘇必略湖 ④安大略湖 ⑤伊利湖", "opts": ["①②③④", "①②③⑤", "①③④⑤", "②③④⑤"], "ans": 2},
+{"q": "密克羅尼西亞島群（Micronesia）位於西太平洋，包括馬里亞納群島、加羅林群島、馬紹爾群島、吉爾伯 特群島等，陸地總面積2584平方公里，有好幾百個珊瑚礁島、礁湖散布其中。請問這裡主要的珊瑚礁型 態是下列那一類？", "opts": ["環礁", "桌礁", "堡礁", "裙礁"], "ans": 1},
+{"q": "馬丘比丘古神廟被聯合國教科文組織訂定為世界文化與自然雙重遺產，下列有關敘述，何者錯誤？", "opts": ["馬丘比丘是印加帝國城市遺跡", "位於秘魯南部的山區，海拔兩千四百餘公尺處", "考古學家認為，馬丘比丘始建於11世紀", "拴日石、太陽神殿和三窗廟是保存完整的三個主要景點"], "ans": 0},
+{"q": "下列有關澳洲地形的敘述，何者正確？", "opts": ["西部是高達2000公尺的高原", "中部主要是平原地形", "東部主要是低海拔的丘陵地形", "東南沿海有全球著名的珊瑚礁群"], "ans": 1},
+{"q": "東非動物大遷徙或肯亞動物大遷徙號稱世界八大自然奇觀，下列那種動物不是遷徙的主要動物？", "opts": ["老虎", "獅子", "斑馬", "牛羚"], "ans": 0},
+{"q": "在2021年那個歐洲的世界文化遺產，因過度開發被註銷登錄，從世界文化遺產名單中移除？", "opts": ["佛羅倫斯歷史中心", "利物浦海事商城", "巴黎塞納河岸", "維也納歷史中心"], "ans": 2},
+{"q": "下列那一個世界文化遺產曾因規避水患而大規模移位重建，其為考古史上重大事件？", "opts": ["埃及阿布辛貝神廟", "長江三峽石寶齋", "阿布達比博物館", "土耳其卡布托奇亞洞窟"], "ans": 3},
+{"q": "下列那一處峽灣自然文化遺產位於格陵蘭？", "opts": ["米佛峽灣（MilfordSound）", "松恩峽灣（Sognefjord）", "伊盧利薩特冰峽灣（IllulissatIcefjord）", "蓋倫格峽灣（Geirangerfjord）"], "ans": 1},
+{"q": "下列何種飲食文化截至 2023 年，尚未被收錄為世界無形文化遺產？", "opts": ["墨西哥傳統美食", "地中海飲食", "韓國泡菜文化", "德國啤酒"], "ans": 0},
+{"q": "大航海時期臺灣土地上曾出現殖民占領時期，所遺留考古史蹟遺址的文化遺產，下列組合何者錯誤？", "opts": ["西班牙→ 聖多明哥城", "西班牙→ 安東尼堡", "西班牙→ 聖薩爾瓦多城", "荷蘭 →熱蘭遮城"], "ans": 0}
+];
+const TOTAL_TIME=3600;
+let timeLeft=TOTAL_TIME,timerInterval=null,submitted=false;
+const answers=new Array(QUESTIONS.length).fill(-1);
+
+function init(){
+  const qa=document.getElementById('quiz-area');
+  const dots=document.getElementById('dots');
+  document.getElementById('totalQ').textContent=QUESTIONS.length;
+  qa.innerHTML='';dots.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const dot=document.createElement('div');
+    dot.className='dot';dot.id='dot'+i;
+    dot.title='第'+(i+1)+'題';
+    dot.onclick=()=>document.getElementById('q'+i).scrollIntoView({behavior:'smooth',block:'center'});
+    dots.appendChild(dot);
+    const card=document.createElement('div');
+    card.className='question-card';card.id='q'+i;
+    const optsHtml=q.opts.map((o,j)=>`
+      <label class="opt-label" id="opt${i}_${j}">
+        <input type="radio" name="q${i}" value="${j}" onchange="selectAns(${i},${j})">
+        <span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span>
+      </label>`).join('');
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div>
+      <div class="q-text">${escHtml(q.q)}</div>
+      <div class="options">${optsHtml}</div>`;
+    qa.appendChild(card);
+  });
+  startTimer();
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function selectAns(qi,val){
+  answers[qi]=val;
+  document.getElementById('dot'+qi).classList.add('answered');
+  document.querySelectorAll(`#q${qi} .opt-label`).forEach((l,j)=>{
+    l.classList.toggle('selected',j===val);
+  });
+}
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    if(submitted)return;
+    timeLeft--;
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    const el=document.getElementById('timer');
+    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el.className='timer';
+    if(timeLeft<=300)el.classList.add('danger');
+    else if(timeLeft<=600)el.classList.add('warn');
+    if(timeLeft<=0){clearInterval(timerInterval);submitQuiz(true);}
+  },1000);
+}
+
+function submitQuiz(timeout=false){
+  if(submitted)return;
+  const unanswered=answers.filter(a=>a===-1).length;
+  if(!timeout&&unanswered>0){
+    if(!confirm(`還有 ${unanswered} 題未作答，確定要交卷？`))return;
+  }
+  clearInterval(timerInterval);submitted=true;
+  document.getElementById('submit-wrap').classList.add('hidden');
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
+  showResults();
+}
+
+function showResults(){
+  let correct=0,wrong=0,skip=0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===-1)skip++;
+    else if(answers[i]===q.ans)correct++;
+    else wrong++;
+  });
+  const score=Math.round(correct/QUESTIONS.length*100);
+  const timeTaken=TOTAL_TIME-timeLeft;
+  const tm=Math.floor(timeTaken/60),ts=timeTaken%60;
+  let grade='',gradeClass='';
+  if(score>=80){grade='優秀';gradeClass='excellent'}
+  else if(score>=60){grade='及格';gradeClass='pass'}
+  else{grade='未及格';gradeClass='fail'}
+
+  document.getElementById('score-panel').innerHTML=`
+    <div class="score-big">${score} 分</div>
+    <div class="grade ${gradeClass}">${grade}</div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num" style="color:#27ae60">${correct}</div><div>答對</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#e74c3c">${wrong}</div><div>答錯</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#888">${skip}</div><div>未作答</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:#2c5f8a">${String(tm).padStart(2,'0')}:${String(ts).padStart(2,'0')}</div><div>用時</div></div>
+    </div>`;
+  document.getElementById('score-panel').classList.remove('hidden');
+  document.getElementById('filter-bar').classList.remove('hidden');
+  document.getElementById('reset-wrap').classList.remove('hidden');
+
+  const ra=document.getElementById('result-area');
+  ra.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const userAns=answers[i];
+    const isCorrect=userAns===q.ans;
+    const isSkip=userAns===-1;
+    const card=document.createElement('div');
+    card.className='question-card'+(isCorrect?' correct':isSkip?'':' wrong');
+    card.id='rq'+i;
+    const optsHtml=q.opts.map((o,j)=>{
+      let cls='opt-label';
+      if(j===q.ans)cls+=' correct-ans';
+      else if(j===userAns&&!isCorrect)cls+=' wrong-ans';
+      return `<label class="${cls}"><span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span></label>`;
+    }).join('');
+    const mark=isCorrect?'✅':isSkip?'⬜':'❌';
+    const hint=(!isCorrect&&!isSkip)?`<div class="correct-hint">✔ 正確答案：${String.fromCharCode(65+q.ans)}. ${escHtml(q.opts[q.ans])}</div>`:'';
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題 <span class="result-mark">${mark}</span></div>
+      <div class="q-text">${escHtml(q.q)}</div>
+      <div class="options">${optsHtml}</div>${hint}`;
+    ra.appendChild(card);
+  });
+}
+
+function filterQ(type,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById('rq'+i);
+    if(!card)return;
+    if(type==='all')card.classList.remove('hidden');
+    else if(type==='wrong')card.classList.toggle('hidden',answers[i]===q.ans);
+    else if(type==='correct')card.classList.toggle('hidden',answers[i]!==q.ans);
+  });
+}
+
+function resetQuiz(){
+  submitted=false;timeLeft=TOTAL_TIME;
+  answers.fill(-1);
+  document.getElementById('score-panel').classList.add('hidden');
+  document.getElementById('filter-bar').classList.add('hidden');
+  document.getElementById('reset-wrap').classList.add('hidden');
+  document.getElementById('result-area').innerHTML='';
+  init();
+  document.getElementById('submit-wrap').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+init();
+</script>
+</body>
+</html>
