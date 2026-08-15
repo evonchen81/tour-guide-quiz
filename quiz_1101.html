@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>115年 領隊執業實務 線上測驗</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans TC', '微軟正黑體', sans-serif;
+    background: #f0f4f8;
+    color: #2d3748;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+    color: white;
+    padding: 20px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-title { font-size: 1.1rem; font-weight: 700; line-height: 1.4; }
+  .header-sub { font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
+  .timer-box {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 10px;
+    padding: 8px 18px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .timer-label { font-size: 0.7rem; opacity: 0.85; letter-spacing: 1px; }
+  .timer-value { font-size: 1.8rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 2px; }
+  .timer-box.warning { border-color: #fbd38d; background: rgba(251,211,141,0.2); }
+  .timer-box.danger  { border-color: #fc8181; background: rgba(252,129,129,0.25); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+  .progress-bar-wrap { background: rgba(255,255,255,0.2); height:4px; border-radius:2px; margin-top:8px; }
+  .progress-bar-fill { height:4px; border-radius:2px; background:#68d391; transition: width .3s; }
+
+  /* ── Main ── */
+  .main { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+
+  .info-bar {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+  }
+  .badge {
+    background: white; border-radius: 8px; padding: 8px 16px;
+    font-size: 0.82rem; color: #4a5568; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .badge span { font-weight: 700; color: #2b6cb0; }
+
+  /* ── Question card ── */
+  .q-card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    border-left: 4px solid #cbd5e0;
+    transition: border-color .2s;
+  }
+  .q-card.answered { border-left-color: #68d391; }
+  .q-card.result-correct { border-left-color: #48bb78; background: #f0fff4; }
+  .q-card.result-wrong   { border-left-color: #fc8181; background: #fff5f5; }
+
+  .q-num {
+    font-size: 0.75rem; font-weight: 700; color: #718096;
+    letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .q-text {
+    font-size: 0.97rem; line-height: 1.7; margin-bottom: 16px; font-weight: 500;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-label {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid #e2e8f0;
+    transition: all .15s; font-size: 0.93rem; line-height: 1.5;
+    user-select: none;
+  }
+  .option-label:hover { border-color: #4299e1; background: #ebf8ff; }
+  .option-label input[type=radio] { display:none; }
+  .option-key {
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+    background: #edf2f7; border: 1.5px solid #cbd5e0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 700; color: #4a5568;
+  }
+  .option-label.selected { border-color: #4299e1; background: #ebf8ff; }
+  .option-label.selected .option-key { background: #4299e1; color: white; border-color: #4299e1; }
+
+  /* Result states */
+  .option-label.correct-ans { border-color: #48bb78 !important; background: #c6f6d5 !important; }
+  .option-label.correct-ans .option-key { background: #48bb78 !important; color: white !important; border-color: #48bb78 !important; }
+  .option-label.wrong-ans   { border-color: #fc8181 !important; background: #fed7d7 !important; }
+  .option-label.wrong-ans .option-key   { background: #fc8181 !important; color: white !important; border-color: #fc8181 !important; }
+
+  .result-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.82rem; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px; margin-top: 12px;
+  }
+  .result-badge.ok  { background: #c6f6d5; color: #276749; }
+  .result-badge.err { background: #fed7d7; color: #9b2c2c; }
+  .correct-note { font-size: 0.82rem; color: #276749; margin-top: 6px; font-weight: 600; }
+
+  /* ── Submit / Reset buttons ── */
+  .btn-area { text-align: center; margin-top: 36px; }
+  .btn-submit {
+    background: linear-gradient(135deg, #2b6cb0, #2c5282);
+    color: white; border: none; padding: 14px 48px;
+    font-size: 1.05rem; font-weight: 700; border-radius: 10px;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(43,108,176,0.4);
+    transition: transform .1s, box-shadow .1s; letter-spacing: 0.5px;
+  }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(43,108,176,0.45); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-reset {
+    background: white; color: #2b6cb0; border: 2px solid #2b6cb0;
+    padding: 12px 40px; font-size: 1rem; font-weight: 700;
+    border-radius: 10px; cursor: pointer; margin-top: 16px;
+    transition: all .15s; letter-spacing: 0.5px;
+  }
+  .btn-reset:hover { background: #ebf8ff; }
+
+  /* ── Score Panel ── */
+  #score-panel {
+    display: none;
+    background: white; border-radius: 16px; padding: 32px 28px;
+    margin-bottom: 32px; box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .score-main { font-size: 3.5rem; font-weight: 800; line-height: 1; }
+  .score-sub { font-size: 1rem; color: #718096; margin-top: 8px; }
+  .score-grade {
+    display: inline-block; margin-top: 16px;
+    padding: 6px 24px; border-radius: 24px; font-size: 1.1rem; font-weight: 700;
+  }
+  .stats-row {
+    display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap;
+  }
+  .stat-box {
+    background: #f7fafc; border-radius: 10px; padding: 12px 20px; min-width: 110px;
+  }
+  .stat-num { font-size: 1.6rem; font-weight: 800; }
+  .stat-lbl { font-size: 0.78rem; color: #718096; }
+
+  .filter-bar {
+    display: flex; gap: 8px; justify-content: center; margin-top: 20px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    border: 1.5px solid #cbd5e0; background: white; border-radius: 6px;
+    padding: 6px 16px; font-size: 0.85rem; cursor: pointer; transition: all .15s;
+  }
+  .filter-btn.active { background: #2b6cb0; color: white; border-color: #2b6cb0; }
+
+  .unanswered-msg {
+    background: #fffbeb; border: 1.5px solid #f6e05e;
+    border-radius: 8px; padding: 12px 18px;
+    font-size: 0.9rem; color: #744210; margin-top: 12px;
+  }
+
+  .answered-count-bar {
+    background: white; border-radius: 10px; padding: 12px 20px;
+    margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07); font-size: 0.88rem; color: #4a5568;
+  }
+  .dot-grid {
+    display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;
+  }
+  .dot {
+    width: 22px; height: 22px; border-radius: 4px;
+    background: #e2e8f0; cursor: pointer; transition: background .15s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 700; color: #718096;
+  }
+  .dot.done { background: #68d391; color: white; }
+  .dot:hover { opacity: .8; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <div class="header-title">115年 領隊執業實務 模擬測驗</div>
+    <div class="header-sub">華語領隊人員 ／ 共50題・每題2分・總分100分</div>
+  </div>
+  <div class="timer-box" id="timerBox">
+    <div class="timer-label">剩餘時間</div>
+    <div class="timer-value" id="timerValue">60:00</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="timerBar" style="width:100%"></div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Answered count -->
+  <div class="answered-count-bar">
+    <div>
+      <div>已作答：<strong id="answeredCount">0</strong> / 50 題</div>
+      <div class="dot-grid" id="dotGrid"></div>
+    </div>
+  </div>
+
+  <!-- Score Panel (hidden until submit) -->
+  <div id="score-panel">
+    <div class="score-main" id="scoreVal">—</div>
+    <div class="score-sub" id="scoreDetail">—</div>
+    <div class="score-grade" id="scoreGrade"></div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="statCorrect" style="color:#48bb78">0</div>
+        <div class="stat-lbl">答對題數</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statWrong" style="color:#fc8181">0</div>
+        <div class="stat-lbl">答錯題數</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statSkip" style="color:#ed8936">0</div>
+        <div class="stat-lbl">未作答</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statTime" style="color:#667eea">—</div>
+        <div class="stat-lbl">作答時間</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterQ('all')">全部題目</button>
+      <button class="filter-btn" onclick="filterQ('wrong')">只看錯誤</button>
+      <button class="filter-btn" onclick="filterQ('correct')">只看答對</button>
+    </div>
+  </div>
+
+  <!-- Question list -->
+  <div id="quizForm"></div>
+
+  <div class="btn-area" id="btnArea">
+    <div id="unansMsg"></div>
+    <br>
+    <button class="btn-submit" onclick="submitQuiz()">📋 送出成績</button>
+    <br>
+    <button class="btn-reset" onclick="resetQuiz()" id="resetBtn" style="display:none">🔄 重新作答</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "關於中風之急救作法的敘述，下列何者錯誤？",
+    opts: ["患者意識清醒時給予平躺，頭肩部微墊高","若有分泌物流出，使患者頭側一邊","鬆解衣物並保暖","可立即給予飲水並協助其飲用"],
+    ans: 3
+  },
+  {
+    q: "下列何種情況適合使用哈姆立克法（Heimlich Maneuver）急救施作？",
+    opts: ["呼吸道異物完全阻塞","呼吸道異物部分阻塞","心跳停止","呼吸停止"],
+    ans: 0
+  },
+  {
+    q: "火災燒傷造成傷害初期，最易導致死亡的原因，下列敘述何者正確？",
+    opts: ["傷口感染","呼吸道吸入性燒傷","燒傷產生的脫水休克","燒傷引起的疼痛"],
+    ans: 1
+  },
+  {
+    q: "有關燒燙傷的緊急處理口訣：『沖脫泡蓋送』，在送醫前的緊急處理過程中，下列敘述何者錯誤？",
+    opts: ["沖：在流動的清水下沖涼10分鐘，勿拖太久","脫：脫除燙傷部位之飾品及衣物","泡：如無傷口情形，可持續在冷水中浸泡著","蓋：蓋上濕紗布或乾淨的濕衣物"],
+    ans: 0
+  },
+  {
+    q: "新冠病毒主要經由下列那一種途徑傳染？",
+    opts: ["空氣或飛沫傳染","食物或飲水傳染","接觸傳染","蟲媒傳染"],
+    ans: 0
+  },
+  {
+    q: "旅遊途中有團員突然有呼吸急促、盜汗、心悸、噁心、嘔吐、胸悶痛等症狀，可能有何健康問題，且應如何處置？",
+    opts: ["心灼熱感；建議吃制酸劑","食物哽在食道；建議喝水","心臟病發作；建議打當地緊急電話","胸悶痛；建議服用止痛藥物"],
+    ans: 2
+  },
+  {
+    q: "團員發生病痛送醫時，應明確描述病情告知醫師，下列敘述何者錯誤？",
+    opts: ["完整的主訴，可以快速引導醫師正確的診斷","由腳部往上循序做主訴","詳細說明所有曾罹患的疾病","應告知家族相關病史"],
+    ans: 1
+  },
+  {
+    q: "經由飲食不當，吃到被污染的食物而引起的肝炎，下列何者正確？",
+    opts: ["A型肝炎","B型肝炎","C型肝炎","D型肝炎"],
+    ans: 0
+  },
+  {
+    q: "旅遊團共30人，其中包含3位素食者、1位糖尿病患者，領隊在訂餐時提供了基本資訊，請問該領隊最主要忽略下列那一項關鍵資訊，導致餐廳無法妥善安排？",
+    opts: ["帶團人員姓名","何時要支付訂金給餐廳","是否需要包廂或特殊座位安排","特殊飲食需求人數"],
+    ans: 3
+  },
+  {
+    q: "東澳8天旅行團預定下午5點喚醒團員，請問領隊應如何向飯店總機表達喚醒團員需求？",
+    opts: ["Collect call","Check-in call","Follow-up call","Wake-up call"],
+    ans: 3
+  },
+  {
+    q: "團體旅遊入住飯店時，旅客要求領隊安排與同團親友鄰近之房間，方便彼此的聯繫，請問領隊人員應如何安排那一種較適當的客房房型給該組團員？",
+    opts: ["Accessible Room","Connecting Room","Dormitory Room","Family Room"],
+    ans: 1
+  },
+  {
+    q: "義瑞法12天旅遊團，臺北起飛時間為2月8日23:25（GMT+8），直飛羅馬抵達時間為2月9日07:15（GMT+1），該班機飛行時間為多久？",
+    opts: ["13個小時20分鐘","13個小時50分鐘","14個小時20分鐘","14個小時50分鐘"],
+    ans: 3
+  },
+  {
+    q: "團體抵達餐廳時，發現餐廳並未保留座位，導致團員必須等待至少50分鐘，下列何者是領隊最合適的處理方式？",
+    opts: ["當場責怪餐廳失誤，要求立即安排座位並給予賠償","向團員誠懇致歉，先安置團員於餐廳外休息區，再積極協調餐廳加快處理，並準備備案餐廳","因餐廳無法即時應變，帶領團員立即離開，另尋附近餐廳用餐，不必與原餐廳再行協調","立即向團員致歉與說明是公司內部作業疏失，與自己操作無關，以免影響團員對領隊觀感"],
+    ans: 1
+  },
+  {
+    q: "領隊帶團抵達義大利威尼斯用餐時，發現餐廳地點位於巷弄中且門牌路標辨識不易，為預防團員因此分散迷路，下列何者為領隊最合適的作法？",
+    opts: ["抵達當地後再依手機導航臨時帶領團員前往餐廳","領隊以口頭方式描述路線後，讓團員分組自由前往餐廳，並要求各組回報到達狀況","指派團員協助辨識路線，讓團員自由活動後再各自前往餐廳集合","先瞭解餐廳的正確位置，並記住附近明顯地標，以利團員辨識餐廳位置"],
+    ans: 3
+  },
+  {
+    q: "在辦理團體退房（Check-Out）手續，準備離開飯店前，領隊最重要工作有：①詢問團員的個人行李和貴重物品是否確實攜帶及上車前已確認看見自己大行李有上車 ②住宿與個人消費費用等是否已全付清 ③清點團體行李件數是否有缺少及是否全數運上遊覽車 ④請團員上車點名，下列何者為領隊較合適的操作順序？",
+    opts: ["④③②①","②④①③","②③④①","①②③④"],
+    ans: 2
+  },
+  {
+    q: "西羅馬帝國於西元476年滅亡，對應中國朝代，下列何者正確？",
+    opts: ["漢朝","唐朝","南北朝","宋朝"],
+    ans: 2
+  },
+  {
+    q: "下列那一位法國國王在位時間最短？",
+    opts: ["路易十三","路易十四","路易十五","路易十六"],
+    ans: 3
+  },
+  {
+    q: "使用ABACUS訂位系統，輸入123NOVSFOTPE11PYVR，其指定的轉機點為下列那個城市？",
+    opts: ["NOV","SFO","TPE","YVR"],
+    ans: 3
+  },
+  {
+    q: "出國團體搭機旅遊，帶團人員應特別注意各個機場之MCT規定。所謂的MCT規定指的是下列何者？",
+    opts: ["最短轉機時間限制","最長轉機時間限制","最低團體人數限制","最高行李重量限制"],
+    ans: 0
+  },
+  {
+    q: "航空票務訂位中航空公司代號，下列何者正確？",
+    opts: ["大韓航空KA","馬來西亞航空MS","華信航空AS","澳洲航空QF"],
+    ans: 3
+  },
+  {
+    q: "航空票務訂位中機場代號，下列何者正確？",
+    opts: ["日本東京羽田HNT","日本大阪關西KIX","韓國首爾仁川ICL","美國紐約紐華克EWK"],
+    ans: 1
+  },
+  {
+    q: "航空票務訂位中，有關機位確認狀態，下列代號何者錯誤？",
+    opts: ["KR","HK","KK","KL"],
+    ans: 0
+  },
+  {
+    q: "航空票務訂位中，那一項為有關旅客攜帶寵物托運特殊行李使用代號？",
+    opts: ["PEAG","PEBG","PEBC","PETC"],
+    ans: 3
+  },
+  {
+    q: "關於英文邀請函，通常會在左下角註記何種縮寫代號，代表敬請回覆？",
+    opts: ["ASAP","ASST","MAAS","RSVP"],
+    ans: 3
+  },
+  {
+    q: "旅館房價，僅提供住宿，不包含任何餐食的計價方式，稱之為何？",
+    opts: ["American Plan（AP）","Continental Plan（CP）","European Plan（EP）","Bermuda Plan（BP）"],
+    ans: 2
+  },
+  {
+    q: "有關名片遞送的禮儀，下列敘述何者較為適宜？",
+    opts: ["名片印刷內容朝下，避免別人看到","接收過對方名片，應立即收起，之後再看","名片須同時遞給多人，順序要「由遠而近」","由職位較低者先遞送名片給職位較高者"],
+    ans: 3
+  },
+  {
+    q: "傳統英式下午茶用餐禮儀，是以三層瓷盤午茶架擺放各式點心，請問最上層應放置何種點心？",
+    opts: ["三明治","鹹派","司康","水果塔"],
+    ans: 3
+  },
+  {
+    q: "在美國搭乘三排座椅之九人座小巴士，下列何者為最尊之座位？",
+    opts: ["司機旁邊","司機後面一排最右邊靠門座位","司機後面一排中間座位","最後第三排中間座位"],
+    ans: 1
+  },
+  {
+    q: "在國家重要典禮演奏國歌時，在場的政府文職官員應行何種禮才恰當？",
+    opts: ["拱手禮","扶手禮","舉手禮","握手禮"],
+    ans: 1
+  },
+  {
+    q: "用餐禮儀中，西餐進餐時，如果餐具掉落，應如何處置？",
+    opts: ["自行撿起","請服務生協助換新餐具","拿別的餐具代替","請附近的人幫忙撿起"],
+    ans: 1
+  },
+  {
+    q: "預防團員於參觀途中走失，領隊宜採何種方式為最佳？",
+    opts: ["將行程向駐外單位報備，以便適時提供援助","提供團員當地警方電話，以備不時之需","事先與旅客約定，在原地等候以待領隊回頭尋找","將全團資料如機票、護照、簽證等存放於旅館保險箱內，以策安全"],
+    ans: 2
+  },
+  {
+    q: "下列何者不是旅行業者經常利用附加費用之方式，轉向團體旅遊旅客收取費用之項目？",
+    opts: ["機票","機場稅","簽證費用","燃油附加費"],
+    ans: 0
+  },
+  {
+    q: "帶團搭乘郵輪時，因惡劣天候因素導致無法如期靠岸，團員開始抱怨並擔心行程受影響，此時領隊應如何處理？",
+    opts: ["向旅客保證一定會趕上所有行程","向旅客誠實說明情況，安撫情緒，並即時協調後續行程調整","請旅客自行上網查詢資訊","無視抱怨，等天氣好轉再說"],
+    ans: 1
+  },
+  {
+    q: "依緊急事故處理「CRISIS」六部曲之內涵，關於「說明（Interpretation）」，下列敘述何者正確？",
+    opts: ["取得各相關文件，如報案文件","主要在控制、掌握客人行動及心態","向各個可能的人員尋求協助","保持冷靜，藉5W2H建立思考及反應模式"],
+    ans: 1
+  },
+  {
+    q: "有關搭乘遊覽車遇緊急事故，若自動門及安全門皆無法開啟，需使用車窗擊破器擊碎車窗玻璃逃生時，下列操作方法何者正確？",
+    opts: ["直接敲擊玻璃中央","敲擊玻璃四個角落","敲擊玻璃下緣中點","先敲擊玻璃再用腳踹開"],
+    ans: 1
+  },
+  {
+    q: "有關旅行社所投保旅行業責任保險有附加「海外緊急救助」，是由下列何機關（構）所提供出國旅客緊急性的各項救助服務？",
+    opts: ["交通部觀光署","外交部","中華民國旅行業品質保障協會","保險機構（公司）"],
+    ans: 3
+  },
+  {
+    q: "旅外國人遭遇急難，駐外機構確認當事人短時間內無法獲得財務支援，且有迫切返國需要時，駐外機構得提供候機返國期間基本生活費借款，其最高金額不超過多少美元？",
+    opts: ["500","600","800","1,000"],
+    ans: 2
+  },
+  {
+    q: "下列何者屬於我國駐外機構可提供之急難協助？",
+    opts: ["調解民事、刑事或勞資糾紛","代墊醫療、住院等款項","提供涉及司法事件之法律意見","提供遭遇不可抗力事件之因應資訊及必要協助"],
+    ans: 3
+  },
+  {
+    q: "旅遊途中因不可抗力或不可歸責於旅行社的事由，致無法履行預定之旅程、食宿或遊覽項目時，下列敘述何者最適當？",
+    opts: ["因行程減少或增加的費用，均由旅行社自行承擔","旅客同意變更行程後，不得主張任何退款或補償","因行程減少而節省之費用，應退還旅客；因不可抗力增加之費用，不得向旅客收取","因行程減少而節省之費用，應退還旅客；因不可抗力增加之費用，得向旅客收取"],
+    ans: 2
+  },
+  {
+    q: "團員在國外發生「非因旅行社故意或過失所致」的身體或財產事故時，下列敘述何者最適當？",
+    opts: ["旅行社應盡善良管理人之注意，全額支付旅客所有醫療及相關費用","旅行社應盡善良管理人之注意協助旅客處理，費用由旅客自行負擔，且事前應告知可能費用","非因旅行社故意或過失所致，旅行社無須提供協助，旅客需自行處理事故","非因旅行社故意或過失所致，旅行社僅需提供所衍生之食宿與交通費用"],
+    ans: 1
+  },
+  {
+    q: "若團員因旅行社過失（例如未辦妥簽證）而被目的地國拒絕入境，下列處理方式何者正確？",
+    opts: ["旅行社無須負擔費用，由團員自行處理返國或滯留問題","安排團員至下一站與其他團員會合，或安排返國，所衍生費用由旅行社負擔","領隊僅需提供聯絡資訊，無須安排後續行程或返國","旅行社僅負責通知國外代理旅行社，由代理旅行社負責費用及處理"],
+    ans: 1
+  },
+  {
+    q: "有關海外急難救助（Overseas Emergency Assistance, OEA），下列敘述何者正確？",
+    opts: ["僅提供醫療諮詢與住院安排服務，不包含法律或旅行相關協助","是一種國際性救援服務，涵蓋醫療、法律、旅遊及緊急事件協助等多項緊急支援服務","為信用卡附帶的海外緊急支援服務提供，不提供保險公司保戶使用","保戶出國時，即可無條件使用海外急難救助服務，與保險契約狀態無關"],
+    ans: 1
+  },
+  {
+    q: "某團員參加北歐12日團體旅遊行程，因冰島火山爆發導致航班取消，延後8日返國，滯留期間每日額外住宿與旅行費用支出為新臺幣3,000元，依旅行業責任保險額外住宿與旅行費用附加條款，每一旅遊團員理賠金額為新臺幣多少元？",
+    opts: ["8,000元","16,000元","20,000元","24,000元"],
+    ans: 1
+  },
+  {
+    q: "為降低國外旅遊時因跨越多個時區而產生的時差影響，下列何項作法最適當？",
+    opts: ["抵達目的地後立即安排重要會議或旅遊行程，以加速生理時鐘調整","飛行途中多飲酒或含咖啡因飲料，可幫助維持清醒，減少時差反應","出發前可逐步調整睡眠時間，抵達後白天多曬陽光，夜晚避免光照","可自行購買含褪黑激素的保健食品，以快速調整生理時鐘"],
+    ans: 2
+  },
+  {
+    q: "旅客於海外因意外受傷需緊急就醫，若不懂當地語言，請問駐外館處協助的服務，下列何者除外？",
+    opts: ["代墊或代付入院保證金","提供醫院及專業翻譯人員名單","協助與家人聯繫","協助通知保險公司"],
+    ans: 0
+  },
+  {
+    q: "團體因班機取消，導致全團滯留機場，且飯店全滿，作為領隊應如何處置？",
+    opts: ["立即安撫團員，聯繫旅行社與航空公司安排餐券或臨時住宿","要求團員自行解決住宿，隔日再集合","讓團員投票決定要不要改搭其他航空公司","立即退票改搭乘其他航空公司"],
+    ans: 0
+  },
+  {
+    q: "若旅行團遇到天然災害（例如地震、颱風、洪水）時，導致團員受傷，下列何者並非領隊負責的工作？",
+    opts: ["將團員送醫","通知旅行社","向媒體說明","照顧團員並記錄事件處理過程"],
+    ans: 2
+  },
+  {
+    q: "帶領銀髮族團體入住旅館，為使行李員將行李儘快送至房間，領隊應如何處理最為適當？",
+    opts: ["請行李員在20分鐘內要完成所有行李運送","請團員自行提領行李至房間","領隊親自一間一間送行李","協助行李員在行李牌上寫上房號"],
+    ans: 3
+  },
+  {
+    q: "團體於日本旅遊時遇強震，以致當地交通全面中斷，領隊應如何因應？",
+    opts: ["按照行程表前往景點","請旅客自行活動","帶團撤離至安全區並通報旅行社與駐外館處","等待媒體報導再決定"],
+    ans: 2
+  },
+  {
+    q: "團體返臺至桃園機場，發現一名團員行李未到，經領隊向航空公司詢問登記後，確認行李須等隔日才能抵臺，請問領隊可以幫此名團員向航空公司爭取什麼權益？",
+    opts: ["申請行李延誤費","將行李送達團員住處","申請日常用品支出費","申請旅遊不便險"],
+    ans: 1
+  }
+];
+
+const KEYS = ['A','B','C','D'];
+const TOTAL_TIME = 60 * 60; // 60 minutes in seconds
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let startTime = Date.now();
+let submitted = false;
+let userAnswers = new Array(QUESTIONS.length).fill(-1);
+
+// Build quiz
+function buildQuiz() {
+  const form = document.getElementById('quizForm');
+  form.innerHTML = '';
+  const dotGrid = document.getElementById('dotGrid');
+  dotGrid.innerHTML = '';
+
+  QUESTIONS.forEach((q, i) => {
+    // dot
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.id = `dot${i}`;
+    dot.textContent = i+1;
+    dot.title = `第${i+1}題`;
+    dot.onclick = () => document.getElementById(`q${i}`).scrollIntoView({behavior:'smooth', block:'center'});
+    dotGrid.appendChild(dot);
+
+    // card
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `q${i}`;
+    card.innerHTML = `
+      <div class="q-num">第 ${i+1} 題</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options" id="opts${i}">
+        ${q.opts.map((opt, j) => `
+          <label class="option-label" id="lbl${i}_${j}" onclick="selectOption(${i},${j})">
+            <input type="radio" name="q${i}" value="${j}">
+            <span class="option-key">${KEYS[j]}</span>
+            <span>${opt}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    form.appendChild(card);
+  });
+}
+
+function selectOption(qi, oi) {
+  if (submitted) return;
+  userAnswers[qi] = oi;
+
+  // Update labels
+  for (let j = 0; j < 4; j++) {
+    const lbl = document.getElementById(`lbl${qi}_${j}`);
+    lbl.classList.toggle('selected', j === oi);
+  }
+
+  // Update card border
+  document.getElementById(`q${qi}`).classList.add('answered');
+  // Update dot
+  document.getElementById(`dot${qi}`).classList.add('done');
+  // Update count
+  updateCount();
+}
+
+function updateCount() {
+  const n = userAnswers.filter(a => a !== -1).length;
+  document.getElementById('answeredCount').textContent = n;
+}
+
+// Timer
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    document.getElementById('timerValue').textContent =
+      String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    const pct = (timeLeft / TOTAL_TIME) * 100;
+    document.getElementById('timerBar').style.width = pct + '%';
+
+    const box = document.getElementById('timerBox');
+    if (timeLeft <= 300) box.className = 'timer-box danger';
+    else if (timeLeft <= 600) box.className = 'timer-box warning';
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!submitted) {
+        alert('⏰ 時間到！自動送出成績。');
+        submitQuiz(true);
+      }
+    }
+  }, 1000);
+}
+
+function submitQuiz(forced = false) {
+  const unanswered = userAnswers.filter(a => a === -1).length;
+  if (!forced && unanswered > 0) {
+    const msg = document.getElementById('unansMsg');
+    msg.innerHTML = `<div class="unanswered-msg">⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要送出嗎？<br>
+      <button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定送出</button>
+      <button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button>
+    </div>`;
+    return;
+  }
+
+  submitted = true;
+  clearInterval(timerInterval);
+
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const em = Math.floor(elapsed / 60);
+  const es = elapsed % 60;
+
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const card = document.getElementById(`q${i}`);
+    if (userAnswers[i] === q.ans) {
+      correct++;
+      card.className = 'q-card result-correct';
+      const badge = document.createElement('div');
+      badge.className = 'result-badge ok';
+      badge.innerHTML = '✅ 答對';
+      card.querySelector('.options').after(badge);
+    } else {
+      card.className = 'q-card result-wrong';
+      const badge = document.createElement('div');
+      badge.className = 'result-badge err';
+      badge.innerHTML = `❌ 答錯`;
+      card.querySelector('.options').after(badge);
+
+      const note = document.createElement('div');
+      note.className = 'correct-note';
+      note.innerHTML = `✔ 正確答案：<strong>${KEYS[q.ans]}．${q.opts[q.ans]}</strong>`;
+      badge.after(note);
+    }
+
+    // Style options
+    for (let j = 0; j < 4; j++) {
+      const lbl = document.getElementById(`lbl${i}_${j}`);
+      lbl.style.cursor = 'default';
+      if (j === q.ans) {
+        lbl.classList.add('correct-ans');
+      } else if (j === userAnswers[i] && userAnswers[i] !== q.ans) {
+        lbl.classList.add('wrong-ans');
+      }
+    }
+  });
+
+  const score = correct * 2;
+  const wrong = QUESTIONS.length - correct - userAnswers.filter(a=>a===-1).length;
+  const skip  = userAnswers.filter(a=>a===-1).length;
+
+  // Grade
+  let grade, gradeColor;
+  if (score >= 80) { grade = '🏆 優秀'; gradeColor = '#276749'; }
+  else if (score >= 60) { grade = '✅ 及格'; gradeColor = '#2b6cb0'; }
+  else { grade = '❌ 未達及格'; gradeColor = '#c53030'; }
+
+  document.getElementById('scoreVal').textContent = score + ' 分';
+  document.getElementById('scoreDetail').textContent = `共 ${QUESTIONS.length} 題・每題 2 分`;
+  const gradeEl = document.getElementById('scoreGrade');
+  gradeEl.textContent = grade;
+  gradeEl.style.background = gradeColor + '22';
+  gradeEl.style.color = gradeColor;
+
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('statSkip').textContent = skip;
+  document.getElementById('statTime').textContent = String(em).padStart(2,'0') + ':' + String(es).padStart(2,'0');
+
+  document.getElementById('score-panel').style.display = 'block';
+  document.getElementById('unansMsg').innerHTML = '';
+  document.querySelector('.btn-submit').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'inline-block';
+
+  document.getElementById('score-panel').scrollIntoView({behavior:'smooth'});
+}
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  QUESTIONS.forEach((q, i) => {
+    const card = document.getElementById(`q${i}`);
+    if (mode === 'all') card.style.display = '';
+    else if (mode === 'wrong') card.style.display = (userAnswers[i] !== q.ans) ? '' : 'none';
+    else if (mode === 'correct') card.style.display = (userAnswers[i] === q.ans) ? '' : 'none';
+  });
+}
+
+function resetQuiz() {
+  submitted = false;
+  userAnswers = new Array(QUESTIONS.length).fill(-1);
+  timeLeft = TOTAL_TIME;
+  startTime = Date.now();
+  clearInterval(timerInterval);
+  document.getElementById('timerBox').className = 'timer-box';
+  document.getElementById('timerValue').textContent = '60:00';
+  document.getElementById('timerBar').style.width = '100%';
+  document.getElementById('score-panel').style.display = 'none';
+  document.querySelector('.btn-submit').style.display = 'inline-block';
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('unansMsg').innerHTML = '';
+  document.getElementById('answeredCount').textContent = '0';
+
+  // Reset filter
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-btn').classList.add('active');
+
+  buildQuiz();
+  startTimer();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Init
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>
