@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>112年 外語導遊 導遊英語</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a4a70,#2c5f8a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3e5f5;color:#6a1b9a}
+.header h1{font-size:1rem;font-weight:700;flex:1}
+.timer{background:rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;min-width:70px;text-align:center}
+.timer.warn{background:rgba(255,180,0,.4)}
+.timer.danger{background:rgba(220,50,50,.5);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-wrap{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 16px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#666;cursor:pointer;transition:.15s}
+.dot.answered{background:#2c5f8a;color:#fff}
+.dot.correct{background:#27ae60;color:#fff}
+.dot.wrong{background:#e74c3c;color:#fff}
+.container{max-width:820px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:10px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.4}
+.opt:hover{border-color:#2c5f8a;background:#f0f6ff}
+.opt.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt.correct-ans{border-color:#27ae60;background:#e8f5e9!important}
+.opt.wrong-ans{border-color:#e74c3c;background:#fdecea!important}
+.opt-label{font-weight:700;min-width:18px;color:#2c5f8a}
+.result-msg{margin-top:8px;font-size:.82rem;padding:6px 10px;border-radius:6px}
+.result-msg.correct{background:#e8f5e9;color:#1e6b3d}
+.result-msg.wrong{background:#fdecea;color:#c0392b}
+.result-msg.special{background:#fff3cd;color:#856404}
+.submit-bar{text-align:center;padding:20px 0 40px}
+.btn-submit{background:#2c5f8a;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#1a4a70}
+.score-panel{display:none;background:#fff;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.12);text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:3rem;font-weight:900;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.pass{color:#27ae60}.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:24px;margin:12px 0;font-size:.85rem;color:#666}
+.filter-bar{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.btn-reset{background:#fff;color:#2c5f8a;border:2px solid #2c5f8a;border-radius:10px;padding:10px 30px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s}
+.btn-reset:hover{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+.year-label{font-size:.7rem;opacity:.8;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">外語導遊</span>
+  <h1>導遊英語<span class="year-label">112年</span></h1>
+  <div class="timer" id="timer">60:00</div>
+</div>
+<div class="progress-wrap">
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="container">
+  <div class="score-panel" id="scorePanel">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="grade" id="gradeLabel"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all')">全部</button>
+      <button class="filter-btn" onclick="filterCards('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterCards('correct')">只看對題</button>
+    </div>
+    <button class="btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+  <div id="quizArea"></div>
+  <div class="submit-bar" id="submitBar">
+    <button class="btn-submit" onclick="submitQuiz()">📋 交卷批改</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`I’ll likethemixedgreen salad.What kindof do youhave?`,opts:[`seasonings`,`flavors`,`dressings`,`tastes`],ans:2},
+  {q:`Tourists may themselves in the city if there is a giant map at the exit of each MRT station inTaipei.`,opts:[`attend`,`orient`,`pursue`,`strive`],ans:1},
+  {q:`all COVID-19 restrictions lifted, overseas visitors to Taiwan won’t be required to undergo anykindofquarantine.`,opts:[`As`,`While`,`Because`,`With`],ans:3},
+  {q:`Foreigners without anROC(Taiwan)Resident Certificate are requiredto anArrival Card.`,opts:[`checkin`,`fill in`,`settledown`,`lookafter`],ans:1},
+  {q:`Guabao,asteamedsandwich, ahamburgerthathasasoftwhitebunfilledwithbraisedpork, pickledvegetables, peanut powder,and cilantro.`,opts:[`assembles`,`dissembles`,`resembles`,`accumulates`],ans:2},
+  {q:`Tomorrowmorning,ClementwillflyfromTaoyuanInternationalAirportandstopinIstanbul to his country,Nigeria.`,opts:[`enmasse`,`bonvoyage`,`bonmot`,`enroute`],ans:3},
+  {q:`Sheis nowlookingfor airlinetickets inordertoreturntoherhomelandsoon.`,opts:[`ludicrous`,`exorbitant`,`prevailing`,`affordable`],ans:3},
+  {q:`Whentravelingabroad, youshouldcarefullychoosethemoneychangers to ____currencies.`,opts:[`converge`,`convert`,`conduct`,`replace`],ans:1},
+  {q:`A day to Yilan is the ideal holiday for you to stay away from the frenetic pace of life in Taipei.`,opts:[`portal`,`gateway`,`getaway`,`shortcut`],ans:2},
+  {q:`you have any questions regarding the loss of your wallet and passport abroad, feel free to contact us anytimeduringofficehours.`,opts:[`Should`,`Had`,`Were`,`Would`],ans:0},
+  {q:`Youmust remainseated whilethefasten-seat-belt signals are duringturbulence.`,opts:[`illustrated`,`impaired`,`intensified`,`illuminated`],ans:3},
+  {q:`Most premium airlines provide passengers with superior levels of comfort, seats, , and luggagemanagement.`,opts:[`amenities`,`immunity`,`lodging`,`intensity`],ans:0},
+  {q:`Do Ineedtodial theinternational while makinga call abroad?`,opts:[`zipcode`,`barcode`,`QR code`,`area code`],ans:3},
+  {q:`Most foreigners find Taipei summertime intolerable because the majority of summer days are .`,opts:[`placid`,`muggy`,`bleak`,`murky`],ans:1},
+  {q:`Afterdays ofnonstoprain, it finally today.`,opts:[`layup`,`layon`,`let up`,`let on`],ans:2},
+  {q:`Simplygiveourcustomerserviceacall,andwewillgladly yourtripstomatchanyparticular requirements orinterests youmayhave.`,opts:[`accustom`,`assimilate`,`configure`,`customize`],ans:3},
+  {q:`Yingge District in New Taipei Cityhas been renowned for its for a longtime, but recently, tourists haverealizedthat this areaoffers so much more.`,opts:[`boutique`,`bazaar`,`fabric`,`pottery`],ans:3},
+  {q:`You can’t call a trip to Tainan complete without tasting the city’s two breakfast : milkfish congee andbeefsoup.`,opts:[`crops`,`ingredients`,`staples`,`clips`],ans:2},
+  {q:`beef may seem like a great choice for holidays and other special occasions, some research suggests it maynot bethehealthiest option.`,opts:[`Since`,`While`,`When`,`What`],ans:1},
+  {q:`TheDuomodiMilanoinItalyhasover3,400sculptures,makingittheplacewiththemost in theworld.`,opts:[`statures`,`statues`,`status`,`statutes`],ans:1},
+  {q:`Inmanycountries,it is customarytoleavea whilediningout.`,opts:[`tip-off`,`gratitude`,`gratuity`,`rip-off`],ans:2},
+  {q:`Itisnotuncommontofindstreet sellingtastyandinexpensivefoodonthestreetsinTaiwan.`,opts:[`donors`,`creditors`,`vendors`,`pitchers`],ans:2},
+  {q:`tourism is a sort of tourism in which tourists visit locations where they may learn family historyanddevelopfamilyconnections.`,opts:[`Ecological`,`Ancestry`,`Collective`,`Spiritual`],ans:1},
+  {q:`Most tourguides earn onsales inadditiontotheirbasesalary.`,opts:[`dedication`,`remission`,`commitment`,`commission`],ans:3},
+  {q:`To compensate for the loss of foreign tourists caused by COVID-19 restrictions, Taiwanese travel businesses haveshifted towards domestic trips.`,opts:[`gears`,`commands`,`handles`,`wheels`],ans:0},
+  {q:`TheDragonBoatFestival Qu-Yuan,anoldpoetwhodrownedhimselfwhenarulerignored his advice.`,opts:[`chastises`,`comforts`,`commemorates`,`appraises`],ans:2},
+  {q:`PeopleinTaiwanlikeeatingshavedicewithfruit orotherdelicious .`,opts:[`accessories`,`chemicals`,`toppings`,`crops`],ans:2},
+  {q:`Taiwan’s shows have reached a new level of creativity and artistic excellence through the hardworkoftheHuangfamilyinYuenlin.`,opts:[`figurine`,`dragondancing`,`beehive`,`puppet`],ans:3},
+  {q:`MuchofTaiwan’s natural beautyandwealthare ontheeast coast oftheisland.`,opts:[`consumed`,`abandoned`,`persevered`,`conserved`],ans:3},
+  {q:`A: Does yourrestaurant supplya continental breakfast? B: ____`,opts:[`Weserveit from 6:00 a.m.to10:00a.m.`,`Yes, it is.`,`Yes, wedo, andit’s servedinabuffet style.`,`It costs \$9.99foradults andis freeforchildren under12.`],ans:2},
+  {q:`A: Howdoes Mexicancuisinetaste? B:`,opts:[`Tacoandburrito.`,`It has aspicyandheavyflavor.`,`Ilikeit medium.`,`It has alot ofdifferent fillings.`],ans:1},
+  {q:`A: Can IusemyEasyCardtorent YouBikes? B:`,opts:[`Yes, it canbepurchasedat anyconveniencestore.`,`It costs 5dollars forthefirst 30minutes.`,`Yes, youcanuseit onsubways, buses andYouBikes.`,`Yes, it’s easyand convenient torideaYouBike.`],ans:2},
+  {q:`A: I’m EmilySmithin316. I’m checkingout. B:`,opts:[`Verygood.Theinvoiceis included.`,`I’ll beright over,Ms. Smith.`,`Can Ipaywithatraveler’s check?`,`Just onemoment.I’ll checkon youlater.`],ans:1},
+  {q:`A: Ilovethis breeze. B:`,opts:[`Is thereatornadocoming?`,`Ididn’t knowthat.`,`Iagreethat astuffydaywouldbebest for anouting.`,`Andit is cool. It is neithertoohot nortoocold.`],ans:3},
+  {q:`A: You’vetraveledtoEuropebefore. B:`,opts:[`Maybe.Wherewould youliketovisit?`,`Yes, that’s true.Do youwant togoon atrip?`,`Howmuchtimedo youwant tospend?`,`Iappreciate your curiosity.`],ans:1},
+  {q:`A: Have youhad anyissues renewing yourvisa? B:`,opts:[`Goodidea, I’m ready.`,`No,nothingworkedout forme.`,`Yes, I’dliketofinda dealer.`,`Not yet.`],ans:3},
+  {q:`Thedoctorwrotemea/an . Ineedto get it filledat thepharmacy.`,opts:[`operation`,`reception`,`prescription`,`description`],ans:2},
+  {q:`Usually a passenger will change from one plane to another and stop over at a midpoint for at most 24hours before continuingthenext journey.`,opts:[`transformed`,`transfer`,`transport`,`transplant`],ans:1},
+  {q:`All ourVIP customers will receivea bottleofwinewithout charge.`,opts:[`complimentary`,`complementary`,`contemplative`,`compensatory`],ans:0},
+  {q:`If passengers haveanythingthat needs tobedeclared,theyshouldgothrough .`,opts:[`Quarantine`,`Airport Terminals`,`Transit Lounges`,`Customs`],ans:3},
+  {q:`Sir,weneed your foraconfirmedand guaranteed reservation.`,opts:[`balance`,`arrival`,`deposit`,`consent`],ans:2},
+  {q:`Everytimewhen IflytoLondon, Iget serious . It makes meuneasy.`,opts:[`jet lag`,`intention`,`occasion`,`affection`],ans:0},
+  {q:`Niagara Falls is animpressivenatural wonder,and Ienjoyits view.`,opts:[`spectator`,`spectacular`,`spectacle`,`spectrum`],ans:1},
+  {q:`Only when David was stopped by a policeman for drunk driving did he realize that his passport had andhewas forcedtoreturnhome.`,opts:[`inspired`,`expired`,`conspired`,`perspired`],ans:1},
+  {q:`We have been committed to delivering the best service and are always working to conduct business as smoothlyas possible.`,opts:[`implants`,`employments`,`discharges`,`transactions`],ans:3},
+  {q:`If youarenot completelysatisfiedwithourproduct, youcanreturnit forafull .`,opts:[`loan`,`premium`,`interest`,`refund`],ans:3},
+  {q:`In the travel , you’ll find information about tours, itineraries, maps, discounts and coupons, orpackageholidays.`,opts:[`brochures`,`brides`,`brooks`,`brooches`],ans:0},
+  {q:`Mineral fields usedtobe amarvelous scenicspot but it has lost its inrecent years.`,opts:[`apparatus`,`approach`,`appeal`,`appendix`],ans:2},
+  {q:`Thesalespersons that theirorganicfoods donot havepreservatives.`,opts:[`catered`,`guaranteed`,`deported`,`refrained`],ans:1},
+  {q:`Youneedto yourflight72hourspriortodeparturedirectlywiththeairlineorsimplycheck- inonlineat theapplicableairline’s website.`,opts:[`forecast`,`withdraw`,`compensate`,`reconfirm`],ans:3},
+  {q:`DesignedbyBritish architects,thehotel can morethan700people.`,opts:[`accommodate`,`alienate`,`acquaint`,`apologize`],ans:0},
+  {q:`A: Goodafternoon.MayIhelp you? B: Wehavebeenwaitinginthe foroneandahalfhours, but some ofour groupmembers still can’t findtheirluggage.`,opts:[`departurelounge`,`boardinggate`,`baggage claim area`,`theimmigrationcounter`],ans:2},
+  {q:`Tourist: I’dliketomake alongdistancecall toNewYork. Hotel Clerk: Yes. Tourist: Yes, Iwould.`,opts:[`Would youmindholdingfor amoment?`,`Can youput methroughtoPeterScott?`,`I’m afraid you’ve got thewrongnumber.`,`Would youliketomakeadirect-dial call?`],ans:3},
+  {q:`Tourist : Could youtell metheinternational countrycodefor France,please? Hotel Clerk:`,opts:[`33is thecountrycallingcodeassignedto France.`,`Thereis noonebyTom Dunkleyregistered at this hotel.`,`Iwill transfer yourcall toAlbert’s room.`,`Would youliketoleaveamessage?`],ans:0},
+  {q:`InformationDesk Clerk: Are youlost? HowmayIhelp you? Tourist:`,opts:[`I’dliketoordertake-out here.`,`Aone-wayticket toChicago,please.`,`Pleaseshowmehowtoget toTaiwanTaoyuan International Airport.`,`I’m verymuchobligedto you.`],ans:2},
+  {q:`Passenger: John: Twodollars oneway,threedollars roundtrip.`,opts:[`Howoftendo thebuses run?`,`What’s thebus fareto TheMetropolitanMuseum ofArt?`,`Howmuchdo Iowe you?`,`What’s thechargeoftheexpress package?`],ans:1},
+  {q:`Flight attendant: Ladies and gentlemen, soon we will be landing at O’Hare International Airport. Pleasefasten yourseat belts andobservethe sign.`,opts:[`NoSpitting`,`NoParking`,`NoAdmittance`,`NoSmoking`],ans:3},
+  {q:`Patient: Pharmacist: Thedirections areinthemedicinebag.Readthem carefullybefore youuseit.`,opts:[`Howmuchis themedicine?`,`Howlonghave youbeentotheclinic?`,`Howoftendo Ihavetogototheclinic?`,`Howmanytimes adayshould Itakethis?`],ans:3},
+  {q:`Doctor:What arethe ? Tiffany: Well, Ihavean upset stomach. Ialso haveacoldand fever.`,opts:[`signs`,`symptoms`,`signals`,`sights`],ans:1},
+  {q:`Doctor:Hello,Janet.What seems tobetheproblem? Janet: I well since Ijoinedatour grouplast Monday.`,opts:[`didn’t feel`,`hadn’t been feeling`,`haven’t beenfeeling`,`haven’t beenfelt`],ans:2},
+  {q:`A is someone who is employed in a hotel to help guests arrange things, such as local tours, theatretickets and restaurant reservations.`,opts:[`concierge`,`securityguard`,`maintenance worker`,`maid`],ans:0},
+  {q:`Beforegoingabroad,youneedtounderstandthecurrentexchangeratesandhavesomeNewTaiwan dollars intoU.S.dollars.`,opts:[`convert`,`converting`,`toconvert`,`converted`],ans:3},
+  {q:`If youarenot hungry,we canorderonemeal andshareit.The areverybig.`,opts:[`elements`,`portions`,`flavors`,`categories`],ans:1},
+  {q:`Today’s special is steamedfish. Youcan thelemonandsalt onthe fish.`,opts:[`spit`,`splash`,`spread`,`sprinkle`],ans:3},
+  {q:`Theplasticvegetableleaves ontheplatearefordecorationonly.Theyare not .`,opts:[`fragile`,`edible`,`portable`,`appropriate`],ans:1},
+  {q:`Waiter: Guest: Medium-well,please.`,opts:[`MayIshow youthedessert menu?`,`Would youlikemore?`,`What would youliketoorder,sir?`,`Howwould youlike yoursteakcooked?`],ans:3},
+  {q:`Attendant: Oh, I’m afraid your bag has exceeded the maximum baggage , so you’ll have to paytheexcess fare. Mr.Brown: Oh, right.`,opts:[`allowance`,`receipt`,`surcharge`,`currency`],ans:0},
+  {q:`Customs: Vincent: I’m visitingsomefriends and relatives.`,opts:[`Howlongdo youplan tostay?`,`Wherewill youbestaying?`,`Have you got anythingtodeclare?`,`What’s thepurposeof yourvisit?`],ans:3},
+  {q:`Ladies and gentlemen, please be careful while opening the overhead as any items stowed insidemight fall out,and takeall yourpersonal belongingswith you.`,opts:[`aircraft`,`compartment`,`instrument`,`detector`],ans:1},
+  {q:`Hotel clerk: HowmayIhelp you? Guest: Yes. Could youtell meabout yourhotel ? Hotel clerk: Wehave abar,a gym,aswimmingpool,tennis courts andabuffet restaurant. Guest: Great.Thanks for theinformation.`,opts:[`vacancies`,`appointments`,`facilities`,`chains In the past few years, most major airlines have announced their plans to use commercial electric airplanes. Travelers can soon travel to different places via an electric aircraft. Take United Airlines for example.Theywillofferfossilfuel-freedomesticflightsby2026.Inaddition,SwedenandDenmarkalso declared their plans to use fossil fuel-free electric-powered airplanes by 2030. Electric air travel (i.e. traveling with an electric-powered aircraft) is going mainstream. There are various methods to supply electricity; however,the most commonwayis to usebatteries. The climate crisis has been worsening these past few years. One of the major contributors to this environmental problem is air transportation. The aviation sector has released huge amounts of carbon dioxide (CO2) into the atmosphere every year. Unfortunately, airplanes are predicted to triple their CO2 emissions by2050ifleft uncheckednow. Most major airlines have thus signed up to meet the targeted net-zero carbon emissions by 2050. Governments from many different countries are establishing policies to help protect the environment. AustriaandFrancehaveenactedbansonshort-hauldomesticflights.IntheUnitedStatesofAmerica,the government is also pushingtoreduceCO2 emissions throughclean-energytransportation. As presented, the use of small electric airplanes is the first step towards greener air travel. The development oflargerelectricplanes maytakeseveral years. Still, youcan expect tohearthat electricair travel will be goingmainstream inthecoming years.`],ans:2},
+  {q:`What is themainideaofthepassage?`,opts:[`Assciencedevelops, views oftravel donot change.`,`Travelingwithanelectric-poweredaircraft is goingmainstream.`,`It does not suggest adifferent solutiontoaproblem.`,`Theclimatecrisis has beenworseningthesepast few years.`],ans:1},
+  {q:`Accordingtothepassage,what is themost commonwaytosupplyelectricity?`,opts:[`Tousebatteries.`,`Touseoceanthermal energy.`,`Tousesolarenergy.`,`Tousewindenergy.`],ans:0},
+  {q:`Whichofthefollowingis trueabout commercial electric airplanes?`,opts:[`UnitedAirlines have announcedthat theywill offer fossil fuel-freedomesticflights by2030.`,`SwedenandDenmark also declaredtheirplans tousefossil fuel-freeairplanes by2026.`,`Airtransportationis oneofthemajor contributors totheworseningenvironmental problem.`,`Theaviationsectorhas releasedhugeamounts ofoxygenintotheatmosphereeveryyear.`],ans:2},
+  {q:`Whichofthefollowingis trueabout helpingprotect theenvironment?`,opts:[`AustriaandFrancehaveannouncedtheirplans touseelectric airtravel by2030.`,`SwedenandDenmark haveenactedbans onshort-haul domesticflights.`,`Airplanes arepredictedtodoubletheirCO2emissions by2050ifleft uncheckednow.`,`Inthe UnitedStates ofAmerica,the government is also pushingtoreduceCO2emissions throughclean-energytransportation.`],ans:3},
+  {q:`What is theadvantageof electric airtravel?`,opts:[`It is cheaper.`,`Electricairtravel is thefirst steptowards greenerairtravel.`,`Electricairtravel does not helpreduceCO2 emissions.`,`It is faster. I was filled with excitement and awe as our vehicle jolted down the muddy paths of the wildlife reserve.Incrediblecreaturesroamedthesavannah,andthesceneriesitselfweresomeofthemoststunning I’veeverseen. Safari travelingis athrillingandone-of-a-kindopportunitytotakeinthesplendorandvarietyofthe naturalworld.Inordertoseeandphotographwildcreaturesintheirnaturalenvironment,safarivacationers oftenvisit anAfricanwildlifereserveornational park. In my experience, seeing iconic and endangered animals like lions, elephants, and gorillas in their natural habitats is expected to be a staple of a safari vacation. My favorite part of the trip was getting to see a group of wild canine animals in their natural habitat. I’d never had such a good look at these endangeredcreatures before. Aside from getting an up-close glimpse at the animals, tourists can receive insight into their habits androutines from knowledgeable guides on several safari programs that include guided drives withinthe park. Safaris sometimes involve more than just visits to zoos and sanctuaries to see animals; they often provideopportunities for hiking,birdwatching, andcultural immersion. Memories created on the safari journey will last a lifetime since it was truly once in a lifetime opportunity. IthinkatriptoAfricaforasafariwouldbeamazingif youhavethechancetogo.You won’t soon forget this incrediblejourney.`],ans:1},
+  {q:`Whichis NOTareason whythe authorsuggests goingonasafari vacation?`,opts:[`Toachieve aserenevacation.`,`Todiscoverthediversityofthenatural world.`,`Toseeanimals intheirnatural environment.`,`Toobservesome endangeredcreatures.`],ans:0},
+  {q:`What does theword“jolted”mean?`,opts:[`Shattered.`,`Shot.`,`Shook.`,`Shrank.`],ans:2},
+  {q:`What was thehighlight oftheauthor’s safari’s trip?`,opts:[`Hewas surroundedbythemost breathtakinglandscapes hehadeverseen.`,`Hehadthe chanceto seeapackofwilddogs upclose.`,`Hecouldexperiencethebeautyanddiversityofthenatural world.`,`Hecould get closeto someofthemost famous andendangered animals intheworld,likelions andgorillas.`],ans:1},
+  {q:`Accordingtothis passage, what cantourists learn from theseknowledgeablesafari guides?`,opts:[`Theycanlearn about theanimals’behaviorand habits.`,`Theycanlearn about endangeredanimal species.`,`Theycanlearn about several Africanwildlifesanctuaries.`,`Theycan get knowledge about thesplendorof nature.`],ans:0},
+  {q:`Accordingtothispassage,whichofthefollowingisNOTincludedinsafarivacationsbesidesanimal sightings?`,opts:[`Hiking.`,`Observingbirds.`,`Animal breeding.`,`Cultural encounters.`],ans:2}
+];
+const TOTAL_Q = 80;
+const TOTAL_TIME = 3600;
+let selected = {};
+let submitted = false;
+let timerInterval;
+let timeLeft = TOTAL_TIME;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return "本題一律給分";
+  if (Array.isArray(q.ans)) return "正確答案：" + q.ans.map(i => "ABCD"[i]).join(" 或 ");
+  return "正確答案：" + "ABCD"[q.ans];
+}
+
+function buildDots() {
+  const grid = document.getElementById("dotGrid");
+  grid.innerHTML = "";
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.textContent = i + 1;
+    d.id = "dot" + i;
+    d.onclick = () => document.getElementById("q" + i).scrollIntoView({behavior:"smooth", block:"center"});
+    grid.appendChild(d);
+  });
+}
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.id = "q" + i;
+    card.dataset.result = "";
+    const labels = ["A","B","C","D"];
+    let optHtml = "";
+    q.opts.forEach((o, oi) => {
+      optHtml += `<div class="opt" id="opt${i}_${oi}" onclick="selectOpt(${i},${oi})"><span class="opt-label">${labels[oi]}</span><span>${o}</span></div>`;
+    });
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題（共 ${QUESTIONS.length} 題）</div><div class="q-text">${q.q}</div><div class="options">${optHtml}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (submitted) return;
+  const labels = ["A","B","C","D"];
+  labels.forEach((_, j) => {
+    const el = document.getElementById("opt" + qi + "_" + j);
+    if (el) el.classList.remove("selected");
+  });
+  const el = document.getElementById("opt" + qi + "_" + oi);
+  if (el) el.classList.add("selected");
+  selected[qi] = oi;
+  const dot = document.getElementById("dot" + qi);
+  if (dot && !submitted) dot.classList.add("answered");
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById("timer");
+    el.textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    el.className = "timer";
+    if (timeLeft <= 300) el.classList.add("warn");
+    if (timeLeft <= 60) el.classList.add("danger");
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(true); }
+  }, 1000);
+}
+
+function submitQuiz(timeout) {
+  const unanswered = QUESTIONS.length - Object.keys(selected).length;
+  if (!timeout && unanswered > 0) {
+    if (!confirm(`尚有 ${unanswered} 題未作答，確定要交卷嗎？`)) return;
+  }
+  clearInterval(timerInterval);
+  submitted = true;
+  document.getElementById("submitBar").classList.add("hidden");
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = selected[i];
+    const ok = (sel !== undefined) && isCorrect(q, sel);
+    const special = q.ans === -1 || Array.isArray(q.ans);
+    if (ok) correct++;
+    const card = document.getElementById("q" + i);
+    card.dataset.result = ok ? "correct" : "wrong";
+    const dot = document.getElementById("dot" + i);
+    if (dot) { dot.classList.remove("answered"); dot.classList.add(ok ? "correct" : "wrong"); }
+    ["A","B","C","D"].forEach((_, oi) => {
+      const el = document.getElementById("opt" + i + "_" + oi);
+      if (!el) return;
+      el.classList.remove("selected");
+      const isAns = q.ans === -1 ? true : (Array.isArray(q.ans) ? q.ans.includes(oi) : q.ans === oi);
+      if (sel === oi && ok) el.classList.add("correct-ans");
+      else if (sel === oi && !ok) el.classList.add("wrong-ans");
+      else if (isAns && !ok) el.classList.add("correct-ans");
+    });
+    let msg = "";
+    if (sel === undefined) {
+      msg = `<div class="result-msg wrong">⚠️ 未作答　${getCorrectLabel(q)}</div>`;
+    } else if (ok && special) {
+      msg = `<div class="result-msg special">✅ 正確　（${getCorrectLabel(q)}）</div>`;
+    } else if (ok) {
+      msg = `<div class="result-msg correct">✅ 正確</div>`;
+    } else {
+      msg = `<div class="result-msg wrong">❌ 錯誤　${getCorrectLabel(q)}</div>`;
+    }
+    card.querySelector(".options").insertAdjacentHTML("afterend", msg);
+  });
+  const total = QUESTIONS.length;
+  const score = Math.round(correct / total * 100);
+  const scoreEl = document.getElementById("scoreBig");
+  scoreEl.textContent = score + " 分";
+  const grade = document.getElementById("gradeLabel");
+  if (score >= 80) { grade.textContent = "🏆 優秀"; grade.className = "grade pass"; }
+  else if (score >= 60) { grade.textContent = "✅ 及格"; grade.className = "grade pass"; }
+  else { grade.textContent = "❌ 未及格"; grade.className = "grade fail"; }
+  document.getElementById("statsRow").textContent = `答對 ${correct} 題 ／ 答錯 ${total - correct} 題 ／ 共 ${total} 題`;
+  document.getElementById("scorePanel").classList.add("show");
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function filterCards(type) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll(".q-card").forEach(card => {
+    if (type === "all") card.classList.remove("hidden");
+    else if (type === "correct") card.classList.toggle("hidden", card.dataset.result !== "correct");
+    else if (type === "wrong") card.classList.toggle("hidden", card.dataset.result !== "wrong");
+  });
+}
+
+function resetQuiz() {
+  selected = {};
+  submitted = false;
+  timeLeft = TOTAL_TIME;
+  document.getElementById("scorePanel").classList.remove("show");
+  document.getElementById("submitBar").classList.remove("hidden");
+  buildDots();
+  buildQuiz();
+  clearInterval(timerInterval);
+  startTimer();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+buildDots();
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>

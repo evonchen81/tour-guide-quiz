@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>112年 華語領隊 領隊執業法規</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a4a70,#2c5f8a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#e3f2fd;color:#1a4a70}
+.header h1{font-size:1rem;font-weight:700;flex:1}
+.timer{background:rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;min-width:70px;text-align:center}
+.timer.warn{background:rgba(255,180,0,.4)}
+.timer.danger{background:rgba(220,50,50,.5);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-wrap{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 16px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#666;cursor:pointer;transition:.15s}
+.dot.answered{background:#2c5f8a;color:#fff}
+.dot.correct{background:#27ae60;color:#fff}
+.dot.wrong{background:#e74c3c;color:#fff}
+.container{max-width:820px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:10px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.4}
+.opt:hover{border-color:#2c5f8a;background:#f0f6ff}
+.opt.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt.correct-ans{border-color:#27ae60;background:#e8f5e9!important}
+.opt.wrong-ans{border-color:#e74c3c;background:#fdecea!important}
+.opt-label{font-weight:700;min-width:18px;color:#2c5f8a}
+.result-msg{margin-top:8px;font-size:.82rem;padding:6px 10px;border-radius:6px}
+.result-msg.correct{background:#e8f5e9;color:#1e6b3d}
+.result-msg.wrong{background:#fdecea;color:#c0392b}
+.result-msg.special{background:#fff3cd;color:#856404}
+.submit-bar{text-align:center;padding:20px 0 40px}
+.btn-submit{background:#2c5f8a;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#1a4a70}
+.score-panel{display:none;background:#fff;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.12);text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:3rem;font-weight:900;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.pass{color:#27ae60}.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:24px;margin:12px 0;font-size:.85rem;color:#666}
+.filter-bar{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.btn-reset{background:#fff;color:#2c5f8a;border:2px solid #2c5f8a;border-radius:10px;padding:10px 30px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s}
+.btn-reset:hover{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+.year-label{font-size:.7rem;opacity:.8;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">華語領隊</span>
+  <h1>領隊執業法規<span class="year-label">112年</span></h1>
+  <div class="timer" id="timer">60:00</div>
+</div>
+<div class="progress-wrap">
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="container">
+  <div class="score-panel" id="scorePanel">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="grade" id="gradeLabel"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all')">全部</button>
+      <button class="filter-btn" onclick="filterCards('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterCards('correct')">只看對題</button>
+    </div>
+    <button class="btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+  <div id="quizArea"></div>
+  <div class="submit-bar" id="submitBar">
+    <button class="btn-submit" onclick="submitQuiz()">📋 交卷批改</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`依發展觀光條例規定，經中央主管機關核准，為旅客設計安排旅程、食宿、領隊人員、導遊人員、代購代 售交通客票、代辦出國簽證手續等有關服務而收取報酬之營利事業，稱為：`,opts:[`遊覽業`,`旅行業`,`旅運業`,`旅遊營業人`],ans:1},
+  {q:`依發展觀光條例規定，中央主管機關為主管全國觀光事務，設下列何機關？`,opts:[`旅遊局`,`交通部觀光局`,`觀光旅遊局`,`觀光傳播局`],ans:1},
+  {q:`依發展觀光條例之規定核准發給之證照，主管機關得收取證照費，其費額由何機關訂定？`,opts:[`交通部`,`法務部`,`經濟部`,`財政部`],ans:0},
+  {q:`旅行業辦理團體或個別旅客旅遊，未依規定與旅客簽訂書面旅遊契約時，應處罰鍰之範圍為何？`,opts:[`新臺幣1萬元以上，3萬元以下`,`新臺幣1萬元以上，5萬元以下`,`新臺幣2萬元以上，5萬元以下`,`新臺幣3萬元以上，5萬元以下`],ans:1},
+  {q:`依照發展觀光條例規定，損壞觀光地區或風景特定區之名勝、自然資源或觀光設施者，應處罰鍰之範圍為 何？`,opts:[`新臺幣10萬元以下`,`新臺幣50萬元以下`,`新臺幣100萬元以下`,`新臺幣200萬元以下`],ans:1},
+  {q:`小賢大學觀光科系畢業，報考通過領隊人員考試，並經職前訓練及格持有領隊人員執業證，目前應徵錄取 擔任旅行社業務人員，同時兼帶出國旅遊團體業務。小賢如若繼續擔任前述工作至少需要幾年才有機會擔 任旅行業經理人？`,opts:[`2年`,`3年`,`5年`,`6年`],ans:1},
+  {q:`依旅行業管理規則規定，新設立乙種旅行業總公司應繳納保證金多少元？`,opts:[`新臺幣15萬元`,`新臺幣50萬元`,`新臺幣60萬元`,`新臺幣100萬元`],ans:2},
+  {q:`依旅行業管理規則規定，乙種旅行業設立後又在基隆市增設分公司一家，則該公司實收之資本額一共不得 少於新臺幣多少元？`,opts:[`150萬元`,`180萬元`,`250萬元`,`300萬元`],ans:1},
+  {q:`依旅行業管理規則規定，高等考試及格，曾任旅行業代表人至少幾年，得參加旅行業經理人訓練？`,opts:[`1年`,`2年`,`3年`,`4年`],ans:1},
+  {q:`依旅行業管理規則規定，旅行業職員有異動時，應於多久時間內將異動表報請交通部觀光局備查？`,opts:[`10日`,`15日`,`20日`,`30日`],ans:0},
+  {q:`依旅行業管理規則規定，旅行業辦理旅遊業務與旅客簽定之旅遊契約書，應設置專櫃保管多久，備供查 核？`,opts:[`2個月`,`3個月`,`6個月`,`1年`],ans:3},
+  {q:`非經依法取得旅行業執照者，不得經營旅行業務，但超商得販售臺灣高速鐵路車票，是依據那個法律的規 定？`,opts:[`公平交易法`,`鐵路法`,`消費者保護法`,`發展觀光條例`],ans:3},
+  {q:`依領隊人員管理規則規定，領隊人員取得結業證書或執業證後，未執行領隊業務，重行參加訓練節次為幾 節課？`,opts:[`21節課`,`28節課`,`31節課`,`38節課`],ans:1},
+  {q:`依領隊人員管理規則之規定，領隊人員執業證之分類為何？`,opts:[`專任領隊人員執業證及特約領隊人員執業證`,`國內領隊人員執業證及國際領隊人員執業證`,`外語領隊人員執業證及華語領隊人員執業證`,`專技高考及格領隊人員執業證及專技普考及格領隊人員執業證`],ans:2},
+  {q:`依領隊人員管理規則規定，申請換發或補發領隊人員執業證，下列有關繳納證照費之敘述何者正確？`,opts:[`換發執業證新臺幣150元`,`補發執業證新臺幣250元`,`皆為新臺幣200元`,`皆為新臺幣500元`],ans:2},
+  {q:`陳小姐出國旅遊時，在旅行社安排的購物店購買產品，發現有瑕疵，得於受領所購物品多久內請求旅遊營 業人協助處理？`,opts:[`7天`,`14天`,`30天`,`45天`],ans:2},
+  {q:`旅客報名參加旅行團後，要求改由其兒子參加，如因而減少費用時，應如何處理？`,opts:[`旅客不得請求退還減少之費用`,`旅客得請求退還三分之一減少之費用`,`旅客得請求退還二分之一減少之費用`,`旅客得請求退還三分之二減少之費用`],ans:0},
+  {q:`旅客參加旅行團出國，在旅遊途中因心臟病發而送醫，因此產生的醫療費用及家屬前往看護的機票款及住 宿費用，如因非可歸責於旅遊營業人之事由，依民法規定應由誰負擔？`,opts:[`旅客`,`旅行社`,`承保本團契約責任險的保險公司`,`國民健康保險給付`],ans:0},
+  {q:`張三報名參加旅行社舉辦之泰國神奇 SPA 六日遊，因係首次出國，旅行社要求張三提供照片申辦護照， 張三遲未提供，雖經旅行社定相當期限催告，張三逾期仍未提供，依民法規定，旅行社對張三得行使何項 權利？`,opts:[`向交通部觀光局申訴`,`終止旅遊契約`,`向消基會申訴`,`請張三家人提供`],ans:1},
+  {q:`對於旅遊營業人所提供之旅遊服務，依民法規定，下列何者正確？`,opts:[`旅遊營業人不必負瑕疵擔保責任`,`旅遊服務應符合通常之價值及約定之品質`,`因可歸責於旅遊營業人之事由，致旅遊服務不具備應有價值或品質時，旅客僅得請求減少費用`,`因可歸責於旅遊營業人之事由，致旅遊服務不具備應有價值或品質時，旅客僅得請求終止契約`],ans:1},
+  {q:`周小姐因歸責旅行社作業問題，未達成旅遊契約所定之旅館，得請求旅行業賠償差額多少倍的違約金？`,opts:[`1倍`,`2倍`,`3倍`,`5倍`],ans:1},
+  {q:`依領隊人員管理規則規定，領隊受訓人員在職前訓練期間，下列何者為應予退訓之情形？`,opts:[`缺課節數達五節課者`,`遲到或早退逾二十分鐘以上者`,`報名檢附之資格證明文件係偽造或變造者`,`因產假、重病者`],ans:2},
+  {q:`王先生參加團體旅遊出發後，因旅行社作業疏忽使簽證污損，致旅客遭當地政府羈押留置時，旅行社除了 應迅速接洽營救事宜，負擔所需費用外，應賠償王先生以每日多少新臺幣計算之違約金？`,opts:[`5千元`,`1萬元`,`2萬元`,`3萬元`],ans:2},
+  {q:`依國外旅遊定型化契約範本規定，出發前因不可抗力或不可歸責於雙方當事人之事由，致契約之全部或一 部無法履行時，下列敘述何者錯誤？`,opts:[`旅客得解除契約，不負損害賠償責任`,`旅行社得解除契約，不負損害賠償責任`,`旅行社應將已代繳之行政規費或履行本契約已支付之全部必要費用扣除後之餘款退還旅客`,`旅行社依規定解除契約後，其已支出之必要費用，應由旅行社負擔`],ans:3},
+  {q:`張先生原已繳團費新臺幣 35,000 元並簽約報名，參加 A 旅行社 8 月 30 日出發之新加坡 5 日遊，後來 因公司臨時有重要會議無法請假，因此於 8 月 5 日通知旅行社取消行程，依國外旅遊定型化契約範本規 定，A 旅行社應退還張先生新臺幣多少元？`,opts:[`17,500元`,`24,500元`,`28,000元`,`31,500元`],ans:2},
+  {q:`護照持照人有下列何種情形應申請換發護照？`,opts:[`取得僑居身分`,`戶籍地址變更`,`自軍中退伍`,`變更中文姓名`],ans:3},
+  {q:`除少數國家另有規定外，依國際慣例，民眾出國洽商、旅遊，其護照至少需要尚餘多少效期？`,opts:[`3個月`,`6個月`,`9個月`,`1年`],ans:1},
+  {q:`在國內出生之男子，申請護照加簽僑居身分，應於年滿幾歲當年之12月31日以前出境？`,opts:[`14歲`,`15歲`,`16歲`,`17歲`],ans:1},
+  {q:`持我國護照入國，已逾期停留或入國後因案撤銷或廢止入國許可之無戶籍國民，申請換發普通護照，應由 何機關代為辦理？`,opts:[`居住地戶政事務所`,`居住地警察分局`,`內政部移民署`,`內政部警政署刑事警察局`],ans:2},
+  {q:`下列何種身分之外來人口，尚不能申請註冊及使用自動查驗通關系統？`,opts:[`外國人具外僑永久居留身分`,`大陸地區人民具長期居留身分`,`外國人持有外交部核發之外交官員證`,`外國人持有航空公司貴賓卡`],ans:3},
+  {q:`非疫情期間，我國國民持中華民國普通護照赴韓國觀光，可以免簽證入境停留幾天？`,opts:[`30日`,`60日`,`90日`,`180日`],ans:2},
+  {q:`國人到國外旅遊遺失護照，下列敘述何者錯誤？`,opts:[`向當地警察機關報案`,`至我國駐外館處申請入國證明書`,`至我國駐外館處申請補發護照`,`向內政部移民署申請入出境許可證`],ans:3},
+  {q:`旅客具特殊身分，於入出國時可以使用內政部移民署指定之快速通關查驗櫃檯，下列關於適用對象之敘 述，何者正確？`,opts:[`各級民意代表、中華民國學術與商務旅行卡之持卡者、經核准之外籍商務人士`,`亞太經濟合作商務旅行卡、中華民國學術與商務旅行卡之持卡者、經核准之外籍商務人士`,`各級民意代表、亞太經濟合作商務旅行卡持卡者、經核准之本國籍商務人士`,`亞太經濟合作商務旅行卡、中華民國學術與商務旅行卡之持卡者、經核准之本國籍商務人士`],ans:1},
+  {q:`在臺灣地區設有戶籍國民入國，應備何種證件，始得查驗入國？`,opts:[`登機證`,`入境登記表`,`入國許可證`,`有效護照`],ans:3},
+  {q:`下列何種身分者，出國不需要申請核准？`,opts:[`接近役齡男子`,`經教育部推薦出國留學的役齡男子`,`具僑民身分的役齡男子`,`歸化我國國籍的役齡男子`],ans:0},
+  {q:`小明大學畢業後，打算到國外讀研究所，已經申請到國外學校的入學許可，由於他尚未服兵役，應向下列 那個機關申請出境？`,opts:[`外交部`,`內政部移民署`,`內政部役政署`,`教育部`],ans:1},
+  {q:`旅客自近三年發生非洲豬瘟之國家或地區入境，若攜帶含豬肉類產品未主動申請檢疫，第一次違規可能遭 受至少新臺幣多少金額之罰鍰？`,opts:[`1萬元`,`3萬元`,`10萬元`,`20萬元`],ans:3},
+  {q:`旅客自禁止輸入之疫區或國家攜帶活植物入境，經申報檢疫不符合規定者，下列處理方式何者錯誤？`,opts:[`重新申請`,`限期補正檢疫證明文件`,`退運至其他國家`,`放棄後銷燬`],ans:0},
+  {q:`依據交通部民用航空局公告，出境旅客攜帶攝影（相）三腳架，其管徑1公分以上、可伸縮且其收合後高 度超過幾公分以上者，不得置於手提行李或隨身攜帶進入航空器，應放置於託運行李交航空公司託運？`,opts:[`30`,`40`,`50`,`60`],ans:3},
+  {q:`旅客出、入境臺灣地區攜帶人民幣現鈔最高限額，下列敘述何者正確？`,opts:[`等值美金1萬元`,`人民幣1萬元`,`人民幣現鈔2萬元，但不計入攜帶之其他外幣現鈔額度內`,`人民幣現鈔2萬元，並計入攜帶之其他外幣現鈔額度內`],ans:2},
+  {q:`甲是大陸地區人民，畢業於北京大學，申請來臺灣地區就讀，若他擬依大陸地區學歷採認辦法規定，申請 學歷採認，他不必檢具下列那項文件？`,opts:[`畢業證（明）書`,`國民身分證`,`學位證（明）書`,`大學歷年成績`],ans:1},
+  {q:`下列何者不是大陸地區人民得申請在臺灣地區定居的條件？`,opts:[`臺灣地區人民之直系血親及配偶，年齡在70歲以上、12歲以下者`,`其臺灣地區之配偶死亡，須在臺灣地區照顧未成年之親生子女者`,`民國76年11月2日後，因船舶故障滯留大陸地區，且在臺灣地區原有戶籍之船員`,`民國38年政府遷臺後，因作戰或執行特種任務被俘之前國軍官兵及其配偶`],ans:2},
+  {q:`臺灣地區各級地方政府如何與大陸地區地方機關締結聯盟？`,opts:[`須經大陸委員會同意`,`須經立法院同意`,`須經內政部會商大陸委員會，報請行政院同意`,`須經內政部會商大陸委員會，報請立法院同意`],ans:2},
+  {q:`有關臺灣地區人民、法人等在大陸地區從事投資或技術合作之規範，下列敘述何者正確？`,opts:[`一定金額以下之投資，得以申報方式為之，其限額由行政院以命令公告之`,`一律採許可制`,`由經濟部會商有關機關，訂定在大陸地區投資或技術合作項目清單，及個案審查原則`,`准許赴大陸地區投資之項目清單，由各有關機關擬訂並公告`],ans:2},
+  {q:`大陸地區人民甲來臺觀光，因旅費不足詢問餐廳老闆臺灣地區人民乙，可否在其餐廳打工，乙因餐廳需人 手幫忙便僱用甲工作，嗣後被警方查獲，下列敘述何者錯誤？`,opts:[`甲未經許可在臺工作，內政部移民署得強制其出境`,`乙須負擔甲被強制出境的費用`,`甲須被勞動部課處10萬元以上50萬元以下罰鍰`,`乙面臨被移送及科處2年以下有期徒刑、拘役或科或併科新臺幣30萬元以下罰金之刑責`],ans:2},
+  {q:`依臺灣地區與大陸地區人民關係條例之規定，臺灣地區人民與大陸地區人民結婚的方式及其他要件，係依 何處之規定？`,opts:[`臺灣地區`,`大陸地區`,`行為地`,`居住地`],ans:2},
+  {q:`依臺灣地區與大陸地區人民關係條例規定，主管機關於實施臺灣地區與大陸地區直接通商、通航及大陸地 區人民進入臺灣地區工作前，應經立法院同意；立法院如於會期內多久未為決議，視為同意？`,opts:[`1個月`,`2個月`,`3個月`,`6個月`],ans:0},
+  {q:`臺灣地區設有戶籍人民（包含取得身分證之大陸配偶）之大陸父母來臺探親停留期間為 1 至 3 個月，每 年總停留期間不得逾幾個月？`,opts:[`6個月`,`7個月`,`8個月`,`9個月`],ans:0},
+  {q:`甲船長擁有一艘船長39.27公尺254噸重的大陸船舶，日前因在彭佳嶼沿海域越界捕魚，依照臺灣地區與 大陸地區人民關係條例規定取締，經扣留後，得處甲船長罰鍰範圍為多少？`,opts:[`新臺幣30萬元以上1000萬元以下`,`新臺幣50萬元以上1500萬元以下`,`新臺幣20萬元以上2000萬元以下`,`新臺幣20萬元以上500萬元以下`],ans:0},
+  {q:`依臺灣地區與大陸地區人民關係條例定義，臺灣地區人民指的是：`,opts:[`在臺灣地區設有戶籍之人民`,`持有中華民國護照之人民`,`在臺灣地區購買或租用住宅者`,`在臺灣地區工作者`],ans:0}
+];
+const TOTAL_Q = 50;
+const TOTAL_TIME = 3600;
+let selected = {};
+let submitted = false;
+let timerInterval;
+let timeLeft = TOTAL_TIME;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return "本題一律給分";
+  if (Array.isArray(q.ans)) return "正確答案：" + q.ans.map(i => "ABCD"[i]).join(" 或 ");
+  return "正確答案：" + "ABCD"[q.ans];
+}
+
+function buildDots() {
+  const grid = document.getElementById("dotGrid");
+  grid.innerHTML = "";
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.textContent = i + 1;
+    d.id = "dot" + i;
+    d.onclick = () => document.getElementById("q" + i).scrollIntoView({behavior:"smooth", block:"center"});
+    grid.appendChild(d);
+  });
+}
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.id = "q" + i;
+    card.dataset.result = "";
+    const labels = ["A","B","C","D"];
+    let optHtml = "";
+    q.opts.forEach((o, oi) => {
+      optHtml += `<div class="opt" id="opt${i}_${oi}" onclick="selectOpt(${i},${oi})"><span class="opt-label">${labels[oi]}</span><span>${o}</span></div>`;
+    });
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題（共 ${QUESTIONS.length} 題）</div><div class="q-text">${q.q}</div><div class="options">${optHtml}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (submitted) return;
+  const labels = ["A","B","C","D"];
+  labels.forEach((_, j) => {
+    const el = document.getElementById("opt" + qi + "_" + j);
+    if (el) el.classList.remove("selected");
+  });
+  const el = document.getElementById("opt" + qi + "_" + oi);
+  if (el) el.classList.add("selected");
+  selected[qi] = oi;
+  const dot = document.getElementById("dot" + qi);
+  if (dot && !submitted) dot.classList.add("answered");
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById("timer");
+    el.textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    el.className = "timer";
+    if (timeLeft <= 300) el.classList.add("warn");
+    if (timeLeft <= 60) el.classList.add("danger");
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(true); }
+  }, 1000);
+}
+
+function submitQuiz(timeout) {
+  const unanswered = QUESTIONS.length - Object.keys(selected).length;
+  if (!timeout && unanswered > 0) {
+    if (!confirm(`尚有 ${unanswered} 題未作答，確定要交卷嗎？`)) return;
+  }
+  clearInterval(timerInterval);
+  submitted = true;
+  document.getElementById("submitBar").classList.add("hidden");
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = selected[i];
+    const ok = (sel !== undefined) && isCorrect(q, sel);
+    const special = q.ans === -1 || Array.isArray(q.ans);
+    if (ok) correct++;
+    const card = document.getElementById("q" + i);
+    card.dataset.result = ok ? "correct" : "wrong";
+    const dot = document.getElementById("dot" + i);
+    if (dot) { dot.classList.remove("answered"); dot.classList.add(ok ? "correct" : "wrong"); }
+    ["A","B","C","D"].forEach((_, oi) => {
+      const el = document.getElementById("opt" + i + "_" + oi);
+      if (!el) return;
+      el.classList.remove("selected");
+      const isAns = q.ans === -1 ? true : (Array.isArray(q.ans) ? q.ans.includes(oi) : q.ans === oi);
+      if (sel === oi && ok) el.classList.add("correct-ans");
+      else if (sel === oi && !ok) el.classList.add("wrong-ans");
+      else if (isAns && !ok) el.classList.add("correct-ans");
+    });
+    let msg = "";
+    if (sel === undefined) {
+      msg = `<div class="result-msg wrong">⚠️ 未作答　${getCorrectLabel(q)}</div>`;
+    } else if (ok && special) {
+      msg = `<div class="result-msg special">✅ 正確　（${getCorrectLabel(q)}）</div>`;
+    } else if (ok) {
+      msg = `<div class="result-msg correct">✅ 正確</div>`;
+    } else {
+      msg = `<div class="result-msg wrong">❌ 錯誤　${getCorrectLabel(q)}</div>`;
+    }
+    card.querySelector(".options").insertAdjacentHTML("afterend", msg);
+  });
+  const total = QUESTIONS.length;
+  const score = Math.round(correct / total * 100);
+  const scoreEl = document.getElementById("scoreBig");
+  scoreEl.textContent = score + " 分";
+  const grade = document.getElementById("gradeLabel");
+  if (score >= 80) { grade.textContent = "🏆 優秀"; grade.className = "grade pass"; }
+  else if (score >= 60) { grade.textContent = "✅ 及格"; grade.className = "grade pass"; }
+  else { grade.textContent = "❌ 未及格"; grade.className = "grade fail"; }
+  document.getElementById("statsRow").textContent = `答對 ${correct} 題 ／ 答錯 ${total - correct} 題 ／ 共 ${total} 題`;
+  document.getElementById("scorePanel").classList.add("show");
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function filterCards(type) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll(".q-card").forEach(card => {
+    if (type === "all") card.classList.remove("hidden");
+    else if (type === "correct") card.classList.toggle("hidden", card.dataset.result !== "correct");
+    else if (type === "wrong") card.classList.toggle("hidden", card.dataset.result !== "wrong");
+  });
+}
+
+function resetQuiz() {
+  selected = {};
+  submitted = false;
+  timeLeft = TOTAL_TIME;
+  document.getElementById("scorePanel").classList.remove("show");
+  document.getElementById("submitBar").classList.remove("hidden");
+  buildDots();
+  buildQuiz();
+  clearInterval(timerInterval);
+  startTimer();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+buildDots();
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>

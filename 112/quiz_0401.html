@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>112年 外語領隊 領隊英語</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a4a70,#2c5f8a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3e5f5;color:#6a1b9a}
+.header h1{font-size:1rem;font-weight:700;flex:1}
+.timer{background:rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;min-width:70px;text-align:center}
+.timer.warn{background:rgba(255,180,0,.4)}
+.timer.danger{background:rgba(220,50,50,.5);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-wrap{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 16px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#666;cursor:pointer;transition:.15s}
+.dot.answered{background:#2c5f8a;color:#fff}
+.dot.correct{background:#27ae60;color:#fff}
+.dot.wrong{background:#e74c3c;color:#fff}
+.container{max-width:820px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:10px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.4}
+.opt:hover{border-color:#2c5f8a;background:#f0f6ff}
+.opt.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt.correct-ans{border-color:#27ae60;background:#e8f5e9!important}
+.opt.wrong-ans{border-color:#e74c3c;background:#fdecea!important}
+.opt-label{font-weight:700;min-width:18px;color:#2c5f8a}
+.result-msg{margin-top:8px;font-size:.82rem;padding:6px 10px;border-radius:6px}
+.result-msg.correct{background:#e8f5e9;color:#1e6b3d}
+.result-msg.wrong{background:#fdecea;color:#c0392b}
+.result-msg.special{background:#fff3cd;color:#856404}
+.submit-bar{text-align:center;padding:20px 0 40px}
+.btn-submit{background:#2c5f8a;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#1a4a70}
+.score-panel{display:none;background:#fff;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.12);text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:3rem;font-weight:900;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.pass{color:#27ae60}.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:24px;margin:12px 0;font-size:.85rem;color:#666}
+.filter-bar{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.btn-reset{background:#fff;color:#2c5f8a;border:2px solid #2c5f8a;border-radius:10px;padding:10px 30px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s}
+.btn-reset:hover{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+.year-label{font-size:.7rem;opacity:.8;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">外語領隊</span>
+  <h1>領隊英語<span class="year-label">112年</span></h1>
+  <div class="timer" id="timer">60:00</div>
+</div>
+<div class="progress-wrap">
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="container">
+  <div class="score-panel" id="scorePanel">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="grade" id="gradeLabel"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all')">全部</button>
+      <button class="filter-btn" onclick="filterCards('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterCards('correct')">只看對題</button>
+    </div>
+    <button class="btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+  <div id="quizArea"></div>
+  <div class="submit-bar" id="submitBar">
+    <button class="btn-submit" onclick="submitQuiz()">📋 交卷批改</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`Flight attendant: Sir,pleaseswitchoff yourmobile phoneas we are about to .`,opts:[`get ridof`,`put off`,`remove`,`takeoff`],ans:3},
+  {q:`Whenthepressuredrops inthecabin, masks will fall.`,opts:[`helium`,`hydrogen`,`nitrogen`,`oxygen`],ans:3},
+  {q:`Flight attendant: Don’t inflate yourlife until you’veleft theplanein caseof emergency.`,opts:[`cufflinks`,`jacket`,`pajama`,`socks`],ans:1},
+  {q:`Please remain until the “fasten seat belt” sign is switched off and the aircraft has come to a completestop.`,opts:[`sat`,`seat`,`seated`,`seats`],ans:2},
+  {q:`Could youpleasetell mewhere ?`,opts:[`has thedeparture gate`,`is thedeparture gate`,`thedeparture gatehas`,`thedeparture gateis`],ans:3},
+  {q:`A: Excuseme, Ican’t findmybaggage. B: Do youhave your tag?`,opts:[`claim`,`hash`,`page`,`price`],ans:0},
+  {q:`A: B: Bycredit card.`,opts:[`Could Ihaveareceipt?`,`Howwould youliketopay?`,`Is that beforeoraftertax?`,`Where’s thecashier?`],ans:1},
+  {q:`Normally,checkedbaggagewillbedeliveredtothe aftertheflightarrivesdependingonthe priorityandthepositionofbaggage.`,opts:[`carousel`,`ferris wheel`,`pirateship`,`rollercoaster`],ans:0},
+  {q:`A: Do youhaveanydress ? B: T-shirts, shorts andslippersarestrictlyprohibited.`,opts:[`circle`,`code`,`crypt`,`cypher`],ans:1},
+  {q:`Flight attendant: Youseem tohavesomeairsickness.B:`,opts:[`Yes, airbornediseases aredifficult toprevent.`,`Yes, do youhavemedicineforthat?`,`Yes, effervescent formulaoffers fast-actingabsorption.`,`Yes, today’s airqualityis poor.`],ans:1},
+  {q:`Gluten meal does not containanygluten-basedproduct.`,opts:[`accepting`,`indulgent`,`intolerant`,`rich`],ans:2},
+  {q:`To maintain your rights, please arrive at the airport three hours prior to your departure time for tax refund .`,opts:[`application`,`disregard`,`inactivity`,`negligence`],ans:0},
+  {q:`Somehotelloyaltyprogramsawardelitemembers benefitsafterstayingacertainnumberof nights.`,opts:[`degrade`,`downgrade`,`reduce`,`upgrade`],ans:3},
+  {q:`Waiter:Goodevening,GrandRestaurant,mayIhelpyou?Customer:Iwouldliketo atable fortonight.`,opts:[`conserve`,`preserve`,`reserve`,`serve`],ans:2},
+  {q:`Ladies and gentlemen,please yourseat belts forlanding.`,opts:[`detach`,`fasten`,`lose`,`unseal`],ans:1},
+  {q:`Somepet-friendlyhotels offer bags forwalking yourdog.`,opts:[`aloofness`,`courtesy`,`disregard`,`disfavor`],ans:1},
+  {q:`Airline programs are designed to encourage customers to collect points which maythen be exchangedfor airtravel rewards.`,opts:[`faithlessness`,`mileage`,`scholarship`,`treachery`],ans:1},
+  {q:`Passengers arrivinginTaiwanmust fill out ahealth form.`,opts:[`concealed`,`cyphered`,`declaration`,`encrypted`],ans:2},
+  {q:`Thehotel offers easy totheNational PalaceMuseum.`,opts:[`access`,`bail`,`ban`,`barrier`],ans:0},
+  {q:`Wemissedthewarning andthat’s whythecar accident happened.`,opts:[`autographs`,`flaws`,`signs`,`stigmas`],ans:2},
+  {q:`Wi-Fi is available throughout thefive-star hotel.`,opts:[`Complimentary`,`Derogatory`,`Inconvenient`,`Unfavorable`],ans:0},
+  {q:`Tippingis acrossmostofNorthAmerica,with15%-20%beingseenasareasonableamount.`,opts:[`prevalent`,`rare`,`uncommon`,`unusual`],ans:0},
+  {q:`Some prescription medications are in Taiwan. Authorities may jail or fine you if you have them.`,opts:[`illegal`,`lawful`,`legitimate`,`permitted`],ans:0},
+  {q:`The water in Sun Moon Lake is green and clear, the images of surrounding mountains and serenelandscape.`,opts:[`absorbing`,`devouring`,`reflecting`,`sucking`],ans:2},
+  {q:`Effective from October13,2022,Taiwanhas thequarantine requirement forall arrivals, so arrivingtravelers will nolongerberequiredtoquarantine.`,opts:[`announced`,`declared`,`implemented`,`lifted`],ans:3},
+  {q:`Thenight market was with manypeopleduringholidays.`,opts:[`boxed`,`herded`,`packed`,`schooled`],ans:2},
+  {q:`Foreigners with a passport/travel document and whose stay in R.O.C does not exceed a period of183days are eligibletoapplyforatax refund.`,opts:[`null`,`revoked`,`valid`,`void`],ans:2},
+  {q:`Muslim visitors to Taiwan will also find many restaurants and other available to cater to theirdietaryand religious needs.`,opts:[`facilities`,`instruments`,`themeparks`,`tools`],ans:0},
+  {q:`A: Shall weorder abottleofthehouse red? B:`,opts:[`Yes, sausageis myfavoritemaincourse.`,`Yes, that’s myfavoritesidedish.`,`Yes, thehouseis paintedinred.`,`Yes, today’s Pinot Noirgoes well withsteaks.`],ans:3},
+  {q:`Bubble tea most commonly consists of tea accompanied by chewy balls (“boba” or “pearls”).`,opts:[`foot`,`soccer`,`tapioca`,`tennis`],ans:2},
+  {q:`Youcan gotothe Lost and FoundServiceCenter for your items.`,opts:[`disposed`,`donated`,`missing`,`winning`],ans:2},
+  {q:`Police: HowmayIhelp you? Ann: Iwant to acrime.`,opts:[`refuse`,`report`,`speak`,`talk`],ans:1},
+  {q:`Many Taipei’s patisseries offer dessert options designed to intrigue both Eastern and Westernpalates.`,opts:[`stale`,`fiasco`,`frustrated`,`fusion`],ans:3},
+  {q:`The online food deliveryindustryhas a special relationship with users in a three-waystructure that includes consumers, restaurants, and .`,opts:[`clerks`,`conductors`,`couriers`,`curators`],ans:2},
+  {q:`Waiter: What would you liketohavefor yourside dish? John: .`,opts:[`I’ll have Frenchfries`,`Medium-rareplease`,`Pecanpieplease`,`Yes, pleaseput it bymyside`],ans:0},
+  {q:`Hand luggage carried aboard aircraft bypassengers must be within the following : length 56 cm,width36cm,height 23 cm.`,opts:[`costs`,`dimensions`,`advantages`,`weights`],ans:1},
+  {q:`Taipei 101is oneofthetop tourist inTaipei.`,opts:[`annex`,`attractions`,`authorities`,`cathedrals`],ans:1},
+  {q:`Hereis the formytriptoEuropethis comingsummer.Do youhaveanysuggestions?`,opts:[`primary`,`itinerary`,`necessary`,`victory`],ans:1},
+  {q:`Ilockedmykeyintheroom,andfortunately, Ihavea set intheofficetouse.`,opts:[`space`,`main`,`pair`,`spare`],ans:3},
+  {q:`Taiwan has become more and more popular among foreign tourists because it is quite and friendly.`,opts:[`affordable`,`costly`,`expensive`,`unreasonable`],ans:0},
+  {q:`Besides yourpassport,thegroundstaffalsoneedstocheckyourCOVID-19 cardduringthe check-in.`,opts:[`variety`,`virus`,`vacuum`,`vaccination`],ans:3},
+  {q:`Excuseme,which should Igotofortheconnectingflight toChicago?`,opts:[`surface`,`display`,`temple`,`terminal`],ans:3},
+  {q:`Eachpassenger canhave twopieces of checkedbaggageallowance andone bag.`,opts:[`hardy`,`carry-on`,`sit-in`,`brown`],ans:1},
+  {q:`This is anon-smokingflight.Pleasebeawarethat smokingis ontheentireaircraft.`,opts:[`tolerant`,`tolerated`,`prohibited`,`prohibiting`],ans:2},
+  {q:`A: I feel dizzy and I am about to vomit. B: Are you OK? Here is the bag, right in front of yourseat pocket.`,opts:[`doggie`,`airsickness`,`lunch`,`sleeping`],ans:1},
+  {q:`Ifyoucarrymorethantheduty-freeallowance,includingabottleofalcohol,theitemswillbe .`,opts:[`confiscate`,`confiscating`,`confiscated`,`confiscation`],ans:2},
+  {q:`Changing money at the airport is convenient to get local , but you may be charged some servicefees.`,opts:[`residence`,`currency`,`exchange`,`personal check`],ans:1},
+  {q:`The immigration officers will ask you to look at the camera. Also, you have to press the buttons to leave your .`,opts:[`message`,`numbers`,`passport`,`fingerprints`],ans:3},
+  {q:`A:Hello.Iwouldliketostayfortwonights.Isthereany today?B: Yes,wehaveastandard twinroom available.`,opts:[`registration`,`brochure`,`kettle`,`vacancy`],ans:3},
+  {q:`A: Is it possibletobookanoperaticket andalocal tourforme? B:Sure.The serviceinour hotel canhelp.`,opts:[`housekeeping`,`postal`,`concierge`,`laundry`],ans:2},
+  {q:`A:Thelampinmyroomdoesnotwork.Itisquitedark.B:Sorryaboutthat.Iwillsenda staff upright away.`,opts:[`facilities`,`parlor`,`maintenance`,`polish`],ans:2},
+  {q:`If youplanto gotothis restaurant,menandwomenare requiredtodress up.`,opts:[`upright`,`upload`,`update`,`upscale`],ans:3},
+  {q:`A: Would you like a glass of wine to go with your meal? B: Sure. How about a soft bouquet with a sweet ?`,opts:[`appearance`,`aftertaste`,`stopper`,`decanter`],ans:1},
+  {q:`It is relaxing to sit in this café and hang with my friends a bit. We can enjoy the riverside viewandhaveachat.`,opts:[`in`,`out`,`up`,`over`],ans:1},
+  {q:`A:Themealissosatisfying.B:Ithinkso.Letmegetthe .Itisonmetoday.Youalwayshelp mealot.A: Thanks.`,opts:[`bill`,`menu`,`napkin`,`roll`],ans:0},
+  {q:`I am afraid that part of the highwayto the airport is under construction, so you mayneed to take a .`,opts:[`look`,`glance`,`nap`,`detour`],ans:3},
+  {q:`Everyonecancometothiscorner.Basedonmyexperience,itisthebestviewtotakea ora groupphoto.`,opts:[`castle`,`selfie`,`manual`,`route`],ans:1},
+  {q:`Insteadofdrivingalongwayforvacation,wehada ,visitingthelocalmuseumsandstaying inahotel nearby.`,opts:[`pullover`,`protection`,`staycation`,`remittance`],ans:2},
+  {q:`Lookatthemap.Wecantakethesubwaytothe .Itiseasytofindthispopularhistoricalsite.`,opts:[`monument`,`entertainment`,`refreshment`,`appointment`],ans:0},
+  {q:`I highly recommend this blue tote bag because of its high quality. It is very and water- resistant.`,opts:[`edible`,`incapable`,`fable`,`durable`],ans:3},
+  {q:`A:Thisredblouseistoo .Doyouhaveasmalleronetotry?B:Yes.Hereyouare.Thefitting room is right there.`,opts:[`stock`,`loose`,`tight`,`silky`],ans:1},
+  {q:`A: Besides the discount, we can also keep the to get a VAT (value-added tax) refund at the airport.B: So great!`,opts:[`recipes`,`receipts`,`renovation`,`revenues`],ans:1},
+  {q:`Excuse me, could you show me how to make a long-distance call from San Diego to New York?`,opts:[`state`,`domestic`,`previous`,`calling`],ans:1},
+  {q:`A:Iamhungryandwanttograbsomefood.B:Trythis number1-800-522-5942forBurger Hot toorderameal.`,opts:[`personal`,`public`,`extension`,`toll-free`],ans:3},
+  {q:`「#」is calledthe key, andis abuttononatelephoneorkeyboard labeled.`,opts:[`star`,`well`,`pound`,`mill`],ans:2},
+  {q:`A: What happened? B: Doctor, it seems I am allergic to seafood. I have rashes and feel all overmyarms.`,opts:[`itchy`,`stuffy`,`catchy`,`gassy`],ans:0},
+  {q:`My wassprained,sowalkingwasquitehard.IthinkImayneedawheelchairforassistance at theairport.`,opts:[`stomach`,`ankle`,`forehead`,`elbow`],ans:1},
+  {q:`A: I need to buy medicine for my splitting headache. B: Here is the one you can take. It is , noprescriptionneeded.`,opts:[`clinic`,`sideeffect`,`over-the-counter`,`symptom`],ans:2},
+  {q:`A:Iwouldliketoreporta .Mywalletwasgone.B:Isee.Pleasecalmdownandtellmewhat happened.`,opts:[`rob`,`theft`,`drought`,`tsunami`],ans:1},
+  {q:`A: What can Ido if Ilose mypassport during the trip? B: You have to go to the embassyto have a newone .`,opts:[`reassured`,`resigned`,`received`,`reissued Global warming and environmental problems raise people’s environmental concerns and increase their environmental responsibility in their buying. Countries all over the world are increasingly emphasizing environmental conservation matters. Green consumers are those who are aware of and interestedinenvironmentalissues.Theysupportbusinessesthatruninenvironmentallyfriendlyways. In addition, green consumers are also concerned about how green the products they bought are. Green productsareproductsthatarenon-toxic,madefromrecycledmaterials,orminimallypackaged.Ingeneral, greenproductsareknownasecologicalproductsorenvironmentallyfriendlyproductsthatimpactlesson the environment. The goal of green marketing is bringing environment issue into marketing. If we can make consumers consider that information of environmental protection duringtheir decision process, we canpush companies toproducemore environmentallyfriendlyproducts. Although the tourism and hospitality industry is also referred to as the non-factory-made industry, companies are still trying hard toward the goal of sustainable development. In Taiwan, the government took several ways to encourage sustainability development in the industry. For example, the EnvironmentalProtectionAdministration(EPA)heldarewardprogramthatcustomerscouldearn“green points”afterdinningat environmentallyfriendlyrestaurants.`],ans:3},
+  {q:`Whichofthefollowingstatements is true?`,opts:[`Countries all overthe worldareignoringenvironmental conservationissues.`,`Greenproducts aremadeofplastic.`,`TheTaiwan government took actions topromotegreendining.`,`Thegoal of greenmarketingmakes nodifferencefrom marketingingeneral.`],ans:2},
+  {q:`Whichofthefollowingis not apossiblecharacteristicofgreenproducts?`,opts:[`Madefrom recycled materials.`,`Minimallypackaged.`,`Non-toxic.`,`Packagedinmanylayers andboxes.`],ans:3},
+  {q:`Whichofthefollowingis trueabout greenconsumers?`,opts:[`Theyareawareofenvironmental issues.`,`Theyareenthusiastic about deathpenaltyissues.`,`Theyareenthusiastic about humanrights.`,`Theyareinterestedin racial rights issues.`],ans:0},
+  {q:`Whichfeature are green products knownfor?`,opts:[`Cheap.`,`Ecological.`,`Planetary.`,`Mechanical.`],ans:1},
+  {q:`What is oneofthecauses that raisepeople’s environmental concerns?`,opts:[`Genderinequality.`,`Global poverty.`,`Global warming.`,`Regional war. The sea turtle has been a species at high risk of extinction for many years. In Taiwan, Xiaoliuqiu (alsocalledLittleLiuqiuorLiuqiu),anislandbelongingtoPingtungCountyinTaiwanhasahighnumber ofsea turtles, andthe majorityof the residents therehavebeen aware oftheimportanceof protectingsea turtles. However,theislandhassomanytouristattractionsthatmanyvisitorscometotheislandonweekends and holidays. They come for scuba diving, SUP (stand-up paddling), snorkeling, and so on. Although these activities promote local economic growth, it leads to some influences on marine life and the environment. To decrease the burden on the environment, a team of volunteers, consisting of university students in Taiwan, non-profit organizations, and residents have started to conduct a project about environmental protection, including sea turtle conservation and marine-debris decoration. The team observes the life of seaturtles,keepingrecordsoftheirmigrationbehaviors.Theteamalsohasaseaturtlepatrolatnightfrom 7:00p.m.to5:00a.m.,learningabouthowseaturtleslaytheireggs.Ontheotherhand,theteamconducts beachclean-upseveryday.Thevolunteerscollect marinedebristocreateanartwallnearthebeach.This decorationwallaimstoremindvisitorsthattheyshouldreducepollutionanddisturbance.Theheadofthe team says thevolunteers will takemoreactions to keeptheisland green.`],ans:2},
+  {q:`What is thepassagemainlyabout?`,opts:[`Abeautiful country.`,`Environmental protection.`,`Wildanimals.`,`Hardworkingresidents.`],ans:1},
+  {q:`Whydovisitors cometo this island?`,opts:[`Tojoinbeachclean-ups.`,`Toobservethe economicgrowth.`,`Topaint thehouses.`,`Toenjoywater activities.`],ans:3},
+  {q:`Accordingtothepassage,whois NOT likelyinvolvedinthevolunteerteam?`,opts:[`Universitystudents.`,`Teachers at LiuqiuJuniorHighSchool.`,`Stafffrom anon-profit organization.`,`Tourmanagers from othercountries.`],ans:3},
+  {q:`Accordingtothepassage,whendoseaturtles likelylayeggs?`,opts:[`At noon.`,`Inthe earlyafternoon.`,`At midnight.`,`At 10inthemorning.`],ans:2},
+  {q:`Accordingtothepassage,howtokeeptheisland greeneffectively?`,opts:[`Promoteecotourism.`,`Producemoredebris tocreatetheart wall.`,`Introducemorefriends tovisit this island.`,`Makefoodtofeedsea turtles.`],ans:0}
+];
+const TOTAL_Q = 80;
+const TOTAL_TIME = 3600;
+let selected = {};
+let submitted = false;
+let timerInterval;
+let timeLeft = TOTAL_TIME;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return "本題一律給分";
+  if (Array.isArray(q.ans)) return "正確答案：" + q.ans.map(i => "ABCD"[i]).join(" 或 ");
+  return "正確答案：" + "ABCD"[q.ans];
+}
+
+function buildDots() {
+  const grid = document.getElementById("dotGrid");
+  grid.innerHTML = "";
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.textContent = i + 1;
+    d.id = "dot" + i;
+    d.onclick = () => document.getElementById("q" + i).scrollIntoView({behavior:"smooth", block:"center"});
+    grid.appendChild(d);
+  });
+}
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.id = "q" + i;
+    card.dataset.result = "";
+    const labels = ["A","B","C","D"];
+    let optHtml = "";
+    q.opts.forEach((o, oi) => {
+      optHtml += `<div class="opt" id="opt${i}_${oi}" onclick="selectOpt(${i},${oi})"><span class="opt-label">${labels[oi]}</span><span>${o}</span></div>`;
+    });
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題（共 ${QUESTIONS.length} 題）</div><div class="q-text">${q.q}</div><div class="options">${optHtml}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (submitted) return;
+  const labels = ["A","B","C","D"];
+  labels.forEach((_, j) => {
+    const el = document.getElementById("opt" + qi + "_" + j);
+    if (el) el.classList.remove("selected");
+  });
+  const el = document.getElementById("opt" + qi + "_" + oi);
+  if (el) el.classList.add("selected");
+  selected[qi] = oi;
+  const dot = document.getElementById("dot" + qi);
+  if (dot && !submitted) dot.classList.add("answered");
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById("timer");
+    el.textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    el.className = "timer";
+    if (timeLeft <= 300) el.classList.add("warn");
+    if (timeLeft <= 60) el.classList.add("danger");
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(true); }
+  }, 1000);
+}
+
+function submitQuiz(timeout) {
+  const unanswered = QUESTIONS.length - Object.keys(selected).length;
+  if (!timeout && unanswered > 0) {
+    if (!confirm(`尚有 ${unanswered} 題未作答，確定要交卷嗎？`)) return;
+  }
+  clearInterval(timerInterval);
+  submitted = true;
+  document.getElementById("submitBar").classList.add("hidden");
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = selected[i];
+    const ok = (sel !== undefined) && isCorrect(q, sel);
+    const special = q.ans === -1 || Array.isArray(q.ans);
+    if (ok) correct++;
+    const card = document.getElementById("q" + i);
+    card.dataset.result = ok ? "correct" : "wrong";
+    const dot = document.getElementById("dot" + i);
+    if (dot) { dot.classList.remove("answered"); dot.classList.add(ok ? "correct" : "wrong"); }
+    ["A","B","C","D"].forEach((_, oi) => {
+      const el = document.getElementById("opt" + i + "_" + oi);
+      if (!el) return;
+      el.classList.remove("selected");
+      const isAns = q.ans === -1 ? true : (Array.isArray(q.ans) ? q.ans.includes(oi) : q.ans === oi);
+      if (sel === oi && ok) el.classList.add("correct-ans");
+      else if (sel === oi && !ok) el.classList.add("wrong-ans");
+      else if (isAns && !ok) el.classList.add("correct-ans");
+    });
+    let msg = "";
+    if (sel === undefined) {
+      msg = `<div class="result-msg wrong">⚠️ 未作答　${getCorrectLabel(q)}</div>`;
+    } else if (ok && special) {
+      msg = `<div class="result-msg special">✅ 正確　（${getCorrectLabel(q)}）</div>`;
+    } else if (ok) {
+      msg = `<div class="result-msg correct">✅ 正確</div>`;
+    } else {
+      msg = `<div class="result-msg wrong">❌ 錯誤　${getCorrectLabel(q)}</div>`;
+    }
+    card.querySelector(".options").insertAdjacentHTML("afterend", msg);
+  });
+  const total = QUESTIONS.length;
+  const score = Math.round(correct / total * 100);
+  const scoreEl = document.getElementById("scoreBig");
+  scoreEl.textContent = score + " 分";
+  const grade = document.getElementById("gradeLabel");
+  if (score >= 80) { grade.textContent = "🏆 優秀"; grade.className = "grade pass"; }
+  else if (score >= 60) { grade.textContent = "✅ 及格"; grade.className = "grade pass"; }
+  else { grade.textContent = "❌ 未及格"; grade.className = "grade fail"; }
+  document.getElementById("statsRow").textContent = `答對 ${correct} 題 ／ 答錯 ${total - correct} 題 ／ 共 ${total} 題`;
+  document.getElementById("scorePanel").classList.add("show");
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function filterCards(type) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll(".q-card").forEach(card => {
+    if (type === "all") card.classList.remove("hidden");
+    else if (type === "correct") card.classList.toggle("hidden", card.dataset.result !== "correct");
+    else if (type === "wrong") card.classList.toggle("hidden", card.dataset.result !== "wrong");
+  });
+}
+
+function resetQuiz() {
+  selected = {};
+  submitted = false;
+  timeLeft = TOTAL_TIME;
+  document.getElementById("scorePanel").classList.remove("show");
+  document.getElementById("submitBar").classList.remove("hidden");
+  buildDots();
+  buildQuiz();
+  clearInterval(timerInterval);
+  startTimer();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+buildDots();
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>
