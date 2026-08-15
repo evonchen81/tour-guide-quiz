@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>115年 導遊英語 線上測驗</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8;min-height:100vh}
+.sticky-header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:12px 20px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start}
+.exam-title{font-size:1.2rem;font-weight:700}
+.exam-sub{font-size:.8rem;opacity:.85;margin-top:2px}
+.timer-box{text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:6px 14px;min-width:100px}
+.timer-box.warning{background:rgba(255,200,0,.3)}
+.timer-box.danger{background:rgba(255,80,80,.4)}
+.timer-label{font-size:.65rem;opacity:.8}
+.timer-value{font-size:1.5rem;font-weight:700;letter-spacing:2px}
+.timer-bar-wrap{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:4px}
+.timer-bar{height:100%;background:#68d391;border-radius:2px;transition:width .5s}
+.progress-area{background:#fff;padding:10px 20px;border-bottom:1px solid #e2e8f0}
+.progress-info{font-size:.85rem;color:#4a5568;margin-bottom:6px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:22px;height:22px;border-radius:50%;background:#e2e8f0;border:1.5px solid #cbd5e0;font-size:.65rem;display:flex;align-items:center;justify-content:center;color:#718096;cursor:pointer;transition:all .2s}
+.dot.done{background:#3182ce;border-color:#2b6cb0;color:#fff}
+.main{max-width:800px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:2px solid #e2e8f0;transition:border-color .2s}
+.q-card.answered{border-color:#90cdf4}
+.q-card.result-correct{border-color:#68d391;background:#f0fff4}
+.q-card.result-wrong{border-color:#fc8181;background:#fff5f5}
+.q-num{font-size:.8rem;color:#718096;margin-bottom:6px;font-weight:600}
+.q-text{font-size:1rem;color:#2d3748;margin-bottom:14px;line-height:1.6}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all .2s;line-height:1.5}
+.option-label:hover{background:#ebf8ff;border-color:#90cdf4}
+.option-label.selected{background:#ebf8ff;border-color:#3182ce}
+.option-label.correct-ans{background:#f0fff4;border-color:#38a169!important}
+.option-label.wrong-ans{background:#fff5f5;border-color:#e53e3e!important}
+.option-key{font-weight:700;color:#3182ce;min-width:20px}
+.option-label input{display:none}
+.result-badge{padding:6px 12px;border-radius:6px;font-weight:700;margin-top:8px;font-size:.9rem}
+.result-badge.ok{background:#f0fff4;color:#276749}
+.result-badge.err{background:#fff5f5;color:#c53030}
+.correct-note{margin-top:6px;padding:8px 12px;background:#ebf8ff;border-radius:6px;color:#2b6cb0;font-size:.9rem}
+.bottom-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:50}
+.btn-submit{background:#3182ce;color:#fff;border:none;border-radius:8px;padding:12px 40px;font-size:1rem;font-weight:700;cursor:pointer}
+.btn-submit:hover{background:#2b6cb0}
+#resetBtn{display:none;background:#805ad5;color:#fff;border:none;border-radius:8px;padding:10px 30px;font-size:.95rem;font-weight:700;cursor:pointer}
+.score-panel{display:none;background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;border:2px solid #90cdf4;text-align:center}
+.score-val{font-size:3rem;font-weight:900;color:#2b6cb0}
+.score-grade{display:inline-block;padding:4px 16px;border-radius:20px;font-size:1rem;font-weight:700;margin:8px 0}
+.score-detail{color:#718096;font-size:.85rem}
+.stats{display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-size:1.4rem;font-weight:700}
+.stat-label{font-size:.75rem;color:#718096}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #cbd5e0;background:#fff;cursor:pointer;font-size:.85rem}
+.filter-btn.active{background:#3182ce;border-color:#3182ce;color:#fff}
+@media(max-width:600px){
+  .exam-title{font-size:1rem}
+  .timer-value{font-size:1.2rem}
+  .dot{width:18px;height:18px;font-size:.55rem}
+}
+</style>
+</head>
+<body>
+<div class="sticky-header">
+  <div class="header-top">
+    <div>
+      <div class="exam-title">115年 導遊英語 模擬測驗</div>
+      <div class="exam-sub">外語導遊人員 ／ 共80題・每題2分・總分100分</div>
+    </div>
+    <div class="timer-box" id="timerBox">
+      <div class="timer-label">剩餘時間</div>
+      <div class="timer-value" id="timerValue">60:00</div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar" style="width:100%"></div></div>
+    </div>
+  </div>
+</div>
+<div class="progress-area">
+  <div class="progress-info">已作答：<strong id="answeredCount">0</strong> / 80 題</div>
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="main">
+  <div id="score-panel" class="score-panel">
+    <div class="score-val" id="scoreVal"></div>
+    <div class="score-grade" id="scoreGrade"></div>
+    <div class="score-detail" id="scoreDetail"></div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num" id="statCorrect" style="color:#38a169"></div><div class="stat-label">答對</div></div>
+      <div class="stat-item"><div class="stat-num" id="statWrong" style="color:#e53e3e"></div><div class="stat-label">答錯</div></div>
+      <div class="stat-item"><div class="stat-num" id="statSkip" style="color:#718096"></div><div class="stat-label">未作答</div></div>
+      <div class="stat-item"><div class="stat-num" id="statTime" style="color:#805ad5"></div><div class="stat-label">用時</div></div>
+    </div>
+    <div class="filter-bar" style="justify-content:center;margin-top:16px">
+      <button class="filter-btn active" onclick="filterQ('all')">全部題目</button>
+      <button class="filter-btn" onclick="filterQ('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterQ('correct')">只看對題</button>
+    </div>
+  </div>
+  <form id="quizForm"></form>
+  <div id="unansMsg"></div>
+</div>
+<div class="bottom-bar">
+  <button class="btn-submit" onclick="submitQuiz()">交卷對答案</button>
+  <button id="resetBtn" onclick="resetQuiz()">🔄 重新作答</button>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`When youareinpublicplaces, besurenot toleave yourpersonal unattended.`, opts:[`boarding`, `amusement`, `themes`, `belongings`], ans:3},
+  {q:`Thousands ofpeople totheKeelungRiverareatotrytheirluck at goldpanning.`, opts:[`drained`, `flocked`, `erected`, `adopted`], ans:1},
+  {q:`Top accommodations can be weeks or even months in advance, so it’s best to plan ahead beforetravellingabroad.`, opts:[`filledout`, `heldback`, `bookedup`, `set aside`], ans:2},
+  {q:`In Kaohsiung City, which embraces the largest in Taiwan, the streets are broad and the weatheris sunnymost of thetime.`, opts:[`doorstep`, `wildlife`, `seaport`, `musician`], ans:2},
+  {q:`TakingabustogettoYangmingshanisabettermeansoftransportationduringtheperiodof control fortheFlower Festival.`, opts:[`technical`, `terrific`, `traffic`, `thought`], ans:2},
+  {q:`Theareaabove2000metersinTaiwanishometotheFormosanblackbear,thelargestlandmammal ontheisland,anddistinguishedbyawhiteV-shaped onthechest.`, opts:[`dimension`, `imprint`, `crescent`, `taboo`], ans:2},
+  {q:`A night market specialty of Tainan Anping Old Street, the coffin bread consists of a thick hunk of friedbread and filledwithacreamychicken,seafood,orvegetable chowder.`, opts:[`cast away`, `hollowedout`, `stirredup`, `piercedthrough`], ans:1},
+  {q:`RightonTaipei’sdoorstep,theeasy-to-reachnationalparkofYangmingshanisageological home tohikingtrails,bubblinghotsprings,somechallengingcyclingroutesandseveraldormantvolcanoes.`, opts:[`basement`, `haven`, `mirage`, `nebula`], ans:1},
+  {q:`Tatajiaisthejumping-offpointforavarietyofforesteddayhikes,aswellasthenon-technical,two- dayascent ofJadePeak, withanovernight stayat Paiyun Lodge enrouteto the .`, opts:[`summit`, `seclusion`, `designation`, `shrine`], ans:0},
+  {q:`Recentnewsaboutafireonboardanairlinerhas renewedconcerns overthesafetyofpower banks duringairtravel.`, opts:[`sparked`, `tendered`, `paralleled`, `transcribed`], ans:0},
+  {q:`Avoidgoingtounmanagedor areas,suchasriversorbeacheswithoutlifeguardsupervision.`, opts:[`employed`, `safe`, `sinical`, `hazardous`], ans:3},
+  {q:`If youarebringinganimals,plants,ortheirproducts intothecountry,toavoidpenalties,applyfor at customs ortheAnimal andPlant Health InspectionAgencyupon entry.`, opts:[`emergency`, `medication`, `intrusion`, `quarantine`], ans:3},
+  {q:`Love River is a symbol of Kaohsiung City in southern Taiwan, with riverside creating a twinklingnight-timeatmosphere,offeringaromanticexperienceforvisitors.`, opts:[`gloominess`, `lackluster`, `illuminations`, `proclamations`], ans:2},
+  {q:`TheMazu isoneofthemostnotedfolkreligiousfestivalsinTaiwan.Peoplegoonajourney tohonorthegoddess Mazu.`, opts:[`immobility`, `temple`, `pilgrimage`, `introduction`], ans:2},
+  {q:`InTaiwan,inadditiontoold-fashionedshoppingstreets,therearealsolavishdepartmentstoreswith designer .`, opts:[`boutiques`, `bargains`, `festivals`, `tawdry`], ans:0},
+  {q:`Riceis a that appears onmost Taiwanesetables.`, opts:[`flavor`, `texture`, `popular`, `staple`], ans:3},
+  {q:`SomehotelsinTaiwanoffernice breakfast.Youcouldtryaskingthefrontdeskifyourstay at thehotel includesafreebreakfast.`, opts:[`complimentary`, `commentary`, `compulsory`, `derogatory`], ans:0},
+  {q:`Taiwanese people often use natural materials in their everyday items, such as clothes, accessories, andtools. Forexample,theAtayal oftenmakeclothingfrom ramie.`, opts:[`introduced`, `introverted`, `superficial`, `indigenous`], ans:3},
+  {q:`If your goal is tocatch an earlyHigh-Speed Rail (HSR) trainto Taichung,the6:00 A.M.MRTis the earliest optionfrom theairport.`, opts:[`viable`, `valuable`, `variable`, `vacant`], ans:0},
+  {q:`Make sure to include Chiayi in your trip to southern Taiwan if you are interested in traditional Taiwanese such as embroideryandcarpentry.`, opts:[`publicity`, `culture`, `exposure`, `manners`], ans:1},
+  {q:`Many people in Taiwan like drinking Pearl Milk Tea which usually consists of sweetened tea with milkand tapioca balls.`, opts:[`crunching`, `screaming`, `chewy`, `stale`], ans:2},
+  {q:`ThetrailaroundSunMoonLakeinNantouislistedasoneofthe10best routesintheworld byCNN.`, opts:[`trade`, `sailing`, `truck`, `cycling`], ans:3},
+  {q:`A: Ididnot see youat thepartyyesterday.What happened? B: Iwas feelingabit ,so Istayedhometo get some rest.`, opts:[`busywithotherplans`, `worriedabout the forecast`, `afraidof crowdedplaces`, `undertheweather`], ans:3},
+  {q:`Are youstill waitingto yourtravel agent? Whydon’t youcall him?`, opts:[`giveup`, `hearfrom`, `call up`, `put upwith`], ans:1},
+  {q:`Travelers can exchange currency upon arrival in Taiwan, even before departing for their trip,toavoidATM servicefees andhigherexchange rate conversioncosts.`, opts:[`or`, `but`, `thus`, `therefore`], ans:0},
+  {q:`Taking up the entire southern tip of Taiwan, Kenting is a playground that lends itself to everythingfrom divingandwindsurfingto a growingsurfingscene.`, opts:[`stellar`, `coastal`, `airborne`, `subterranean`], ans:1},
+  {q:`Rentinga 1,500c.c. five-seater car allows for 48 hours of use. Before pickingup the , please call therental companytoassist youinarrangingthepickup.`, opts:[`vessel`, `vase`, `venue`, `vehicle`], ans:3},
+  {q:`With a growing focus on and ethical tourism, sustainable tourism is becoming an increasinglyimportant industryworldwide.`, opts:[`representative`, `responsible`, `regretful`, `resonating`], ans:1},
+  {q:`The commercial district in the city is now a trendy neighborhood with the perfect of past andpresent.`, opts:[`grant`, `stake`, `clerk`, `blend`], ans:3},
+  {q:`A: Excuseme. Iseem to havelost myway. B:`, opts:[`Do you rememberwhere youlast sawit?`, `Let mehelp you.Whereare youtryingtogo?`, `You’ll receivea confirmationemail once yourapplicationis complete.`, `Youmaytryyourluck at the Lost andFound.`], ans:1},
+  {q:`Longshan Temple, located in Wanhua, is one of Taipei’s finest examples of Taiwan’s architectural andhistorical .`, opts:[`original`, `ancestry`, `reasonable`, `heritage`], ans:3},
+  {q:`Elevationsabove700metersmaytrigger ofaltitudesicknessinsomeindividuals,including rapid breathing,increasedheart rate,fatigue, asthma,nausea, andvomiting.`, opts:[`implosions`, `symptoms`, `expressions`, `reflexes`], ans:1},
+  {q:`The Alishan Forest Railway is a of Taiwan. Every day, the train takes passengers on wonderful rides forward throughdifferent forest types.`, opts:[`reassure`, `closure`, `pressure`, `treasure`], ans:3},
+  {q:`In the past, a patriarchal family including grandparents, uncles, aunts, parents and children wasthetraditional patternforpeople.`, opts:[`extended`, `obtained`, `accessed`, `imposed`], ans:0},
+  {q:`Thebuildings arebuilt veryclosetoeachothertoprovideshade for walkinginthe city.`, opts:[`vegetarians`, `pedestrians`, `impressions`, `conventions`], ans:1},
+  {q:`Personal forspecificpurposes,includingsunscreen,hairdye(perm),antiperspirantandodor control,andteethwhitening,areallowed.`, opts:[`medication`, `property`, `appliances`, `cosmetics`], ans:3},
+  {q:`Theseconnectedwalkways act likefunnels that breezes insummer.`, opts:[`blowup`, `call off`, `drawin`, `hangout`], ans:2},
+  {q:`Thebuildings weredesignedtomitigateheat and air-conditioninguse.`, opts:[`leap`, `curb`, `gaze`, `spin`], ans:1},
+  {q:`InTaiwan,special rental places suchas “whole-houselodging”canbefound.Youcanrent awhole housejust for yourpartyandhave to your ownprivatefacilities.`, opts:[`access`, `hotel`, `snacks`, `ocean`], ans:0},
+  {q:`Thevolcanoontheislandhasbeenunusuallyactiveoverthepastfewdays;manyresidentsareafraid that it is goingto in notime.`, opts:[`freeze`, `erupt`, `creep`, `perish`], ans:1},
+  {q:`AtthesummitofBaguaMountainsitstheEightTrigramMountainsBuddhaLandscape,asightthat canbeseenfrom almost anywhereinChanghuaCity. It is aperfect placeto goforalight .`, opts:[`hike`, `weight`, `stunt`, `jump`], ans:0},
+  {q:`Therich topographic featuresand vegetationofTarokoNational Parkbringabout avariety ofhabitats inwhichmanylife forms thrive.`, opts:[`complicated`, `diverse`, `epic`, `roaring`], ans:1},
+  {q:`By using a variety of cost-cutting strategies, from charging for extras like checked baggage and meals to operating more efficient aircraft, airlines have revolutionized air travel, making it accessibletomillions.`, opts:[`union`, `ecology`, `effect`, `budget`], ans:3},
+  {q:`A: Can Ibringmypet alongonthetrip? B: No,toprotect the rights andcomfort ofall passengers, pets are onboard.`, opts:[`permitted`, `forbidden`, `allowed`, `disposable`], ans:1},
+  {q:`Askfor before youtakeclose-upphotographsofpeople,andifpaymentisrequested,either payuporput thecamera away.`, opts:[`capital`, `justice`, `permission`, `substance`], ans:2},
+  {q:`The indigenous people of Alishan, the Tsou people, are of nine major tribes, each holding their own celebrations every year from September to December jointly referred to as the famous “TsouAnnual Festival” ofAlishan.`, opts:[`deprived`, `held`, `comprised`, `assured`], ans:2},
+  {q:`Ittakesapproximatelyfiveworkingdays(excludingweekendsandnationalholidays)to passport applications.`, opts:[`promise`, `process`, `progress`, `prolong`], ans:1},
+  {q:`Jiufen, a mountain village in New Taipei City, is a popular destination for international travelers mainlybecauseofits old .`, opts:[`river`, `street`, `highway`, `forest`], ans:1},
+  {q:`TheYanshuiFireworksFestivalinvolvesshootingtensofthousandsofbottlerocketsandfireworks not intothesky,but directlyintocrowds of participants.`, opts:[`deferring`, `receding`, `resigned`, `willing`], ans:3},
+  {q:`Becauseofthesoil’smineral ,therocksinthewaterfallhaveacquiredagolden yellowcolor overtime.`, opts:[`attempt`, `concept`, `auction`, `content`], ans:3},
+  {q:`Thisisaplainbrickbuildingwithwhitewashed wallsandtimberceilingsseenintraditional houses.`, opts:[`interior`, `incident`, `province`, `pamphlet`], ans:0},
+  {q:`Changhuaisnotedforitsmanytemplesaswellas itsuniquelocal ,suchasba-wan,mao-shu noodle,andbraisedpork withrice.`, opts:[`bookstore`, `delicacies`, `publications`, `inedible`], ans:1},
+  {q:`YushanNational Parkis thebiggest parkinTaiwanandwas in1985.`, opts:[`demolished`, `disbanded`, `disproved`, `established`], ans:3},
+  {q:`Along Taiwan’s coast, the wonders made by nature can be seen at Yehliu Geopark. Wind andwaveshavetransformedrocksintovariousshapes,includingaqueenwithabeautiful,thinneck.`, opts:[`northern`, `southern`, `eastern`, `western`], ans:0},
+  {q:`Kenting National Park is in the southernmost area of the Taiwan island along Bashi , which attracts tourists whowishtoexperiencebeautiful sunshine,ocean andnature.`, opts:[`Tunnel`, `Channel`, `Colone`, `Flannel`], ans:1},
+  {q:`Normally,theearliestAirportMRTfromTaoyuanInternationalAirporttotheTaoyuanHSRStation at 6:02A.M.`, opts:[`delays`, `launches`, `departs`, `dismisses`], ans:2},
+  {q:`Taiwanuses electric current of110volts at 60cycles; appliances from Europe,Australia,orSouth- East Asiawill needa(n) ortransformer.`, opts:[`inspector`, `converter`, `amplifier`, `compressor`], ans:1},
+  {q:`Youneedapassport to aninternational flight andtoentera country.`, opts:[`broad`, `bound`, `board`, `abroad`], ans:2},
+  {q:`Ahotpotmealincludesatable-sidepanofboilingsoupwhereyoucan meatandvegetables intocookbefore you eat.`, opts:[`dip`, `mop`, `pry`, `vow`], ans:0},
+  {q:`Before departure, please check the airline’s official website to that your flight is operating normally.`, opts:[`conform`, `confirm`, `confine`, `confess`], ans:1},
+  {q:`The“YehliuGeopark”is oneofthemost famous ofTaiwan.`, opts:[`felineparks`, `festivals`, `landmarks`, `parkinglots`], ans:2},
+  {q:`TheNational PalaceMuseum houses theworld’s largest ofpriceless Chineseart treasures.`, opts:[`collection`, `crowd`, `flock`, `herd`], ans:0},
+  {q:`The team is committed to implementing strategies to eliminate fatal and serious traffic in thecity.`, opts:[`crashes`, `groans`, `statues`, `yields`], ans:0},
+  {q:`PeoplecometoTarokoNationalParkforitsnaturalwonders.Itfeaturesmajestic ,waterfalls, andbluestreams.`, opts:[`operas`, `sports`, `cliffs`, `snacks`], ans:2},
+  {q:`Designed to look like a pole of bamboo, this is the tallest and most iconic landmark of the city.`, opts:[`skyscraper`, `generation`, `resistance`, `atmosphere`], ans:0},
+  {q:`QixingtanBeachinHualienismanypeople’sfavoriteplacetovisit.Itisnotedforitsunique beach andstunningstars at night.`, opts:[`jumble`, `pebble`, `humble`, `gamble`], ans:1},
+  {q:`AfteryouhavevisitedHawaii,you’lldiscovertherearegreatdifferencesbetweenreadingaboutand experiencingHawaii .`, opts:[`firsthand`, `beforehand`, `offhand`, `forehand`], ans:0},
+  {q:`The Taiwan International Hot-Air Balloon Festival in Taitung is one of the most summer events, attractingcountless visitors whocometowitness andexperiencethespectacle.`, opts:[`animated`, `anticipated`, `ambivalent`, `ambiguous`], ans:1},
+  {q:`Theislandboaststoweringmountains withgorgesandvalleyscarvedoutbycountlessrivers andstreams.`, opts:[`interwoven`, `extinguished`, `outperformed`, `underwritten`], ans:0},
+  {q:`Theriversidebikewaysarebeautifullyscenic,andonholidaysthey withcyclistsofallages.`, opts:[`assume`, `bustle`, `ignore`, `tackle 請依下文回答第71題至第75題： To mark the beginning of a new chapter for the Alishan Forest Railway, modern designers teamed upwithtrainmanufacturers torefurbish its agingcarriages. Aftertwo years andtwomonths ofwork,the “VividExpress”finallymadeitsdebut.InChinese,itsnameconveysthesenseofacheerfulandenergetic train filled with joy. The renovation also symbolized the fusion of tradition and technology—old timber craftsmanshipmeetingdigitaldesignmodeling—toensuretheforestrailwaycontinuestoattract younger travelers whilepreservingits nostalgiccharm. TheinspirationfortheVividExpresscamefromthecollaredbushrobin.Themalebird,withitsdeep bluefeathersandscarf-likeorangemarkings,inspiredtheexteriordesign,bringingvitalitytotheotherwise subdued color palette. Meanwhile, the female bird’s soft yellow plumage was adopted for the interior, brighteningtheoveralllookandmovingawayfromtheoldred-and-yellowscheme.DrawingonAlishan’s ecological treasures, the train blends striking design with the experience of exploring Alishan’s rich biodiversity, making the Vivid Express a truly unique journey. Rooted in Alishan’s ecological richness, the concept also nods to the line’s heritage as a historic narrow-gauge mountain railway dating back to theearly20thcentury.Designersevenconsultedlocalbirdwatcherstocapturetherobin’s authenticcolor balance, ensuring the tones felt organic under mountain sunlight. The choice of colors also represents ecological harmony, remindingvisitors ofAlishan’s diversewildlifeandits protectedhabitats. The Vivid Express has the following features. First, seating is arranged into compartments and observation areas. Compartments offer families or groups a cozy, semi-private space, while the observation section features rotatable seats that passengers can turn for the best view outside. Second, unliketraditionaltrainswithclosedcabs,theVividExpressusesawideglasspartitionatthefront,which allows riders to take in the scenery ahead. Third, an eight-channel surround-sound system immerses travelers in the natural sounds of Alishan, enhancing the visual experience with an audio dimension. Additionally, the carriages are equipped with a wireless emergency call system that includes both voice and video, enabling the driver and train staff to respond quickly during unexpected events and ensure passenger safety. This transparent driver’s-eye perspective is rare amongmountain trains, givingtourists the sense of participating in the journey rather than just observing it. It also reflects the railway’s philosophy of openness and connection between passengers and nature. The entire journey has thus become both a moving observatory and a cultural showcase, bridging the century-old heritage of the Alishanlinewiththeaestheticsensibilities ofcontemporaryTaiwan.`], ans:1},
+  {q:`Accordingtothepassage,whichofthefollowingstatements is TRUE?`, opts:[`Afterfive years ofwork,theVividExpress was finallycompleted.`, `The female bird’s dark blue plumage and scarf-like orange markings on the neck were incorporatedintothe exteriorofthe carriage.`, `The Alishan Forest Railwayride takes visitors on a train journeyto explore the rich biodiversity ofAlishan.`, `The Vivid Express uses a large piece of metal as a partition so that passengers can imagine what it is liketodriveatrain.`], ans:2},
+  {q:`Whichofthefollowingis closest inmeaningtotheword“subdued”(inthe secondparagraph)?`, opts:[`understated`, `bright`, `bold`, `colorful`], ans:0},
+  {q:`What does theword“plumage”(inthesecondparagraph)mean?`, opts:[`color`, `feather`, `wings`, `claw`], ans:1},
+  {q:`Whichofthefollowingis thetopicofthepassage?`, opts:[`Handlingthesituation incaseof atrainemergency.`, `ExplorationoftherichbiodiversityofAlishan.`, `Integratingthebird’s colors intotheinterioroftherailwaycarriage.`, `Thelaunchof aone-of-a-kindmodifiedAlishan forest railwaytrain.`], ans:3},
+  {q:`Whichofthefollowingstatements about “theVividExpress”is FALSE?`, opts:[`Atraditional closedcabwas usedforpassengers toenjoythenatural sceneryinfront ofthem.`, `ThenameofthetraininChinesemeans “avibrant trainfull ofjoy.”`, `Thedesignersofthe“VividExpress”consultedlocalbirdwatcherstocapturetherobin’sauthentic colorbalance.`, `Thevibrant railwaydesignwasbasedonthe ecological resources ofAlishan. 請依下文回答第76題至第80題： New findings from Lux Research suggest that while autonomous robotaxis will further disrupt the conventional taxi andridesharingspaces, carownershipwill not beaffected.Autonomous ridehailingis amajor goal formanycompanies workinginthefield,includingWaymo, Cruise,Argoand Zoox. In their new report called “The Economics of Robotaxis,” Lux found that the average cost of operatingarobotaxicouldbeenoughtoundercuthuman-driventaxis.Butthosecostsaren’tlowenough, noris theculturesurroundingcarownershipweak enough,todisplaceprivatecars. Whilerobotaxisarestilllimitedbythescopeofavailabletechnology,Luxresearchdirectorandlead report authorChristopher Robinson said that theytookahugeleaplast year. “Robotaxi operations require SAE Level 4 autonomous vehicles capable of operating without a backupdriverbutconstrainedtospecificoperatingconditions,suchasgeographyorweatherconditions,” Robinsonsaidinapressrelease.“Whilemanyearlyoperationsfeaturesafetydriversreadytotakecontrol of the vehicle at any time, 2020 saw the advent of the first truly driverless robotaxi operations, with relianceon acombinationofteleoperators andtrailingsafetydrivers inothervehicles.” Lux argues that the elements required to implement geofenced SAE Level 4 autonomous robotaxis are within reach in the next decade. The firm looked at what it costs to operate a robotaxi in China, the United Kingdom and the United States, finding that it costs 28 cents per mile, 38 cents per mile and 42 centspermile,respectively.That analysisfactorsinthecostofpurchasinganelectriccarandoutfittingit with autonomous technology, installing and using electric vehicle charging infrastructure, fleet maintenance,insurance, vehicleteleoperationand othercosts. In conventional taxis and ride hailing, one of the largest costs is the human driver. On average, today’s ridehailingservices charge$2permileinNorthAmericaand$1inChina.Additionally,thecost of operating a conventional taxi includes having the license to do so. In major U.S. cities like New York City, Chicago and Boston, operators are required to purchase a “medallion,” a transferable permit that is ofteninlimitedsupply. Recently, in New York, medallions have sold for about $80,000. In 2014, the price for a medallion surpassed $1 million, but crashed as ride hailing permeated the marketplace. “With operating costs between $0.46 per mile and $0.29 per mile, robotaxi operators will likely be able to offer cheaper rides than incumbent ride-hailing services,” the report says. But that isn’t enough to make a dent in car ownership,where Lux estimatestheownershipof anelectriccartobe10cents permile. The report also argues that while car ownership won’t be displaced by the developments in autonomousdriving,automakersshouldnotignoretheopportunitytojumpin.Nomajoroperatorworking onautonomous cars is designingandbuildingtheirownvehicles. Inapreviousforecast,Luxprojectedthatautonomousvehiclesaleswillbehigherthanrobotaxisales, anotherreasonforOEMstogetintoautonomouscardevelopment.Theendgoalisabetterunderstanding ofhowconsumers interact withthis technology. Ultimately, Lux says that how cities regulate autonomous vehicles, and possibly incorporate them intopublictransit solutions, will dictatehowrobotaxis areused.`], ans:0},
+  {q:`Whichofthefollowingis closest inmeaningtotheword“undercut”inthesecondparagraph?`, opts:[`Sell at alowerprice`, `Weakenmaterially`, `Reduceinesteem orrank`, `Criticizeaimlessly`], ans:0},
+  {q:`Whichcompanies arespecificallymentioned as workingon autonomous ride-hailing?`, opts:[`Cruise,Argo,Toyota, Uber`, `Waymo,Tesla,Uber, Zoox`, `Waymo,Cruise,Argo, Zoox`, `Tesla, Lyft,Cruise,Argo`], ans:2},
+  {q:`Whydidthepriceoftaxi medallions inNewYork fall dramaticallyafter2014?`, opts:[`Robotaxis replacedmost taxis.`, `Ride-hailingservices alteredthemarket drastically.`, `Publictransportationimprovedsignificantly.`, `Electricvehicles becametooexpensive.`], ans:1},
+  {q:`Whichofthefollowingbest explains whyrobotaxis areunlikelytoreduce privatecarownership?`, opts:[`Robotaxis aremoreexpensivethanconventional taxis.`, `Operatingcosts aretoohighfor robotaxi companies.`, `Carownershipcosts permilearesignificantlylower.`, `Automakers refuseto support autonomous vehicledevelopment.`], ans:2},
+  {q:`WhydoesLuxarguethatrobotaxiswillstillbedisruptiveeveniftheydon’tdisplacecarownership?`, opts:[`Becausetheyaremore environmentallyfriendly.`, `Becausetheyare cheapertoinsurethanprivate cars.`, `Becausetheywill makemedallions moreexpensiveagain.`, `Becausetheywill affect theconventional taxi andride-hailingmarkets.`], ans:3}
+];
+const KEYS=['A','B','C','D'];
+const TOTAL_TIME=3600;
+let timeLeft=TOTAL_TIME,timerInterval,userAnswers=new Array(QUESTIONS.length).fill(-1),submitted=false,startTime=Date.now();
+function buildQuiz(){
+  const form=document.getElementById('quizForm'),dg=document.getElementById('dotGrid');
+  form.innerHTML='';dg.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const dot=document.createElement('div');
+    dot.className='dot';dot.id=`dot${i}`;dot.textContent=i+1;
+    dot.onclick=()=>document.getElementById(`q${i}`).scrollIntoView({behavior:'smooth',block:'center'});
+    dg.appendChild(dot);
+    const card=document.createElement('div');
+    card.className='q-card';card.id=`q${i}`;
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div><div class="q-text">${q.q}</div><div class="options" id="opts${i}">${q.opts.map((opt,j)=>`<label class="option-label" id="lbl${i}_${j}" onclick="selectOption(${i},${j})"><input type="radio" name="q${i}" value="${j}"><span class="option-key">${KEYS[j]}</span><span>${opt}</span></label>`).join('')}</div>`;
+    form.appendChild(card);
+  });
+}
+function selectOption(qi,oi){
+  if(submitted)return;
+  userAnswers[qi]=oi;
+  for(let j=0;j<4;j++)document.getElementById(`lbl${qi}_${j}`).classList.toggle('selected',j===oi);
+  document.getElementById(`q${qi}`).classList.add('answered');
+  document.getElementById(`dot${qi}`).classList.add('done');
+  document.getElementById('answeredCount').textContent=userAnswers.filter(a=>a!==-1).length;
+}
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    document.getElementById('timerValue').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    document.getElementById('timerBar').style.width=(timeLeft/TOTAL_TIME*100)+'%';
+    const box=document.getElementById('timerBox');
+    if(timeLeft<=300)box.className='timer-box danger';
+    else if(timeLeft<=600)box.className='timer-box warning';
+    if(timeLeft<=0){clearInterval(timerInterval);if(!submitted){alert('⏰ 時間到！自動交卷。');submitQuiz(true);}}
+  },1000);
+}
+function submitQuiz(forced=false){
+  const unanswered=userAnswers.filter(a=>a===-1).length;
+  if(!forced&&unanswered>0){
+    document.getElementById('unansMsg').innerHTML=`<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？<br><button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button><button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button></div>`;
+    return;
+  }
+  submitted=true;clearInterval(timerInterval);
+  const elapsed=Math.round((Date.now()-startTime)/1000),em=Math.floor(elapsed/60),es=elapsed%60;
+  let correct=0;
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById(`q${i}`);
+    if(userAnswers[i]===q.ans){
+      correct++;card.className='q-card result-correct';
+      const b=document.createElement('div');b.className='result-badge ok';b.innerHTML='✅ 答對';card.querySelector('.options').after(b);
+    }else{
+      card.className='q-card result-wrong';
+      const b=document.createElement('div');b.className='result-badge err';b.innerHTML='❌ 答錯';card.querySelector('.options').after(b);
+      const n=document.createElement('div');n.className='correct-note';n.innerHTML=`✔ 正確答案：<strong>${KEYS[q.ans]}：${q.opts[q.ans]}</strong>`;b.after(n);
+    }
+    for(let j=0;j<4;j++){
+      const lbl=document.getElementById(`lbl${i}_${j}`);
+      lbl.style.cursor='default';
+      if(j===q.ans)lbl.classList.add('correct-ans');
+      else if(j===userAnswers[i]&&userAnswers[i]!==q.ans)lbl.classList.add('wrong-ans');
+    }
+  });
+  const score=Math.round(correct*100/QUESTIONS.length);
+  const wrong=QUESTIONS.length-correct-userAnswers.filter(a=>a===-1).length;
+  const skip=userAnswers.filter(a=>a===-1).length;
+  let grade,gc;
+  if(score>=80){grade='🏆 優秀';gc='#276749';}else if(score>=60){grade='✅ 及格';gc='#2b6cb0';}else{grade='❌ 未及格';gc='#c53030';}
+  document.getElementById('scoreVal').textContent=score+' 分';
+  document.getElementById('scoreDetail').textContent=`共 ${QUESTIONS.length} 題・每題 ${(100/QUESTIONS.length).toFixed(1)} 分`;
+  const ge=document.getElementById('scoreGrade');ge.textContent=grade;ge.style.background=gc+'22';ge.style.color=gc;
+  document.getElementById('statCorrect').textContent=correct;
+  document.getElementById('statWrong').textContent=wrong;
+  document.getElementById('statSkip').textContent=skip;
+  document.getElementById('statTime').textContent=String(em).padStart(2,'0')+':'+String(es).padStart(2,'0');
+  document.getElementById('score-panel').style.display='block';
+  document.getElementById('unansMsg').innerHTML='';
+  document.querySelector('.btn-submit').style.display='none';
+  document.getElementById('resetBtn').style.display='inline-block';
+  document.getElementById('score-panel').scrollIntoView({behavior:'smooth'});
+}
+function filterQ(mode){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById(`q${i}`);
+    if(mode==='all')card.style.display='';
+    else if(mode==='wrong')card.style.display=(userAnswers[i]!==q.ans)?'':'none';
+    else card.style.display=(userAnswers[i]===q.ans)?'':'none';
+  });
+}
+function resetQuiz(){
+  submitted=false;userAnswers=new Array(QUESTIONS.length).fill(-1);
+  timeLeft=TOTAL_TIME;startTime=Date.now();clearInterval(timerInterval);
+  document.getElementById('timerBox').className='timer-box';
+  document.getElementById('timerValue').textContent='60:00';
+  document.getElementById('timerBar').style.width='100%';
+  document.getElementById('score-panel').style.display='none';
+  document.querySelector('.btn-submit').style.display='inline-block';
+  document.getElementById('resetBtn').style.display='none';
+  document.getElementById('unansMsg').innerHTML='';
+  document.getElementById('answeredCount').textContent='0';
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.filter-btn').classList.add('active');
+  buildQuiz();startTimer();window.scrollTo({top:0,behavior:'smooth'});
+}
+buildQuiz();startTimer();
+</script>
+</body>
+</html>

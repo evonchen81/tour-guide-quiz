@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>115年 導遊執業實務 線上測驗</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8;min-height:100vh}
+.sticky-header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:12px 20px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start}
+.exam-title{font-size:1.2rem;font-weight:700}
+.exam-sub{font-size:.8rem;opacity:.85;margin-top:2px}
+.timer-box{text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:6px 14px;min-width:100px}
+.timer-box.warning{background:rgba(255,200,0,.3)}
+.timer-box.danger{background:rgba(255,80,80,.4)}
+.timer-label{font-size:.65rem;opacity:.8}
+.timer-value{font-size:1.5rem;font-weight:700;letter-spacing:2px}
+.timer-bar-wrap{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:4px}
+.timer-bar{height:100%;background:#68d391;border-radius:2px;transition:width .5s}
+.progress-area{background:#fff;padding:10px 20px;border-bottom:1px solid #e2e8f0}
+.progress-info{font-size:.85rem;color:#4a5568;margin-bottom:6px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:22px;height:22px;border-radius:50%;background:#e2e8f0;border:1.5px solid #cbd5e0;font-size:.65rem;display:flex;align-items:center;justify-content:center;color:#718096;cursor:pointer;transition:all .2s}
+.dot.done{background:#3182ce;border-color:#2b6cb0;color:#fff}
+.main{max-width:800px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:2px solid #e2e8f0;transition:border-color .2s}
+.q-card.answered{border-color:#90cdf4}
+.q-card.result-correct{border-color:#68d391;background:#f0fff4}
+.q-card.result-wrong{border-color:#fc8181;background:#fff5f5}
+.q-num{font-size:.8rem;color:#718096;margin-bottom:6px;font-weight:600}
+.q-text{font-size:1rem;color:#2d3748;margin-bottom:14px;line-height:1.6}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all .2s;line-height:1.5}
+.option-label:hover{background:#ebf8ff;border-color:#90cdf4}
+.option-label.selected{background:#ebf8ff;border-color:#3182ce}
+.option-label.correct-ans{background:#f0fff4;border-color:#38a169!important}
+.option-label.wrong-ans{background:#fff5f5;border-color:#e53e3e!important}
+.option-key{font-weight:700;color:#3182ce;min-width:20px}
+.option-label input{display:none}
+.result-badge{padding:6px 12px;border-radius:6px;font-weight:700;margin-top:8px;font-size:.9rem}
+.result-badge.ok{background:#f0fff4;color:#276749}
+.result-badge.err{background:#fff5f5;color:#c53030}
+.correct-note{margin-top:6px;padding:8px 12px;background:#ebf8ff;border-radius:6px;color:#2b6cb0;font-size:.9rem}
+.bottom-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:50}
+.btn-submit{background:#3182ce;color:#fff;border:none;border-radius:8px;padding:12px 40px;font-size:1rem;font-weight:700;cursor:pointer}
+.btn-submit:hover{background:#2b6cb0}
+#resetBtn{display:none;background:#805ad5;color:#fff;border:none;border-radius:8px;padding:10px 30px;font-size:.95rem;font-weight:700;cursor:pointer}
+.score-panel{display:none;background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;border:2px solid #90cdf4;text-align:center}
+.score-val{font-size:3rem;font-weight:900;color:#2b6cb0}
+.score-grade{display:inline-block;padding:4px 16px;border-radius:20px;font-size:1rem;font-weight:700;margin:8px 0}
+.score-detail{color:#718096;font-size:.85rem}
+.stats{display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-size:1.4rem;font-weight:700}
+.stat-label{font-size:.75rem;color:#718096}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #cbd5e0;background:#fff;cursor:pointer;font-size:.85rem}
+.filter-btn.active{background:#3182ce;border-color:#3182ce;color:#fff}
+@media(max-width:600px){
+  .exam-title{font-size:1rem}
+  .timer-value{font-size:1.2rem}
+  .dot{width:18px;height:18px;font-size:.55rem}
+}
+</style>
+</head>
+<body>
+<div class="sticky-header">
+  <div class="header-top">
+    <div>
+      <div class="exam-title">115年 導遊執業實務 模擬測驗</div>
+      <div class="exam-sub">華語導遊人員 ／ 共50題・每題2分・總分100分</div>
+    </div>
+    <div class="timer-box" id="timerBox">
+      <div class="timer-label">剩餘時間</div>
+      <div class="timer-value" id="timerValue">60:00</div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar" style="width:100%"></div></div>
+    </div>
+  </div>
+</div>
+<div class="progress-area">
+  <div class="progress-info">已作答：<strong id="answeredCount">0</strong> / 50 題</div>
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="main">
+  <div id="score-panel" class="score-panel">
+    <div class="score-val" id="scoreVal"></div>
+    <div class="score-grade" id="scoreGrade"></div>
+    <div class="score-detail" id="scoreDetail"></div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num" id="statCorrect" style="color:#38a169"></div><div class="stat-label">答對</div></div>
+      <div class="stat-item"><div class="stat-num" id="statWrong" style="color:#e53e3e"></div><div class="stat-label">答錯</div></div>
+      <div class="stat-item"><div class="stat-num" id="statSkip" style="color:#718096"></div><div class="stat-label">未作答</div></div>
+      <div class="stat-item"><div class="stat-num" id="statTime" style="color:#805ad5"></div><div class="stat-label">用時</div></div>
+    </div>
+    <div class="filter-bar" style="justify-content:center;margin-top:16px">
+      <button class="filter-btn active" onclick="filterQ('all')">全部題目</button>
+      <button class="filter-btn" onclick="filterQ('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterQ('correct')">只看對題</button>
+    </div>
+  </div>
+  <form id="quizForm"></form>
+  <div id="unansMsg"></div>
+</div>
+<div class="bottom-bar">
+  <button class="btn-submit" onclick="submitQuiz()">交卷對答案</button>
+  <button id="resetBtn" onclick="resetQuiz()">🔄 重新作答</button>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`下列有關解說的定義，何者錯誤？`, opts:[`一種教育活動，藉由原始事物的使用，以揭示其意義與關聯`, `幫助遊客感受環境與人員所展現的事物，增進對環境的理解與態度`, `一種專為導遊人員設計的翻譯技巧，目的在提升溝通能力`, `一種人類與文化、自然資源交流的方式`], ans:2},
+  {q:`下列何者不屬於解說媒體的類型？`, opts:[`標示解說牌`, `自導式步道系統`, `生態模型與展示櫃`, `口譯翻譯服務`], ans:3},
+  {q:`在戶外導覽行程中，何種感官知覺納入解說設計作為環境連結的媒介比較容易有安全上的疑慮？`, opts:[`視覺`, `聽覺`, `觸覺`, `味覺`], ans:3},
+  {q:`生態導覽活動中，突然天氣驟變，遊客情緒緊張並急於尋求指引。此時解說員最適當的應變方式為：`, opts:[`立即保持冷靜並安撫團體情緒`, `詳細講解氣候變遷的科學知識`, `繼續按照原本流程完成導覽內容`, `建議遊客自行分散尋找避難地點`], ans:0},
+  {q:`臺灣的傳統老街中，建築前方設有一樓層挑高、有遮蔽的空間，可供行人走動與乘涼，避免日曬雨淋。此 建築場所在閩南語中被稱為：`, opts:[`廟埕`, `一條通`, `戲棚腳`, `亭仔腳`], ans:3},
+  {q:`智慧多媒體互動導覽設備之主要解說目的不包含下列何者？`, opts:[`減輕解說人員負擔`, `降低單位的經營成本`, `加強解說呈現方式`, `提升遊客導覽體驗`], ans:1},
+  {q:`根據聯合國教科文組織對於遺產解說品質的四個評估要素，不包含下列何者？`, opts:[`提供通往更深層意義的途徑`, `將現象轉化為體驗`, `促進對所有遺產的管理責任`, `強調遺產為在地帶來的收益`], ans:3},
+  {q:`下列有關馬祖國家風景區的導覽解說內容，何者錯誤？`, opts:[`位處臺灣海峽西北西方，分南竿、北竿、莒光、東引四鄉五島`, `有黃酒、白酒、藥酒三類`, `人文資源包括閩東的生活、習俗及宗教等`, `以玄武岩地形為主，有島礁及懸崖峭壁等景觀`], ans:3},
+  {q:`導遊為了讓遊客容易理解且聽得清楚，每分鐘最適宜的解說字數約為：`, opts:[`100字`, `200字`, `400字`, `600字`], ans:1},
+  {q:`戶外導覽解說過程的最高指導原則為：`, opts:[`遊客興趣`, `服裝儀容`, `經費收入`, `遊客安全`], ans:3},
+  {q:`導遊遇到遊客眾多時的導覽解說方式，下列何者正確？`, opts:[`站在北邊的位置`, `行動間解說`, `站在定點面向遊客`, `禁止遊客提問`], ans:2},
+  {q:`為預防團員於參觀博物館過程中走失，領團人員事先須告知團員如發生走失情形時，下列那一應對方式最 不適當？`, opts:[`站在原地等候領團人員來找`, `直接撥打領團人員行動電話`, `自行設法找到團隊`, `尋求博物館服務人員幫忙`], ans:2},
+  {q:`旅行業辦理國內、外觀光團體旅遊，發生緊急事故時，應於幾小時內向交通部觀光署報備？`, opts:[`12小時`, `24小時`, `36小時`, `48小時`], ans:1},
+  {q:`臺灣每年登山旅遊遭虎頭蜂螫，下列何者為風險最高的月份？`, opts:[`1～4月`, `5～7月`, `8～11月`, `12月～隔年2月`], ans:2},
+  {q:`一般而言，解除時差失調之問題，每跨過一個時區，約需時多久？`, opts:[`約半天`, `約1天`, `約2天`, `約3天`], ans:1},
+  {q:`團體旅遊團員夜間外出時，下列有關護照的保管方式，何者正確？`, opts:[`由導遊統一集中保管`, `團員自行保管`, `託同團團員代為保管`, `交由旅館服務檯人員代為保管`], ans:1},
+  {q:`導遊帶團乘坐遊覽車時的安全規範，下列何者錯誤？`, opts:[`事先確認交通行經路線順暢`, `隨時注意遊覽車司機的駕駛行為`, `隨時提醒團員，勿將頭手伸出窗外`, `安排年長者及易暈車的團員坐在後面座位`], ans:3},
+  {q:`有關泡湯應注意事項，下列何者正確？`, opts:[`入浴一次時間不宜超過15分鐘，總時間不宜超過1小時`, `可攜帶寵物入浴`, `有心臟病者，最好冷、熱水替換浸泡`, `全身浴之浸泡高度應超過心臟`], ans:0},
+  {q:`旅行團發生緊急事故時，導遊的優先處置為：`, opts:[`通報旅行社總部`, `搶救與穩定現場傷者`, `向媒體發布訊息`, `安排後續旅程`], ans:1},
+  {q:`依據「旅行業管理規則」之規定，旅行業應為團體旅遊投保責任保險，其中意外死亡險的最低投保金額為 新臺幣多少元？`, opts:[`100萬元`, `150萬元`, `250萬元`, `500萬元`], ans:2},
+  {q:`機場入境臺灣之旅客攜帶下列何種物品時，可以免申報通關？`, opts:[`牛肉乾`, `新鮮橘子`, `肉鬆蛋捲`, `巧克力`], ans:3},
+  {q:`下列何者是臺灣面積（含陸域及海域）最大的國家風景區？`, opts:[`東部海岸國家風景區`, `澎湖國家風景區`, `雲嘉南濱海國家風景區`, `花東縱谷國家風景區`], ans:3},
+  {q:`銀髮族藉由旅行中盡情消費並將經驗分享給親友們，此為基於下列何種旅遊動機？`, opts:[`促進健康`, `享樂炫耀`, `逃避放鬆`, `拓展社交`], ans:1},
+  {q:`遊客對於喜歡的景點會有較高的重遊率，且會透過紀念品購買來提醒自己曾去過該景點，此為下列何種人 格型態？`, opts:[`依賴型人格`, `冒險型人格`, `中庸型人格`, `自我型人格`], ans:0},
+  {q:`下列何者不是銀髮族偏好的旅遊型態？`, opts:[`鐵道觀光`, `手做體驗`, `溯溪探險`, `森林療癒`], ans:2},
+  {q:`下列何者不屬於觀光需求的外在環境因素？`, opts:[`自然資源`, `廉價航空`, `觀光動機`, `外匯匯率`], ans:2},
+  {q:`下列有關觀光行為的內容，何者錯誤？`, opts:[`觀光活動可視為一種商品`, `旅遊行程是一種實體商品`, `觀光產品的購買就是消費`, `觀光行為是一種消費者行為`], ans:1},
+  {q:`航空公司提供會員貴賓卡，並在特殊節日問候或致贈禮品，為馬斯洛（Maslow）理論的下列何種需求？`, opts:[`歸屬需求`, `生理需求`, `尊重需求`, `安全需求`], ans:2},
+  {q:`「朋友推薦某家民宿而選擇入住」是屬於下列何種影響因素？`, opts:[`個人因素`, `文化因素`, `社會因素`, `心理因素`], ans:2},
+  {q:`下列何者不是消費者蒐集資訊的來源？`, opts:[`人際來源`, `商業來源`, `動機來源`, `公共來源`], ans:2},
+  {q:`旅客對旅遊產品的預期與實際體驗產生落差，是屬於下列何種現象？`, opts:[`社會交換`, `動機強化`, `態度形成`, `認知失調`], ans:3},
+  {q:`旅客因某導遊互動親切、談吐得體，就認為他的專業能力很強，是屬於下列何種心理效應？`, opts:[`投射效應`, `對比效應`, `近因效應`, `月暈效應`], ans:3},
+  {q:`旅遊銷售員如實說明產品內容與價值，不誇大或隱瞞，主要是為了：`, opts:[`建立專業形象與信任`, `提高衝動購買`, `增加旅程娛樂性`, `提高銷售速度`], ans:0},
+  {q:`臺灣原住民族中，下列那一族有紋身或黥面習俗？`, opts:[`賽夏族`, `布農族`, `雅美族`, `阿美族`], ans:0},
+  {q:`旅客持有一張一年期的全額經濟艙機票，下列何者是因故改期的標準規定？`, opts:[`必須支付高額改票手續費`, `須支付淡旺季的艙位差價`, `通常可以在機票效期內，免費更改日期`, `必須在原定出發日期前七天完成更改，否則失效`], ans:2},
+  {q:`旅客購買了Non-refundable的機票，因航空公司航班取消而無法成行，航空公司應如何處理？`, opts:[`僅退還稅金，票價不退`, `可向旅客收取高額退票手續費`, `航空公司須全額退款或安排替代航班`, `只能退還部分票價`], ans:2},
+  {q:`旅客攜帶超大型的攝影器材箱必須托運，下列何者為正確代碼？`, opts:[`BSCT`, `BULK`, `CBBG`, `XBAG`], ans:1},
+  {q:`達美航空是下列那一聯盟的成員？`, opts:[`星空聯盟`, `天合聯盟`, `優行聯盟`, `寰宇一家`], ans:1},
+  {q:`下列有關航空組織的中文名稱與英文縮寫，何者錯誤？`, opts:[`國際航空運輸協會（IATA）`, `國際民航組織（ICAO）`, `航空報告公司（ARC）`, `美國航空財務組織（FAA）`], ans:3},
+  {q:`若壓迫及抬高對患肢止血無效，應採取下列何種止血措施？`, opts:[`熱敷局部加壓`, `使用止血帶於傷口近心端`, `大面積冰敷患部`, `只要熱敷即可`], ans:1},
+  {q:`病人語言模糊、一側肢體麻痺可能是下列何種徵狀？`, opts:[`低血糖症`, `中風`, `心肌梗塞`, `頸椎受傷`], ans:1},
+  {q:`若發現有人倒地無意識且無呼吸現象，下列何種處置正確？`, opts:[`先查看身上證件`, `移動身體`, `打電話給家人`, `確認現場安全後實施CPR`], ans:3},
+  {q:`關於「辛辛那提到院前腦中風指數」的檢查項目，下列何者錯誤？`, opts:[`請病患嘴角上揚露齒微笑，觀察臉部是否對稱`, `請病患閉眼並雙手平舉10秒，觀察是否下垂`, `請病患說一句簡單的話，觀察是否正確清晰`, `請病患閉眼並單腳站立10秒，觀察是否跌倒`], ans:3},
+  {q:`單人執行成人CPR時，胸部按壓與人工呼吸之比例為：`, opts:[`15：2`, `20：2`, `25：2`, `30：2`], ans:3},
+  {q:`有轉盤的中餐餐桌，若需取離自己較遠之菜餚時，應該如何做？`, opts:[`站起來夾菜`, `順時針轉動轉盤`, `逆時針快速轉動轉盤`, `看菜餚在左方或右方再轉動`], ans:1},
+  {q:`下列有關Brunch之敘述，何者正確？`, opts:[`比平常食用更加豐盛的早餐`, `流行於較貧窮國家，以降低糧食耗損`, `多半在假日時，大家起床較晚，於是合併早、午兩餐一起用`, `內容為簡單的牛奶加麵包`], ans:2},
+  {q:`下列有關宴客禮儀的作法，何者錯誤？`, opts:[`陪客身分應高於主賓以示尊重`, `請柬一旦發出後，不宜輕易更改或取消`, `英文請柬左下角的R.S.V.P.註記，意為回覆參加與否`, `允諾參與宴會，應準時赴約`], ans:0},
+  {q:`下列有關進餐時要注意的餐桌禮儀，何者錯誤？`, opts:[`應注意以食物就口，勿以口就食物，且應閉嘴靜嚼，勿大聲談話`, `口中如有魚骨或其他骨刺或果核時，可自口中取出吐在空握的拳頭內，然後放在盤子內`, `如果要取用遠處的調味品，可請鄰座客人幫忙傳遞`, `女士用餐時如需要補妝，可於座位上遮掩一下再進行補妝`], ans:3},
+  {q:`下列有關乘車的禮儀，何者正確？`, opts:[`駕駛盤在左之小汽車，如有司機駕駛時，是以後座左側為首位，後座右側為次位，司機旁的座位為最小位`, `如果是主人親自駕駛小汽車，又與長輩或長官同車時，應禮讓長輩或長官坐後座`, `如果是主人親自駕駛小汽車，主人旁的賓客先行下車，後座賓客仍留在原座位上即可`, `有司機駕駛的小汽車，依國際慣例，女賓不宜坐前座`], ans:3},
+  {q:`有關筷子禮儀，下列何者被視為不禮貌？`, opts:[`筷子並排放在筷架上`, `將筷子直插入飯中`, `將筷子放在碗邊`, `團膳用餐時使用公筷`], ans:1}
+];
+const KEYS=['A','B','C','D'];
+const TOTAL_TIME=3600;
+let timeLeft=TOTAL_TIME,timerInterval,userAnswers=new Array(QUESTIONS.length).fill(-1),submitted=false,startTime=Date.now();
+function buildQuiz(){
+  const form=document.getElementById('quizForm'),dg=document.getElementById('dotGrid');
+  form.innerHTML='';dg.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const dot=document.createElement('div');
+    dot.className='dot';dot.id=`dot${i}`;dot.textContent=i+1;
+    dot.onclick=()=>document.getElementById(`q${i}`).scrollIntoView({behavior:'smooth',block:'center'});
+    dg.appendChild(dot);
+    const card=document.createElement('div');
+    card.className='q-card';card.id=`q${i}`;
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div><div class="q-text">${q.q}</div><div class="options" id="opts${i}">${q.opts.map((opt,j)=>`<label class="option-label" id="lbl${i}_${j}" onclick="selectOption(${i},${j})"><input type="radio" name="q${i}" value="${j}"><span class="option-key">${KEYS[j]}</span><span>${opt}</span></label>`).join('')}</div>`;
+    form.appendChild(card);
+  });
+}
+function selectOption(qi,oi){
+  if(submitted)return;
+  userAnswers[qi]=oi;
+  for(let j=0;j<4;j++)document.getElementById(`lbl${qi}_${j}`).classList.toggle('selected',j===oi);
+  document.getElementById(`q${qi}`).classList.add('answered');
+  document.getElementById(`dot${qi}`).classList.add('done');
+  document.getElementById('answeredCount').textContent=userAnswers.filter(a=>a!==-1).length;
+}
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    document.getElementById('timerValue').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    document.getElementById('timerBar').style.width=(timeLeft/TOTAL_TIME*100)+'%';
+    const box=document.getElementById('timerBox');
+    if(timeLeft<=300)box.className='timer-box danger';
+    else if(timeLeft<=600)box.className='timer-box warning';
+    if(timeLeft<=0){clearInterval(timerInterval);if(!submitted){alert('⏰ 時間到！自動交卷。');submitQuiz(true);}}
+  },1000);
+}
+function submitQuiz(forced=false){
+  const unanswered=userAnswers.filter(a=>a===-1).length;
+  if(!forced&&unanswered>0){
+    document.getElementById('unansMsg').innerHTML=`<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？<br><button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button><button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button></div>`;
+    return;
+  }
+  submitted=true;clearInterval(timerInterval);
+  const elapsed=Math.round((Date.now()-startTime)/1000),em=Math.floor(elapsed/60),es=elapsed%60;
+  let correct=0;
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById(`q${i}`);
+    if(userAnswers[i]===q.ans){
+      correct++;card.className='q-card result-correct';
+      const b=document.createElement('div');b.className='result-badge ok';b.innerHTML='✅ 答對';card.querySelector('.options').after(b);
+    }else{
+      card.className='q-card result-wrong';
+      const b=document.createElement('div');b.className='result-badge err';b.innerHTML='❌ 答錯';card.querySelector('.options').after(b);
+      const n=document.createElement('div');n.className='correct-note';n.innerHTML=`✔ 正確答案：<strong>${KEYS[q.ans]}：${q.opts[q.ans]}</strong>`;b.after(n);
+    }
+    for(let j=0;j<4;j++){
+      const lbl=document.getElementById(`lbl${i}_${j}`);
+      lbl.style.cursor='default';
+      if(j===q.ans)lbl.classList.add('correct-ans');
+      else if(j===userAnswers[i]&&userAnswers[i]!==q.ans)lbl.classList.add('wrong-ans');
+    }
+  });
+  const score=Math.round(correct*100/QUESTIONS.length);
+  const wrong=QUESTIONS.length-correct-userAnswers.filter(a=>a===-1).length;
+  const skip=userAnswers.filter(a=>a===-1).length;
+  let grade,gc;
+  if(score>=80){grade='🏆 優秀';gc='#276749';}else if(score>=60){grade='✅ 及格';gc='#2b6cb0';}else{grade='❌ 未及格';gc='#c53030';}
+  document.getElementById('scoreVal').textContent=score+' 分';
+  document.getElementById('scoreDetail').textContent=`共 ${QUESTIONS.length} 題・每題 ${(100/QUESTIONS.length).toFixed(1)} 分`;
+  const ge=document.getElementById('scoreGrade');ge.textContent=grade;ge.style.background=gc+'22';ge.style.color=gc;
+  document.getElementById('statCorrect').textContent=correct;
+  document.getElementById('statWrong').textContent=wrong;
+  document.getElementById('statSkip').textContent=skip;
+  document.getElementById('statTime').textContent=String(em).padStart(2,'0')+':'+String(es).padStart(2,'0');
+  document.getElementById('score-panel').style.display='block';
+  document.getElementById('unansMsg').innerHTML='';
+  document.querySelector('.btn-submit').style.display='none';
+  document.getElementById('resetBtn').style.display='inline-block';
+  document.getElementById('score-panel').scrollIntoView({behavior:'smooth'});
+}
+function filterQ(mode){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById(`q${i}`);
+    if(mode==='all')card.style.display='';
+    else if(mode==='wrong')card.style.display=(userAnswers[i]!==q.ans)?'':'none';
+    else card.style.display=(userAnswers[i]===q.ans)?'':'none';
+  });
+}
+function resetQuiz(){
+  submitted=false;userAnswers=new Array(QUESTIONS.length).fill(-1);
+  timeLeft=TOTAL_TIME;startTime=Date.now();clearInterval(timerInterval);
+  document.getElementById('timerBox').className='timer-box';
+  document.getElementById('timerValue').textContent='60:00';
+  document.getElementById('timerBar').style.width='100%';
+  document.getElementById('score-panel').style.display='none';
+  document.querySelector('.btn-submit').style.display='inline-block';
+  document.getElementById('resetBtn').style.display='none';
+  document.getElementById('unansMsg').innerHTML='';
+  document.getElementById('answeredCount').textContent='0';
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.filter-btn').classList.add('active');
+  buildQuiz();startTimer();window.scrollTo({top:0,behavior:'smooth'});
+}
+buildQuiz();startTimer();
+</script>
+</body>
+</html>
