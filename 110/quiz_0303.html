@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>110年 華語導遊 導遊觀光資源概要</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a4a70,#2c5f8a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#e8f5e9;color:#1e6b3d}
+.header h1{font-size:1rem;font-weight:700;flex:1}
+.timer{background:rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;min-width:70px;text-align:center}
+.timer.warn{background:rgba(255,180,0,.4)}
+.timer.danger{background:rgba(220,50,50,.5);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-wrap{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 16px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#666;cursor:pointer;transition:.15s}
+.dot.answered{background:#2c5f8a;color:#fff}
+.dot.correct{background:#27ae60;color:#fff}
+.dot.wrong{background:#e74c3c;color:#fff}
+.container{max-width:820px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:10px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.4}
+.opt:hover{border-color:#2c5f8a;background:#f0f6ff}
+.opt.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt.correct-ans{border-color:#27ae60;background:#e8f5e9!important}
+.opt.wrong-ans{border-color:#e74c3c;background:#fdecea!important}
+.opt-label{font-weight:700;min-width:18px;color:#2c5f8a}
+.result-msg{margin-top:8px;font-size:.82rem;padding:6px 10px;border-radius:6px}
+.result-msg.correct{background:#e8f5e9;color:#1e6b3d}
+.result-msg.wrong{background:#fdecea;color:#c0392b}
+.result-msg.special{background:#fff3cd;color:#856404}
+.submit-bar{text-align:center;padding:20px 0 40px}
+.btn-submit{background:#2c5f8a;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#1a4a70}
+.score-panel{display:none;background:#fff;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.12);text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:3rem;font-weight:900;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.pass{color:#27ae60}.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:24px;margin:12px 0;font-size:.85rem;color:#666}
+.filter-bar{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.btn-reset{background:#fff;color:#2c5f8a;border:2px solid #2c5f8a;border-radius:10px;padding:10px 30px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s}
+.btn-reset:hover{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+.year-label{font-size:.7rem;opacity:.8;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">華語導遊</span>
+  <h1>導遊觀光資源概要<span class="year-label">110年</span></h1>
+  <div class="timer" id="timer">60:00</div>
+</div>
+<div class="progress-wrap">
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="container">
+  <div class="score-panel" id="scorePanel">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="grade" id="gradeLabel"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all')">全部</button>
+      <button class="filter-btn" onclick="filterCards('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterCards('correct')">只看對題</button>
+    </div>
+    <button class="btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+  <div id="quizArea"></div>
+  <div class="submit-bar" id="submitBar">
+    <button class="btn-submit" onclick="submitQuiz()">📋 交卷批改</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`在參觀高雄市鳳儀書院的活動中，遊客問導遊當時如要參加入學考試，進書院讀書，應具備的資格。下列 導遊的回答何者正確？`,opts:[`童生`,`生員`,`舉人`,`貢生`],ans:0},
+  {q:`鄭經時期曾與何國簽訂通商條約，准許他們在臺建立商館，發展貿易？`,opts:[`日本`,`英國`,`西班牙`,`葡萄牙`],ans:1},
+  {q:`清領時期，各廳、縣等行政單位大多設有具官方學校性質的儒學，但也有未設立者，此即：`,opts:[`彰化縣`,`淡水廳`,`噶瑪蘭廳`,`澎湖廳`],ans:3},
+  {q:`「臺灣總督府醫學校畢業，在他主持的大安醫院旁邊設置《臺灣民報》批發處，在《臺灣民報》上發表〈臨 床講義〉，批評臺灣總督府，也意圖啓蒙大眾。」這段文字敘述的人是誰？`,opts:[`簡吉`,`林獻堂`,`蔣渭水`,`吳新榮`],ans:2},
+  {q:`日本首任臺灣總督樺山資紀對原住民族的基本政策是：`,opts:[`綏撫政策`,`鎮壓政策`,`放任政策`,`封鎖政策`],ans:0},
+  {q:`日治時期的臺灣著名作家及其知名作品，下列各組的配對（前為作家名、後為作品名）何組錯誤？`,opts:[`楊逵、《送報伕》`,`龍瑛宗、《植有木瓜樹的小鎮》`,`張文環、《閹雞》`,`巫永福、《奔流》`],ans:3},
+  {q:`西元 1908 年 4 月，臺灣南北縱貫鐵路全線開通，若欲搭乘縱貫鐵路遊覽臺灣各地，不可能藉由此鐵路到 達下列那兩個地方？`,opts:[`桃園和嘉義`,`苗栗和高雄`,`基隆和雲林`,`宜蘭和屏東`],ans:3},
+  {q:`西元 1927 年，臺灣教育會創辦第一屆臺灣美術展覽會（簡稱臺展），有 3 位臺籍東洋畫家的作品入選， 這 3 人被稱為「臺展三少年」。請問下列何者不是「臺展三少年」？`,opts:[`陳進`,`李梅樹`,`林玉山`,`郭雪湖`],ans:1},
+  {q:`日本統治臺灣後，認為臺灣人生活上有三大陋習。此三大陋習不包括下列那一項？`,opts:[`男子辮髮`,`女子纏足`,`祭典奢侈`,`吸食鴉片`],ans:2},
+  {q:`依目前的臺灣考古資料，一般認為十三行文化晚期的主人，很可能是：`,opts:[`西拉雅族`,`噶瑪蘭族`,`賽德克族`,`凱達格蘭族`],ans:3},
+  {q:`西元 1970 年代中期後，臺灣出現許多政論雜誌，下列何者屬此類雜誌？`,opts:[`文星`,`自由中國`,`臺灣政論`,`自由人`],ans:2},
+  {q:`臺灣綜藝節目曾有輝煌的歷史，出過不少著名的主持人，下列何者錯誤？`,opts:[`張小燕`,`張菲`,`胡瓜`,`陳淑樺`],ans:3},
+  {q:`陳誠擔任臺灣省政府主席期間，實施的政策，不包括下列那一項？`,opts:[`三七五減租`,`新臺幣改革`,`戒嚴`,`簽署臺北和約`],ans:3},
+  {q:`臺灣原住民族中與出海捕魚較有關者為：`,opts:[`阿美族和雅美族`,`阿美族和卑南族`,`卑南族和雅美族`,`雅美族和魯凱族`],ans:0},
+  {q:`下列那一位不是傳統水墨畫的畫家？ 3201 4 － 2`,opts:[`張大千`,`溥心畬`,`楊三郎`,`黃君璧`],ans:2},
+  {q:`蔣經國總統為因應中共提出「三通四流」的統戰，提倡「三不政策」，此一政策內容是：`,opts:[`不通航、不通商、不通郵`,`不接觸、不妥協、不承諾`,`不交流、不往來、不屈服`,`不接觸、不談判、不妥協`],ans:3},
+  {q:`戰後負責接收臺灣的陳儀，不曾擔任過下列那一項職務？`,opts:[`臺灣調查委員會主任委員`,`臺灣省行政長官公署行政長官`,`臺灣省警備總司令部總司令`,`臺灣省主席`],ans:3},
+  {q:`嘉慶年間，臺灣中部巴宰族千餘人翻山越嶺前往何處墾殖？`,opts:[`宜蘭`,`花蓮`,`臺東`,`臺北`],ans:0},
+  {q:`在臺灣移民潮中，最晚移入的原住民族為：`,opts:[`雅美族（達悟族）`,`噶瑪蘭族`,`布農族`,`魯凱族`],ans:0},
+  {q:`「傳說從前有某一部落頭目的女兒巴冷，嫁給獨自住在鬼湖的百步蛇郎君，兩人就此守護著世世代代的族 人」，這則傳說應為何族所有？`,opts:[`魯凱族`,`噶瑪蘭族`,`卑南族`,`賽德克族`],ans:0},
+  {q:`北迴歸線是太陽在北半球能夠直射的最北界。在臺灣，下列那些地方設有北迴歸線紀念標誌？①雲林縣台 西鄉 ②嘉義縣水上鄉 ③臺南市白河區 ④花蓮縣豐濱鄉 ⑤花蓮縣瑞穗鄉`,opts:[`①②③`,`①③④`,`②④⑤`,`③④⑤`],ans:2},
+  {q:`宜蘭國際童玩節於西元 1996 年開辦，乃是為紀念某事件發生 200 週年所構想的活動。該事件應是下列何 者？`,opts:[`設立噶瑪蘭廳`,`吳沙率眾入墾宜蘭`,`宜蘭線鐵路通車`,`冬山河截彎取直`],ans:1},
+  {q:`若想認識泰雅族的編織文化特色，最適合造訪下列那一個鄉鎮？`,opts:[`花蓮縣豐濱鄉`,`新北市烏來區`,`屏東縣來義鄉`,`嘉義縣阿里山鄉`],ans:1},
+  {q:`相傳臺南府城外五條港地區，昔日郊商雲集，勞工需求龐大。勞工中未滿 16 歲者僅能領取童工薪資，故 當地人家在孩子滿 16 歲時，即舉行「做 16 歲」成年禮，請來工頭及親朋歡慶，臺灣因此有「做 16 歲」 成年禮的禮俗。該成年禮的禮俗，最可能在那一節日舉辦？`,opts:[`清明`,`端午`,`七夕`,`中秋`],ans:2},
+  {q:`臺灣早期交通不便，許多客死他鄉者常被地方善心人士購買棺木收殮，暫時寄櫬特定場所，待日後運回家 鄉安葬。由寄櫬之所發展出來的祠廟最可能是下列何者？`,opts:[`公廨`,`地藏王廟`,`土地公廟`,`東嶽大帝廟`],ans:1},
+  {q:`參加臺南市東山吉貝耍西拉雅族夜祭活動，能觀察到下列那一項文化儀式？`,opts:[`敬拜天公`,`施放天燈`,`牽曲敬祖`,`流放水燈`],ans:2},
+  {q:`臺鐵宜蘭線鐵路沿線的礦業聚落，昔日民宅屋頂常用黑色油毛氈覆蓋。此一民宅景觀和下列何者關係最密 切？`,opts:[`太陽輻射強`,`日夜溫差大`,`降水量豐沛`,`落山風強勁`],ans:2},
+  {q:`新北市鶯歌區的老街形象商圈中除了販售商品外，還有許多 DIY 體驗活動。這些活動最可能融合下列那 項在地產業？`,opts:[`染整業`,`結腦業`,`製茶業`,`陶瓷業`],ans:3},
+  {q:`交通部觀光局自民國 96 年開始在某地整合「溫泉」及「美食」觀光資源，推出「溫泉美食嘉年華」。該 地最可能是下列何者？`,opts:[`臺南白河`,`宜蘭蘇澳`,`新竹南寮`,`花蓮豐濱`],ans:0},
+  {q:`某縣市每年於 6 ～ 8 月間舉辦臺灣國際熱氣球嘉年華，當熱氣球緩緩升起，卑南大溪與鹿野溪景觀盡在眼 前，一覽無遺。該縣市最可能為下列何者？ 3201 4 － 3`,opts:[`屏東縣`,`臺東縣`,`花蓮縣`,`宜蘭縣`],ans:1},
+  {q:`機械業為整體製造業之基礎產業，政府為推動機械產業技術提升，設置精密機械科技創新園區，將相關產 業集中，形成綿密的產業連鎖關係。若考量臺灣精密機械的發展歷史，該園區最適合設在下列那一個縣 市？`,opts:[`臺北`,`臺中`,`新竹`,`嘉義`],ans:1},
+  {q:`每年時序入秋，九降風一起，家家戶戶都忙著將柿子削皮、曝曬、整形、烘乾，剛削好的柿子，整片放在 竹籃上排列整齊的畫面，成為各政府單位對外宣傳的重點產業。文中敘述的畫面最可能出現在下列何處？`,opts:[`南投縣埔里鎮`,`臺中市后里區`,`苗栗縣竹南鎮`,`新竹縣新埔鎮`],ans:3},
+  {q:`日本儒學家柴野栗山於西元 1807 年到城崎溫泉南方旅遊，看到當地某一岩洞附近的岩石景觀，具有蛇身 般長條狀的節理、龜甲般六角形的斷面，於是聯想到中國古代北方的守護神「玄武」，而將此地命名為玄 武洞。西元 1884 年，東京帝國大學的小滕文次郎，將此一名稱運用於類似的岩石種類，稱為「玄武岩」。 如果想用上述資料向遊客推薦類似的玄武岩景觀，下列何處最為恰當？`,opts:[`澎湖`,`綠島`,`龜山島`,`小琉球`],ans:0},
+  {q:`遊客到臺灣某聚落旅遊時，發現該聚落附近的河床中壺穴眾多，聚落外圍還有廢棄的煤礦礦廠。該聚落最 可能是下列何者？`,opts:[`新北市瑞芳區侯硐`,`臺中市石岡區土牛`,`花蓮縣秀林鄉太魯閣`,`屏東縣萬巒鄉五溝水`],ans:0},
+  {q:`前往屏東小琉球風景區觀光，除可浮潛、賞龜外，還可欣賞花瓶岩、美人洞、烏鬼洞、山豬溝等奇岩洞穴 景觀。這些奇岩洞穴景觀主要是在下列何種岩石基礎上發育出來的？`,opts:[`石灰岩`,`玄武岩`,`安山岩`,`花岡岩`],ans:0},
+  {q:`臺灣某個地形區擁有眾多埤塘，是臺北赤蛙、柴棺龜、臺灣萍蓬草、龍潭莕菜等動植物重要的棲息環境。 該地形區最可能是下列何者？`,opts:[`林口台地`,`桃園台地`,`大肚台地`,`八卦台地`],ans:1},
+  {q:`「此地原為礫岩紅土台地，經雨水的切割，加上侵蝕、崩塌作用，而形成壁立山峰、礫石層、卵石流等特 殊地形景觀。」引文最可能是下列那個自然保留區的介紹？`,opts:[`苗栗三義火炎山自然保留區`,`澎湖南海玄武岩自然保留區`,`墾丁高位珊瑚礁自然保留區`,`烏山頂泥火山地景自然保留區`],ans:0},
+  {q:`臺灣從桃園到雲林的西部沿海，可看到為數眾多的風力發電機組。下列何者是這些發電機組主要使用的風 力？`,opts:[`季風`,`信風`,`西風`,`谷風`],ans:0},
+  {q:`下圖為根據臺灣某一個氣象觀測站資料所繪製的氣候圖。此氣象觀測站最有可能位於下列何處？ 降雨 (mm) 氣溫 ( 攝氏 ) 3201 4 － 4`,opts:[`蘇澳`,`梧棲`,`臺南`,`恆春`],ans:0},
+  {q:`若想安排鯉魚潭、瑞穗溫泉、舞鶴茶園等景點的旅遊行程，一定會經過下列那一條公路？`,opts:[`臺 7 線`,`臺 9 線`,`臺 11 線`,`臺 23 線`],ans:1},
+  {q:`依發展觀光條例第 36 條規定，下列何者不是水域遊憩活動管理機關為維護遊客安全對水域遊憩活動進行 限制的項目？`,opts:[`水域遊憩活動種類`,`水域遊憩活動範圍`,`水域遊憩活動時間`,`水域遊憩活動人數`],ans:3},
+  {q:`資源管理單位於國家公園內之生態保護區見到虎頭蜂蜂巢，經評估可能影響遊客安全時，應採取下列何種 管理作為最為適切？`,opts:[`立告示牌提醒遊客不要干擾蜂巢並快速通過`,`將蜂巢摘除或移置`,`將蜂巢燒毀`,`不用管它，讓蜂巢自然存在即可`],ans:0},
+  {q:`下列何者不是交通部觀光局在《生態旅遊白皮書》中所提及臺灣地區生態旅遊應遵守的原則？`,opts:[`發展生態旅遊前應事先規劃整套區域性的觀光及遊客管理計畫`,`制定周詳規範以約束遊客活動以及各項開發行為`,`確保一定比例的觀光收益用於保育及經營管理當地自然生態`,`在生態旅遊的規劃、執行、管理、監測與評估等階段，由中央主管機關辦理即可`],ans:3},
+  {q:`風景區風險管理中，資源管理或事業經營單位與遊客之關係可區分為被邀請者（ invitee ）、許可進入者 （ licensee ）及違規進入者（ trespasser ） 3 種類型。下列何種遊憩參與者屬「被邀請者」？`,opts:[`朋友邀請一同至東北角海岸龍洞岬從事磯釣活動之釣客`,`申請至插天山自然保留區之自然體驗者`,`於陽明山國家公園擎天崗草原跨過欄杆與水牛互動之遊客`,`買票進入奧萬大國家森林遊樂區的遊客`],ans:3},
+  {q:`目前政府推動生態旅遊示範島之作為，不包括下列那一項？`,opts:[`使用節能設施`,`使用低碳交通工具`,`推動生態旅遊`,`強調地方美食`],ans:3},
+  {q:`太魯閣國家公園內那一條步道須先辦理入園申請始可進入？`,opts:[`錐麓古道`,`砂卡礑步道`,`白楊步道`,`燕子口步道`],ans:0},
+  {q:`有關宜蘭頭城搶孤活動之敘述，下列何者正確？`,opts:[`搶孤儀式於農曆 7 月 15 日舉辦，是為祈求普渡孤魂、消災解厄`,`頭城搶孤主要的棚架包含飯棚與孤棚各 1 座`,`頭城搶孤活動是臺灣觀光年曆中評定為縣市級的節慶活動`,`搶孤者除為了獲取孤棧的祭品外，也為爭奪棧頂豎立的五行旗`],ans:1},
+  {q:`下列對地質公園的敘述何者錯誤？`,opts:[`以地景為基礎的社區經濟發展模式`,`西元 2017 年後依據文化資產保存法設置`,`核心價值考量環境保育與觀光遊憩`,`主要仰賴菁英式的參與`],ans:3},
+  {q:`內政部評選之國家重要濕地中，下列那一個「國際級」濕地位於台江國家公園範圍內？`,opts:[`曾文溪口濕地`,`八掌溪口濕地`,`七股鹽田濕地`,`鹽水溪口濕地`],ans:0},
+  {q:`下列那一種軌道最初被建造時不是以運輸木材為主要目的？`,opts:[`烏來臺車軌道`,`阿里山森林鐵道`,`太平山蹦蹦車軌道`,`平溪鐵道`],ans:3}
+];
+const TOTAL_Q = 50;
+const TOTAL_TIME = 3600;
+let selected = {};
+let submitted = false;
+let timerInterval;
+let timeLeft = TOTAL_TIME;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return "本題一律給分";
+  if (Array.isArray(q.ans)) return "正確答案：" + q.ans.map(i => "ABCD"[i]).join(" 或 ");
+  return "正確答案：" + "ABCD"[q.ans];
+}
+
+function buildDots() {
+  const grid = document.getElementById("dotGrid");
+  grid.innerHTML = "";
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.textContent = i + 1;
+    d.id = "dot" + i;
+    d.onclick = () => document.getElementById("q" + i).scrollIntoView({behavior:"smooth", block:"center"});
+    grid.appendChild(d);
+  });
+}
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.id = "q" + i;
+    card.dataset.result = "";
+    const labels = ["A","B","C","D"];
+    let optHtml = "";
+    q.opts.forEach((o, oi) => {
+      optHtml += `<div class="opt" id="opt${i}_${oi}" onclick="selectOpt(${i},${oi})"><span class="opt-label">${labels[oi]}</span><span>${o}</span></div>`;
+    });
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題（共 ${QUESTIONS.length} 題）</div><div class="q-text">${q.q}</div><div class="options">${optHtml}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (submitted) return;
+  const labels = ["A","B","C","D"];
+  labels.forEach((_, j) => {
+    const el = document.getElementById("opt" + qi + "_" + j);
+    if (el) el.classList.remove("selected");
+  });
+  const el = document.getElementById("opt" + qi + "_" + oi);
+  if (el) el.classList.add("selected");
+  selected[qi] = oi;
+  const dot = document.getElementById("dot" + qi);
+  if (dot && !submitted) dot.classList.add("answered");
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById("timer");
+    el.textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    el.className = "timer";
+    if (timeLeft <= 300) el.classList.add("warn");
+    if (timeLeft <= 60) el.classList.add("danger");
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(true); }
+  }, 1000);
+}
+
+function submitQuiz(timeout) {
+  const unanswered = QUESTIONS.length - Object.keys(selected).length;
+  if (!timeout && unanswered > 0) {
+    if (!confirm(`尚有 ${unanswered} 題未作答，確定要交卷嗎？`)) return;
+  }
+  clearInterval(timerInterval);
+  submitted = true;
+  document.getElementById("submitBar").classList.add("hidden");
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = selected[i];
+    const ok = (sel !== undefined) && isCorrect(q, sel);
+    const special = q.ans === -1 || Array.isArray(q.ans);
+    if (ok) correct++;
+    const card = document.getElementById("q" + i);
+    card.dataset.result = ok ? "correct" : "wrong";
+    const dot = document.getElementById("dot" + i);
+    if (dot) { dot.classList.remove("answered"); dot.classList.add(ok ? "correct" : "wrong"); }
+    ["A","B","C","D"].forEach((_, oi) => {
+      const el = document.getElementById("opt" + i + "_" + oi);
+      if (!el) return;
+      el.classList.remove("selected");
+      const isAns = q.ans === -1 ? true : (Array.isArray(q.ans) ? q.ans.includes(oi) : q.ans === oi);
+      if (sel === oi && ok) el.classList.add("correct-ans");
+      else if (sel === oi && !ok) el.classList.add("wrong-ans");
+      else if (isAns && !ok) el.classList.add("correct-ans");
+    });
+    let msg = "";
+    if (sel === undefined) {
+      msg = `<div class="result-msg wrong">⚠️ 未作答　${getCorrectLabel(q)}</div>`;
+    } else if (ok && special) {
+      msg = `<div class="result-msg special">✅ 正確　（${getCorrectLabel(q)}）</div>`;
+    } else if (ok) {
+      msg = `<div class="result-msg correct">✅ 正確</div>`;
+    } else {
+      msg = `<div class="result-msg wrong">❌ 錯誤　${getCorrectLabel(q)}</div>`;
+    }
+    card.querySelector(".options").insertAdjacentHTML("afterend", msg);
+  });
+  const total = QUESTIONS.length;
+  const score = Math.round(correct / total * 100);
+  const scoreEl = document.getElementById("scoreBig");
+  scoreEl.textContent = score + " 分";
+  const grade = document.getElementById("gradeLabel");
+  if (score >= 80) { grade.textContent = "🏆 優秀"; grade.className = "grade pass"; }
+  else if (score >= 60) { grade.textContent = "✅ 及格"; grade.className = "grade pass"; }
+  else { grade.textContent = "❌ 未及格"; grade.className = "grade fail"; }
+  document.getElementById("statsRow").textContent = `答對 ${correct} 題 ／ 答錯 ${total - correct} 題 ／ 共 ${total} 題`;
+  document.getElementById("scorePanel").classList.add("show");
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function filterCards(type) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll(".q-card").forEach(card => {
+    if (type === "all") card.classList.remove("hidden");
+    else if (type === "correct") card.classList.toggle("hidden", card.dataset.result !== "correct");
+    else if (type === "wrong") card.classList.toggle("hidden", card.dataset.result !== "wrong");
+  });
+}
+
+function resetQuiz() {
+  selected = {};
+  submitted = false;
+  timeLeft = TOTAL_TIME;
+  document.getElementById("scorePanel").classList.remove("show");
+  document.getElementById("submitBar").classList.remove("hidden");
+  buildDots();
+  buildQuiz();
+  clearInterval(timerInterval);
+  startTimer();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+buildDots();
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>

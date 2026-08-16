@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>110年 華語領隊 領隊執業實務</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a4a70,#2c5f8a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#e3f2fd;color:#1a4a70}
+.header h1{font-size:1rem;font-weight:700;flex:1}
+.timer{background:rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;min-width:70px;text-align:center}
+.timer.warn{background:rgba(255,180,0,.4)}
+.timer.danger{background:rgba(220,50,50,.5);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-wrap{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 16px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#666;cursor:pointer;transition:.15s}
+.dot.answered{background:#2c5f8a;color:#fff}
+.dot.correct{background:#27ae60;color:#fff}
+.dot.wrong{background:#e74c3c;color:#fff}
+.container{max-width:820px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:10px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.4}
+.opt:hover{border-color:#2c5f8a;background:#f0f6ff}
+.opt.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt.correct-ans{border-color:#27ae60;background:#e8f5e9!important}
+.opt.wrong-ans{border-color:#e74c3c;background:#fdecea!important}
+.opt-label{font-weight:700;min-width:18px;color:#2c5f8a}
+.result-msg{margin-top:8px;font-size:.82rem;padding:6px 10px;border-radius:6px}
+.result-msg.correct{background:#e8f5e9;color:#1e6b3d}
+.result-msg.wrong{background:#fdecea;color:#c0392b}
+.result-msg.special{background:#fff3cd;color:#856404}
+.submit-bar{text-align:center;padding:20px 0 40px}
+.btn-submit{background:#2c5f8a;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#1a4a70}
+.score-panel{display:none;background:#fff;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.12);text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:3rem;font-weight:900;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.pass{color:#27ae60}.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:24px;margin:12px 0;font-size:.85rem;color:#666}
+.filter-bar{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.btn-reset{background:#fff;color:#2c5f8a;border:2px solid #2c5f8a;border-radius:10px;padding:10px 30px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s}
+.btn-reset:hover{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+.year-label{font-size:.7rem;opacity:.8;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">華語領隊</span>
+  <h1>領隊執業實務<span class="year-label">110年</span></h1>
+  <div class="timer" id="timer">60:00</div>
+</div>
+<div class="progress-wrap">
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="container">
+  <div class="score-panel" id="scorePanel">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="grade" id="gradeLabel"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all')">全部</button>
+      <button class="filter-btn" onclick="filterCards('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterCards('correct')">只看對題</button>
+    </div>
+    <button class="btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+  <div id="quizArea"></div>
+  <div class="submit-bar" id="submitBar">
+    <button class="btn-submit" onclick="submitQuiz()">📋 交卷批改</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`有關領隊執行遊程時應注意事項，下列何者正確？`,opts:[`可帶眷屬同行`,`可分享團員的隱私話題`,`可與旅客有財務往來`,`可提醒旅客海關規定`],ans:3},
+  {q:`領隊帶團解說活動進行時，應注意下列那些事項？①提早到達活動集合地點，留下良好印象 ②分組進行 時注意組員是否跟上 ③據點解說可以先到先解說，不用等團員到齊 ④進行途中要告知活動行程，最後 再次清點人數，提醒應注意及配合事項`,opts:[`①②③`,`①②④`,`①③④`,`②③④`],ans:1},
+  {q:`解說員主要的工作內容，包括下列那些項目？①安排帶隊解說，設計解說活動與準備解說內容 ②規範遊 客，擔負帶隊責任，避免發生危險 ③代訂往返交通車票、餐食與住宿 ④鼓勵遊客了解景點與體驗自然 ⑤主動引導參觀，避免破壞設施`,opts:[`①②③④`,`①②③⑤`,`①②④⑤`,`②③④⑤`],ans:2},
+  {q:`我國旅遊團出國行程當中旅行社多安排食用中式餐食，有關其原因，下列何者錯誤？`,opts:[`上餐速度快`,`符合國人的飲食需求`,`用餐時間短`,`國外中式餐廳眾多且易尋找`],ans:3},
+  {q:`血腸是下列那個國家的傳統料理？`,opts:[`英國`,`德國`,`法國`,`荷蘭`],ans:[0, 1, 2]},
+  {q:`遊程規劃中，航空公司如有共掛航班，稱之為？`,opts:[`CODEINTERLINE`,`CODEAIRLINE`,`CODECARRIER`,`CODESHARE`],ans:3},
+  {q:`旅遊團體機票中，最低人數如為 15 人，其呈現方式為何？`,opts:[`GP15`,`GR15`,`GV15`,`GM15`],ans:2},
+  {q:`以一定點住宿飯店為基地，配合每日行程皆採當天來回的行程走法為：`,opts:[`環狀行程`,`線條狀行程`,`點加點行程`,`放射狀行程`],ans:3},
+  {q:`旅行業者為避免消費爭議，下列何種處理方式較不適宜？`,opts:[`簽訂旅遊契約`,`派遣合格領隊`,`安排預先載明的購物點`,`推薦自費行程`],ans:3},
+  {q:`觀光業運用行銷 4P 組合變數來探測市場，其中以直接行銷、仲介商等方式進行是屬於 4P 中的：`,opts:[`產品`,`價格`,`通路`,`促銷`],ans:2},
+  {q:`旅行業者基於消費者喜愛韓國偶像劇而推出韓國追星旅遊行程，是屬於下列那一種市場區隔基礎？`,opts:[`心理特性`,`人口統計`,`地理特性`,`使用行為`],ans:0},
+  {q:`旅客於航空站隨地吐痰、檳榔汁、檳榔渣，拋棄紙屑、菸蒂、口香糖、其他廢棄物或於禁菸區吸菸，依民 用航空法第 119 條之 3 規定，最高罰鍰為新臺幣多少元？`,opts:[`5 千元`,`2 萬元`,`2 萬 5 千元`,`3 萬元`],ans:2},
+  {q:`國泰航空來往香港與洛杉磯的直飛航班可飛越日本之領空，為運用下列那一航權？`,opts:[`第一航權`,`第二航權`,`第三航權`,`第四航權`],ans:0},
+  {q:`搭機時下列那一樣物品不能放在手提行李內？`,opts:[`行動電源`,`造型慕斯（ 85ml ）`,`嬰兒奶粉`,`水銀溫度計`],ans:3},
+  {q:`依據民用航空乘客與航空器運送人運送糾紛調處辦法，國際航線航空器無法依表定時間起程，致遲延幾分 鐘以上者，應即向乘客詳實說明原因及處理方式？ 1501 4 － 2`,opts:[`10 分鐘`,`15 分鐘`,`20 分鐘`,`30 分鐘`],ans:3},
+  {q:`旅客搭機出國時，其手杖不可置於何處？`,opts:[`沿著機身方向的艙壁放置`,`座椅上方儲物櫃內`,`衣帽間`,`靠走道之座位邊`],ans:3},
+  {q:`航空公司英文字母代號及數字代號的組合（例如： China Airlines 代號是 CI ，數字代號是 297 ），下列何 者正確？`,opts:[`AE ， 695`,`BR ， 160`,`BA ， 125`,`CX ， 403`],ans:2},
+  {q:`有關國際線嬰兒機票之使用規定，下列敘述何者錯誤？`,opts:[`嬰兒票的票價為成人票的 10%`,`其年齡以旅行日為準，旅行日如果滿 2 歲，則需付兒童票`,`嬰兒不占機位須由父、母或監護人抱在懷中搭乘同一班機、同等艙位`,`帶二個嬰兒時，第二個嬰兒則需購買成人票價的機票`],ans:3},
+  {q:`女士參加正式晚宴，不宜穿著何種服裝？`,opts:[`當地的傳統禮服`,`流行時尚的休閒服裝`,`西式晚禮服`,`中式旗袍禮服`],ans:1},
+  {q:`有關正式的用餐禮節，下列敘述何者正確？`,opts:[`用生蠔、龍蝦、蝸牛等類的食物時，通常會附上一碗附有鮮花、飾物的水碗，是洗指碗，不是飲用水`,`西餐中，絕不可用手撕麵包，實在失禮`,`吃水果時，果核可直接由口中吐在盤內`,`餐桌上輪流傳遞取菜時，由小孩先取用，是友愛幼小的表現`],ans:0},
+  {q:`有關名片遞送的禮儀，下列敘述何者較為適宜？`,opts:[`印刷內容朝下，避免別人看到`,`陪同長官拜訪他人，應先於長官致送名片給對方，以示禮貌`,`雙手握住名片兩端正面朝對方致送`,`在他人交談中遞送名片，自我介紹`],ans:2},
+  {q:`有關出外旅遊上洗手間，下列敘述何者錯誤？`,opts:[`在歐洲皆不用付費`,`不可踩在馬桶座墊上`,`應依序於門口靠邊排隊`,`女性應帶幼童上女廁`],ans:0},
+  {q:`IT8CX3PG43 ，說明該團體搭乘的是：`,opts:[`TigerairTaiwan （代碼： IT ）`,`EastStarAirlines （代碼： 8C ）`,`CathayPacificAirways （代碼： CX ）`,`BangkokAirways （代碼： PG ）`],ans:2},
+  {q:`對受到輕微灼傷患者施行急救時，下列急救動作何者錯誤？`,opts:[`可在傷處沖冷水或浸於冷水`,`可用冰濕布冷敷傷處`,`不可用油膏、油脂類塗抹傷處`,`可刺破傷處水泡，放出裡面的水`],ans:3},
+  {q:`有關心絞痛服用硝酸甘油酯（ NTG ）的方法，下列敘述何者錯誤？`,opts:[`以足夠開水由口服用`,`最多連續含服 3 次`,`每間隔 5 分鐘可再含服`,`藥物保存要注意避光`],ans:0},
+  {q:`假設賞櫻季節來臨，日本卻爆發嚴重麻疹疫情，下列給予旅客的建議，何者較不適當？`,opts:[`1 歲以下嬰兒，應避免前往`,`1-6 歲學齡前幼兒，未完成麻疹 - 腮腺炎 - 德國麻疹混合疫苗（ MMR ）接種者，應於接種 MMR 疫苗 2 週 後再前往`,`18-30 歲之大專院校教職員生、軍人，還有醫事、教保及托育機構人員，建議補強接種 MMR 疫苗 2 週 後再前往`,`所有旅客皆須施打 MMR 疫苗`],ans:3},
+  {q:`成年人的 CPR 施救法中，俟手掌的定位正確後，其手掌使用法及下壓胸廓之深度為何？`,opts:[`以手掌心定位，手指向下，每次下壓約 2 至 3 公分`,`雙手手指互扣，前端微翹，以手掌基部定位，每次下壓約 5 至 6 公分`,`以手掌心定位，手指向下，每次下壓約 4 至 5 公分`,`雙手手指互扣，前端微翹，以手掌基部定位，每次下壓約 2 至 3 公分`],ans:1},
+  {q:`Cholera 的中文翻譯為何？`,opts:[`霍亂`,`腹瀉`,`感冒`,`黑死病`],ans:0},
+  {q:`當旅客疑似發生高山症時，下列處理原則何者不適當？`,opts:[`迅速離開高海拔環境`,`休息`,`藥物治療`,`喝熱開水`],ans:3},
+  {q:`為了減少團員不必要的危險暴露，行前你應講解的「 4F 危險準則」，下列何者屬於其中一項？ 1501 4 － 3`,opts:[`防蚊措施要完善`,`不要靠海邊太近`,`保持愉快的心情`,`避免夜晚開車`],ans:0},
+  {q:`新加坡 5 日遊團體於環球影城當天自由活動時間結束，旅客 A 未出現在集合地點；旅客 B 告訴導遊，半 小時前還看到旅客 A 在商店區買紀念品。有關領隊之處理方式，下列敘述何者最不適當？`,opts:[`請環球影城協助尋找旅客 A`,`請導遊先帶領已抵達集合地的旅客上遊覽車等候`,`領隊自己到紀念品商店尋找旅客 A`,`請旅客 B 到紀念品商店協助尋找旅客 A`],ans:3},
+  {q:`當團員身體不適，無法隨團繼續行程時，下列那一項不是領隊協助處理的義務？`,opts:[`代訂回程機票`,`協助就醫`,`負擔住院保證金`,`通知家屬`],ans:2},
+  {q:`消費者遇到旅遊糾紛，如：旅行社未履行旅遊契約或其服務品質欠佳時，下列處理管道何者較不適當？`,opts:[`循司法途徑解決`,`向中華民國旅行業品質保障協會申訴`,`投訴媒體主持公道`,`申請各縣市政府消保官協調`],ans:2},
+  {q:`旅客於旅途中亡故，帶團人員應注意照料全團團員之心理情緒，其應重點處理的事項不包括下列何者？`,opts:[`立即向警方報案，取得相關法律及證明文件`,`通知公司及家屬，詳細告知所有細節`,`就地執行火化，並清點遺物以便交還家屬`,`向保險公司報備，以利家屬日後申請理賠事宜`],ans:2},
+  {q:`旅行社未依規定投保責任保險，發生旅遊事故致旅客死亡時，應以主管機關規定最低投保金額計算其應理 賠金額之幾倍作為賠償金額？`,opts:[`2 倍`,`3 倍`,`4 倍`,`負責到底`],ans:1},
+  {q:`旅客海外旅遊遇到行李延遲或遺失時，需填寫行李意外報告表，以利行李尋找，下列何者不是行李意外報 告表中的重要資訊？`,opts:[`填寫行李的外型與特徵`,`填寫行李的顏色`,`填寫行李的賠償價格`,`填寫行李的內容物`],ans:2},
+  {q:`在國外旅遊時，領團人員如遇到團員遺失護照時，下列敘述何者錯誤？`,opts:[`本人須持身分證明文件親自向遺失地警察局報案`,`國外遺失向鄰近駐外館處申請補發`,`當地警察機關尚未發給或不發給遺失報案證明，得以遺失護照說明書代替`,`護照經申報遺失確認後尋獲者，得申請撤案，無毀損亦可再使用`],ans:3},
+  {q:`領隊主動幫想要參加水上自費行程的旅客，在岸邊看顧其私人隨身貴重包包，因領隊途中想要去上廁所， 委請一位沒有參加自費活動的團員協助看一下所有團員的包包，待其回來後，發現有位旅客的包包失竊， 內有護照與現金等貴重物品，因此全團旅客被帶往警察局報案，行程因此耽誤了半天時間，下列敘述何者 較為正確？`,opts:[`旅行社應負責賠償遊客半天的旅遊費用之違約金`,`當中答應要協助領隊看顧包包的旅客，也需要共同承擔行程延誤的賠償事宜`,`依據國外旅遊定型化契約，旅行社應盡到妥善保管旅客證件與物品的責任，故旅客可以跟旅行社要求現 金損失的賠償`,`雖然領隊主動協助看顧旅客包包，但此失竊事件屬於不可抗拒因素，故無法請求領隊賠償`],ans:0},
+  {q:`領團人員帶領團體旅遊期間，遇團員要求變更部分行程時，有關處置之相關敘述，下列何者錯誤？`,opts:[`旅行業執行業務時，該旅行業及其所派遣之隨團服務人員，除有不可抗力因素外，不得未經旅客請求而 變更旅程`,`若有團員提議變更行程，導遊於取得全體團員與領隊同意後，報備公司評估可行性後，決定是否同意辦理`,`若旅客要求變更旅遊內容，且經全體團員同意並取得書面同意書後，旅行社同意辦理，因變更行程而增 加的費用，應由旅客另行負擔`,`若旅客要求變更旅遊內容，且經全體團員同意並取得書面同意書後，旅行社同意辦理，因變更行程而減 少的費用，須全部退還旅客`],ans:3},
+  {q:`領隊帶領北京 5 天旅遊，行程第 3 天導遊告知臺灣出團旅行業者倒閉，此團團費並未結清，此外，先前亦曾 積欠兩團團費尚未結清，領隊幾經聯繫之後確定導遊所述為真，當地接待旅行業者表示旅客必須墊付此團團 費與之前尚未結清團費方能繼續行程。下列處置何者較為正確？`,opts:[`聯繫中華民國旅行業品質保障協會請其協助後續處理，以利後續行程順利繼續進行`,`領隊人員自認倒楣結清此團與之前積欠團費，以利後續行程順利繼續進行`,`再請旅客墊付此團團費，以利後續行程順利繼續進行`,`再請旅客墊付此團與之前積欠團費，以利後續行程順利繼續進行`],ans:0},
+  {q:`領隊於行前說明會時，應向團員說明隨身行李攜帶液體、膠狀及噴霧類物品之注意事項，下列敘述何者錯誤？ 1501 4 － 4`,opts:[`旅客隨身行李內液體、膠狀及噴霧類物品，其體積不可超過 100 毫升`,`液體、膠狀及噴霧類物品的容器容量除符合規定外，還需裝於不超過 1 公升且可重複密封之透明塑膠袋內`,`旅客通過機場安檢線時，裝有液體、膠狀及噴霧類物品之透明塑膠袋應置於置物籃內，通過檢查人員目 視及 X 光檢查儀檢查`,`攜帶超過 100 毫升之嬰兒牛奶食品上機，請旅客於通關時，口頭說明後即可攜帶上機`],ans:3},
+  {q:`在旅遊安全維護及緊急意外事故處理作業手冊當中，有關領團人員在緊急事件處理的注意事項方面，下列 敘述何者錯誤？`,opts:[`當發生緊急事故時，領團人員應立即搶救並通知我國駐外機構及公司相關人員，隨時回報最新處理情形`,`現場處理事故時，領團人員應保持冷靜，利用 5W2H 幫助自己建立思考及反應模式`,`航空公司只協助有關班機搭乘的問題，當發生與搭乘班機無關的緊急事件時，不需向航空公司人員請求 幫忙`,`為避免旅遊糾紛，領團人員應幫團員申請或收集相關文件及收據，並記錄事發經過及留下各項佐證資料`],ans:2},
+  {q:`團體出發前，領隊對於具危險性的自費行程，領隊應盡的責任為何？`,opts:[`直接代為報名並給予客人最好的服務`,`交由當地的接待旅行社負責安排`,`應盡到告知旅客危險性之義務，由客人自行決定參加與否`,`該行程如屬合法業者經營者，由旅客自己參加`],ans:2},
+  {q:`馬來西亞五日行程，全團旅客抵達後順利出關，遲遲未見導遊接機，領隊聯絡後得知，導遊途中發生意外 事故，無法按時前來接團，領隊應如何優先處理較適當？`,opts:[`應先與公司回報狀況`,`聯絡當地旅行社，立即派遣其他當地導遊前來`,`聯絡當地司機，和新派遣的導遊約定是否在下一個景點開始碰面，且開始行程`,`先安置團員`],ans:3},
+  {q:`領隊帶團前往日本，在機場正要劃位時，被航空公司告知機位不足，而且旅客無法完全候補上機。有關領 隊處理突發狀況之敘述，下列何者較為適當？`,opts:[`領隊該向航空公司表明堅持全團上機，並帶領團員進行抗爭`,`如果必須分搭兩班飛機時，基於公平原則，全團公開抽籤決定搭乘順序`,`如果必須分搭兩班飛機時，可考慮團員的外語能力較佳者安排搭乘第一班，領隊搭乘第二班`,`如果必須分搭兩班飛機時，應禮讓老弱婦孺優先搭乘第一班，領隊搭乘第二班`],ans:2},
+  {q:`旅客參加旅行社「馬來西亞大紅花 5 日遊」，入境馬來西亞時，因旅行社過失被移民官留置。有關旅行社 及領隊突發狀況之緊急處理方式，下列處理方式何者不適當？`,opts:[`旅客留置期間所支出之食宿或其他必要費用，應由旅行社全額負擔`,`旅行社應儘速依預定旅程，安排旅遊活動或安排旅客返國`,`旅行社賠償旅客依旅遊費用總額除以全部旅遊日數，乘以滯留日數計算之違約金`,`所衍生的回程遣返機票費用，因需重新購買單程，則由旅客自行負擔`],ans:3},
+  {q:`某旅行社承辦泰國 5 日遊團體，每名旅客繳付團費新臺幣 2 萬 7 千元，旅客人數共 15 位；某團員在旅途 中覺得領隊服務不夠專業，經由交通部觀光局行政資訊網的消保事項專區查詢，發現旅行社並未指派領有 領隊執業證之領隊帶團。依國外旅遊定型化契約書範本之規定，某旅行社應賠償每名旅客新臺幣多少元的 違約金？`,opts:[`500 元`,`1,350 元`,`1,500 元`,`2,700 元`],ans:2},
+  {q:`團體在旅遊區域遇到火山爆發而造成團體旅客無法如期返臺，滯留國外，下列敘述何者錯誤？`,opts:[`請國外接待旅行社先安排將旅客安置到安全的地方`,`留滯期間的食宿，要符合安全衛生的條件，並斟酌費用負擔`,`留滯期間的食宿費用由旅客先自行支付，並於返國後，由旅行社協助旅客向保險公司申請理賠`,`留滯期間如簽證效期屆滿，領隊應協助旅客辦理延長效期`],ans:2},
+  {q:`旅客於旅行社安排的購物地點購物，回國後，旅客向領團人員反映當時所購物品有瑕疵時，領團人員下列 那一項處理方式較不適當？`,opts:[`協助旅客將商品帶回原購物商店進行更換`,`請其他領團人員協助將商品帶回原購物商店進行更換`,`已經離開購物地點，所以無法協助處理`,`回報給公司，請求公司協助處理`],ans:2},
+  {q:`盧老先生退休後帶著太太參加旅行社所辦理的俄羅斯旅行團，行程中預定參觀教堂，帶團人員告知該教堂 內有皇室家族棺木數十具。盧老太太膽子不大，一聽說要參觀棺木，心裡自是非常排斥。下遊覽車時，盧 老太太告訴領團人員不想進入教堂參觀，此時帶團人員應如何處理最為適當？`,opts:[`委婉拒絕盧老太太，因為遊覽車不會停在這附近的停車場`,`導遊帶領團體入內參觀，另由領隊陪同盧老太太`,`打電話向公司報告，請公司更改行程`,`打電話給國外代理旅行社說明情況並替盧老太太安排退款事宜`],ans:1}
+];
+const TOTAL_Q = 50;
+const TOTAL_TIME = 3600;
+let selected = {};
+let submitted = false;
+let timerInterval;
+let timeLeft = TOTAL_TIME;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return "本題一律給分";
+  if (Array.isArray(q.ans)) return "正確答案：" + q.ans.map(i => "ABCD"[i]).join(" 或 ");
+  return "正確答案：" + "ABCD"[q.ans];
+}
+
+function buildDots() {
+  const grid = document.getElementById("dotGrid");
+  grid.innerHTML = "";
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.textContent = i + 1;
+    d.id = "dot" + i;
+    d.onclick = () => document.getElementById("q" + i).scrollIntoView({behavior:"smooth", block:"center"});
+    grid.appendChild(d);
+  });
+}
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.id = "q" + i;
+    card.dataset.result = "";
+    const labels = ["A","B","C","D"];
+    let optHtml = "";
+    q.opts.forEach((o, oi) => {
+      optHtml += `<div class="opt" id="opt${i}_${oi}" onclick="selectOpt(${i},${oi})"><span class="opt-label">${labels[oi]}</span><span>${o}</span></div>`;
+    });
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題（共 ${QUESTIONS.length} 題）</div><div class="q-text">${q.q}</div><div class="options">${optHtml}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (submitted) return;
+  const labels = ["A","B","C","D"];
+  labels.forEach((_, j) => {
+    const el = document.getElementById("opt" + qi + "_" + j);
+    if (el) el.classList.remove("selected");
+  });
+  const el = document.getElementById("opt" + qi + "_" + oi);
+  if (el) el.classList.add("selected");
+  selected[qi] = oi;
+  const dot = document.getElementById("dot" + qi);
+  if (dot && !submitted) dot.classList.add("answered");
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById("timer");
+    el.textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    el.className = "timer";
+    if (timeLeft <= 300) el.classList.add("warn");
+    if (timeLeft <= 60) el.classList.add("danger");
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(true); }
+  }, 1000);
+}
+
+function submitQuiz(timeout) {
+  const unanswered = QUESTIONS.length - Object.keys(selected).length;
+  if (!timeout && unanswered > 0) {
+    if (!confirm(`尚有 ${unanswered} 題未作答，確定要交卷嗎？`)) return;
+  }
+  clearInterval(timerInterval);
+  submitted = true;
+  document.getElementById("submitBar").classList.add("hidden");
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = selected[i];
+    const ok = (sel !== undefined) && isCorrect(q, sel);
+    const special = q.ans === -1 || Array.isArray(q.ans);
+    if (ok) correct++;
+    const card = document.getElementById("q" + i);
+    card.dataset.result = ok ? "correct" : "wrong";
+    const dot = document.getElementById("dot" + i);
+    if (dot) { dot.classList.remove("answered"); dot.classList.add(ok ? "correct" : "wrong"); }
+    ["A","B","C","D"].forEach((_, oi) => {
+      const el = document.getElementById("opt" + i + "_" + oi);
+      if (!el) return;
+      el.classList.remove("selected");
+      const isAns = q.ans === -1 ? true : (Array.isArray(q.ans) ? q.ans.includes(oi) : q.ans === oi);
+      if (sel === oi && ok) el.classList.add("correct-ans");
+      else if (sel === oi && !ok) el.classList.add("wrong-ans");
+      else if (isAns && !ok) el.classList.add("correct-ans");
+    });
+    let msg = "";
+    if (sel === undefined) {
+      msg = `<div class="result-msg wrong">⚠️ 未作答　${getCorrectLabel(q)}</div>`;
+    } else if (ok && special) {
+      msg = `<div class="result-msg special">✅ 正確　（${getCorrectLabel(q)}）</div>`;
+    } else if (ok) {
+      msg = `<div class="result-msg correct">✅ 正確</div>`;
+    } else {
+      msg = `<div class="result-msg wrong">❌ 錯誤　${getCorrectLabel(q)}</div>`;
+    }
+    card.querySelector(".options").insertAdjacentHTML("afterend", msg);
+  });
+  const total = QUESTIONS.length;
+  const score = Math.round(correct / total * 100);
+  const scoreEl = document.getElementById("scoreBig");
+  scoreEl.textContent = score + " 分";
+  const grade = document.getElementById("gradeLabel");
+  if (score >= 80) { grade.textContent = "🏆 優秀"; grade.className = "grade pass"; }
+  else if (score >= 60) { grade.textContent = "✅ 及格"; grade.className = "grade pass"; }
+  else { grade.textContent = "❌ 未及格"; grade.className = "grade fail"; }
+  document.getElementById("statsRow").textContent = `答對 ${correct} 題 ／ 答錯 ${total - correct} 題 ／ 共 ${total} 題`;
+  document.getElementById("scorePanel").classList.add("show");
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function filterCards(type) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll(".q-card").forEach(card => {
+    if (type === "all") card.classList.remove("hidden");
+    else if (type === "correct") card.classList.toggle("hidden", card.dataset.result !== "correct");
+    else if (type === "wrong") card.classList.toggle("hidden", card.dataset.result !== "wrong");
+  });
+}
+
+function resetQuiz() {
+  selected = {};
+  submitted = false;
+  timeLeft = TOTAL_TIME;
+  document.getElementById("scorePanel").classList.remove("show");
+  document.getElementById("submitBar").classList.remove("hidden");
+  buildDots();
+  buildQuiz();
+  clearInterval(timerInterval);
+  startTimer();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+buildDots();
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>
