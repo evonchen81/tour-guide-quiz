@@ -3,312 +3,312 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>113年 導遊英語</title>
+<title>113年 導遊英語 線上測驗</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f5f5f5;color:#333}
-.header{position:sticky;top:0;background:#2c5f8a;color:#fff;padding:10px 16px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.header h1{font-size:1rem;font-weight:700}
-.header .meta{font-size:.8rem;opacity:.85;margin-top:2px}
-.timer{display:inline-block;background:rgba(255,255,255,.2);padding:2px 10px;border-radius:12px;font-weight:700;font-size:.95rem}
-.timer.warn{background:#f39c12}
-.timer.danger{background:#e74c3c;animation:blink 1s infinite}
-@keyframes blink{50%{opacity:.5}}
-.progress-wrap{background:#1a4a70;padding:8px 16px}
-.dots{display:flex;flex-wrap:wrap;gap:4px}
-.dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:.2s}
-.dot.answered{background:#4fc3f7}
-.container{max-width:860px;margin:0 auto;padding:12px 16px 40px}
-.question-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);border-left:4px solid #2c5f8a}
-.question-card.correct{border-left-color:#27ae60}
-.question-card.wrong{border-left-color:#e74c3c}
-.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
-.q-text{font-size:.95rem;line-height:1.6;margin-bottom:12px;white-space:pre-wrap}
-.options{display:flex;flex-direction:column;gap:6px}
-.opt-label{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.9rem;line-height:1.5}
-.opt-label:hover{border-color:#2c5f8a;background:#f0f7ff}
-.opt-label input{margin-top:3px;flex-shrink:0;accent-color:#2c5f8a}
-.opt-label.selected{border-color:#2c5f8a;background:#e3f2fd}
-.opt-label.correct-ans{border-color:#27ae60!important;background:#e8f5e9!important}
-.opt-label.wrong-ans{border-color:#e74c3c!important;background:#ffebee!important}
-.result-mark{float:right;font-size:1.1rem}
-.correct-hint{font-size:.82rem;color:#27ae60;margin-top:6px;font-weight:600}
-.submit-wrap{text-align:center;margin:20px 0}
-.btn{padding:12px 32px;border:none;border-radius:24px;font-size:1rem;cursor:pointer;font-family:inherit;font-weight:700;transition:.2s}
-.btn-submit{background:#2c5f8a;color:#fff}
-.btn-submit:hover{background:#1a4a70}
-.btn-reset{background:#27ae60;color:#fff}
-.btn-reset:hover{background:#1e8449}
-.score-panel{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.12);text-align:center}
-.score-big{font-size:3rem;font-weight:700;color:#2c5f8a}
-.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
-.grade.excellent{color:#27ae60}
-.grade.pass{color:#2c5f8a}
-.grade.fail{color:#e74c3c}
-.stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:12px;font-size:.9rem}
+body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8;min-height:100vh}
+.sticky-header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:12px 20px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start}
+.exam-title{font-size:1.2rem;font-weight:700}
+.exam-sub{font-size:.8rem;opacity:.85;margin-top:2px}
+.timer-box{text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:6px 14px;min-width:100px}
+.timer-box.warning{background:rgba(255,200,0,.3)}
+.timer-box.danger{background:rgba(255,80,80,.4)}
+.timer-label{font-size:.65rem;opacity:.8}
+.timer-value{font-size:1.5rem;font-weight:700;letter-spacing:2px}
+.timer-bar-wrap{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:4px}
+.timer-bar{height:100%;background:#68d391;border-radius:2px;transition:width .5s}
+.progress-area{background:#fff;padding:10px 20px;border-bottom:1px solid #e2e8f0}
+.progress-info{font-size:.85rem;color:#4a5568;margin-bottom:6px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:22px;height:22px;border-radius:50%;background:#e2e8f0;border:1.5px solid #cbd5e0;font-size:.65rem;display:flex;align-items:center;justify-content:center;color:#718096;cursor:pointer;transition:all .2s}
+.dot.done{background:#3182ce;border-color:#2b6cb0;color:#fff}
+.main{max-width:800px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:2px solid #e2e8f0;transition:border-color .2s}
+.q-card.answered{border-color:#90cdf4}
+.q-card.result-correct{border-color:#68d391;background:#f0fff4}
+.q-card.result-wrong{border-color:#fc8181;background:#fff5f5}
+.q-num{font-size:.8rem;color:#718096;margin-bottom:6px;font-weight:600}
+.q-text{font-size:1rem;color:#2d3748;margin-bottom:14px;line-height:1.6}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all .2s;line-height:1.5}
+.option-label:hover{background:#ebf8ff;border-color:#90cdf4}
+.option-label.selected{background:#ebf8ff;border-color:#3182ce}
+.option-label.correct-ans{background:#f0fff4;border-color:#38a169!important}
+.option-label.wrong-ans{background:#fff5f5;border-color:#e53e3e!important}
+.option-key{font-weight:700;color:#3182ce;min-width:20px}
+.option-label input{display:none}
+.result-badge{padding:6px 12px;border-radius:6px;font-weight:700;margin-top:8px;font-size:.9rem}
+.result-badge.ok{background:#f0fff4;color:#276749}
+.result-badge.err{background:#fff5f5;color:#c53030}
+.correct-note{margin-top:6px;padding:8px 12px;background:#ebf8ff;border-radius:6px;color:#2b6cb0;font-size:.9rem}
+.bottom-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:50}
+.btn-submit{background:#3182ce;color:#fff;border:none;border-radius:8px;padding:12px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s}
+.btn-submit:hover{background:#2b6cb0}
+#resetBtn{display:none;background:#805ad5;color:#fff;border:none;border-radius:8px;padding:10px 30px;font-size:.95rem;font-weight:700;cursor:pointer}
+.score-panel{display:none;background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;border:2px solid #90cdf4;text-align:center}
+.score-val{font-size:3rem;font-weight:900;color:#2b6cb0}
+.score-grade{display:inline-block;padding:4px 16px;border-radius:20px;font-size:1rem;font-weight:700;margin:8px 0}
+.score-detail{color:#718096;font-size:.85rem}
+.stats{display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap}
 .stat-item{text-align:center}
 .stat-num{font-size:1.4rem;font-weight:700}
-.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.filter-btn{padding:6px 16px;border:2px solid #2c5f8a;border-radius:20px;background:#fff;color:#2c5f8a;cursor:pointer;font-size:.85rem;font-family:inherit;font-weight:600}
-.filter-btn.active{background:#2c5f8a;color:#fff}
-.hidden{display:none!important}
+.stat-label{font-size:.75rem;color:#718096}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #cbd5e0;background:#fff;cursor:pointer;font-size:.85rem;transition:all .2s}
+.filter-btn.active{background:#3182ce;border-color:#3182ce;color:#fff}
+.q-blank{display:inline-block;min-width:55px;border-bottom:2px solid #444;vertical-align:baseline;margin:0 3px;text-align:center}
+@media(max-width:600px){
+  .exam-title{font-size:1rem}
+  .timer-value{font-size:1.2rem}
+  .dot{width:18px;height:18px;font-size:.55rem}
+}
 </style>
 </head>
 <body>
-<div class="header">
-  <div style="display:flex;justify-content:space-between;align-items:center">
+<div class="sticky-header">
+  <div class="header-top">
     <div>
-      <h1>113年 導遊英語</h1>
-      <div class="meta">外語導遊人員｜共 <span id="totalQ">0</span> 題</div>
+      <div class="exam-title">113年 導遊英語 模擬測驗</div>
+      <div class="exam-sub">外語導遊人員 ／ 共80題・每題1.25分・總分100分</div>
     </div>
-    <div class="timer" id="timer">60:00</div>
+    <div class="timer-box" id="timerBox">
+      <div class="timer-label">剩餘時間</div>
+      <div class="timer-value" id="timerValue">80:00</div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar" style="width:100%"></div></div>
+    </div>
   </div>
 </div>
-<div class="progress-wrap">
-  <div class="dots" id="dots"></div>
+<div class="progress-area">
+  <div class="progress-info">已作答：<strong id="answeredCount">0</strong> / 80 題</div>
+  <div class="dot-grid" id="dotGrid"></div>
 </div>
-<div class="container">
-  <div id="quiz-area"></div>
-  <div class="submit-wrap" id="submit-wrap">
-    <button class="btn btn-submit" onclick="submitQuiz()">📋 交卷</button>
+<div class="main">
+  <div id="score-panel" class="score-panel">
+    <div class="score-val" id="scoreVal"></div>
+    <div class="score-grade" id="scoreGrade"></div>
+    <div class="score-detail" id="scoreDetail"></div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num" id="statCorrect" style="color:#38a169"></div><div class="stat-label">答對</div></div>
+      <div class="stat-item"><div class="stat-num" id="statWrong" style="color:#e53e3e"></div><div class="stat-label">答錯</div></div>
+      <div class="stat-item"><div class="stat-num" id="statSkip" style="color:#718096"></div><div class="stat-label">未作答</div></div>
+      <div class="stat-item"><div class="stat-num" id="statTime" style="color:#805ad5"></div><div class="stat-label">用時</div></div>
+    </div>
+    <div class="filter-bar" style="justify-content:center;margin-top:16px">
+      <button class="filter-btn active" onclick="filterQ('all')">全部題目</button>
+      <button class="filter-btn" onclick="filterQ('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterQ('correct')">只看對題</button>
+    </div>
   </div>
-  <div id="score-panel" class="hidden"></div>
-  <div id="filter-bar" class="filter-bar hidden">
-    <button class="filter-btn active" onclick="filterQ('all',this)">全部</button>
-    <button class="filter-btn" onclick="filterQ('wrong',this)">只看錯題</button>
-    <button class="filter-btn" onclick="filterQ('correct',this)">只看對題</button>
-  </div>
-  <div id="result-area"></div>
-  <div id="reset-wrap" class="submit-wrap hidden">
-    <button class="btn btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
-  </div>
+  <form id="quizForm"></form>
+  <div id="unansMsg"></div>
+</div>
+<div class="bottom-bar">
+  <button class="btn-submit" onclick="submitQuiz()">交卷對答案</button>
+  <button id="resetBtn" onclick="resetQuiz()">🔄 重新作答</button>
 </div>
 <script>
-const QUESTIONS=[
-{"q": "Wife: Did youmakethe airlinereservationforourtrip yet? Husband:", "opts": ["Sure,anytime.", "Great, I’m lookingforwardtoit.", "Yes, Ididthat online.", "Sure,it is mypleasure."], "ans": 2},
-{"q": "Toprotect thehouses from airpollution,aspecial coatingwas appliedonthe surfaceofthe walls forall thehouses inthetown.", "opts": ["exterior", "revision", "insanity", "diarrhea"], "ans": 0},
-{"q": "During the tea-picking and making season, the of tea permeates tea factories in the mountain.", "opts": ["freshness", "flimsiness", "fragrance", "feature"], "ans": 2},
-{"q": "Waitress: Howwould you like yoursteak? ,medium orwell done? Guest: Medium,please.", "opts": ["Rough", "Softened", "Rare", "Smoked"], "ans": 2},
-{"q": "Caller: Howmuchare yoursingle rooms? Front DeskClerk: The varydependingupontheseason andtypeof singlerooms.", "opts": ["specials", "rates", "services", "ranges"], "ans": 1},
-{"q": "Driver: We’re all set to go, sir. It’ll be about a 20-minute to the hotel. Have you visited Taipei before? Guest: No,this is myfirst visit.", "opts": ["ride", "race", "passage", "process"], "ans": 0},
-{"q": "Airports with international flights have customs and facilities, which allow right of entry intoacountry.", "opts": ["authoritarian", "immigration", "segregation", "sanitation"], "ans": 1},
-{"q": "ThespiritualcenterofJapan’scultureand ,Kyotoisrenownedforitsabundanceofgreentea.", "opts": ["heritage", "vintage", "courage", "pilgrimage"], "ans": 0},
-{"q": "The park’s landscape unique coastal rock formations shaped by natural forces over several million years.", "opts": ["features", "indulges", "bargains", "entreats"], "ans": 0},
-{"q": "Thecitywas byanexceptional hightide,whichcausedsevereflooddamagetobridgesand roadways.", "opts": ["struck", "sponged", "elicited", "objected"], "ans": 0},
-{"q": "The cityof Kaohsiungin Taiwan has been performing a job in enhancing its network of off-road bicycle trails, providing ample chances for leisure activities, family outings, and daily commutes.", "opts": ["terrible", "mediocre", "horrific", "fantastic"], "ans": 3},
-{"q": "When you are faced with a , raising your voice is never a successful way to settle the disagreement.", "opts": ["conflict", "duration", "lavatory", "pamphlet"], "ans": 0},
-{"q": "Whentravelingtopopulartouristdestinationsduringpeakseason,encounteringcrowdsis a part oftheexperience.", "opts": ["rarely", "inevitably", "surprisingly", "randomly"], "ans": 1},
-{"q": "When driving on curvy or roads, do not fidget with phones and radios. It only takes a moment ofinattentionbeforeweareout ofthelane.", "opts": ["crooked", "haughty", "bullish", "roasted"], "ans": 0},
-{"q": "The ofjunglesandrainforests is critical tothesurvival ofmanyspecies.", "opts": ["conservation", "cancellation", "consultation", "condensation"], "ans": 0},
-{"q": "Due to increased demand, the national park started more permits for overnight camping to accommodatemorehikers.", "opts": ["collecting", "issuing", "engaging", "decreasing"], "ans": 1},
-{"q": "Tourism is one of the city’s economic and an important driver of economic growth that provides moreemployment opportunities topeople.", "opts": ["mainstays", "downturns", "barbarians", "reproaches"], "ans": 0},
-{"q": "Customs and Border Protection officers three shipments containing various luxury items, whichweredeemedtobe counterfeits.", "opts": ["seized", "averted", "groaned", "eroded"], "ans": 0},
-{"q": "The view from the mountain peak was absolutely , offering a panorama that took my breath away.", "opts": ["rotary", "lame", "sublime", "prompt"], "ans": 2},
-{"q": "Travelers who bringfood and other organic material back to their countries can often carry pests andotherrisks.", "opts": ["unintentionally", "disrespectfully", "institutionally", "sympathetically"], "ans": 0},
-{"q": "Dear guests, youareleavingTaiwantomorrowmorning.As yourtourguide, Iwouldliketoinform you a few things concerning your . First, your baggage pick-up time is 9:00 a.m. tomorrow morning,andpleasehave all yourbaggage readyandput them outside your room by9:00a.m.", "opts": ["departure", "department", "compartment", "apartment"], "ans": 0},
-{"q": "Those items in this show room are in price and quality, so it’s really a matter of what your ownpreferenceis inweight and color.", "opts": ["comparable", "compare", "comparing", "comparison"], "ans": 0},
-{"q": "Guest: Whereis thefitness center? FrontDeskClerk:Gopassthesaunaandturnright.Thesignswill youthere.Youcan’tmiss it.", "opts": ["direct", "detect", "deduct", "induct"], "ans": 0},
-{"q": "It is a good habit for students to keep a diaryeveryday. However, it will be a task for their teachers toreviewthediaryandmakesome comments onit everyweek.", "opts": ["timekeeping", "time-consuming", "timesaving", "time-releasing"], "ans": 1},
-{"q": "Tourist: Do youhaveanyinformationoncitytours? Front Desk Clerk: Certainly. Here is a guidebook and some providing detailed information about thecityandthecitytours.", "opts": ["prescriptions", "preferences", "belongings", "brochures"], "ans": 3},
-{"q": "LadiesandGentlemen,asweareencounteringsome ,thecruisingisnotstable.Pleasereturn to yourseat andfasten yourseatbelt.", "opts": ["turbulence", "vacancy", "congestion", "attention"], "ans": 0},
-{"q": "The new luxury hotel boasts a of 500 guests, offering them unparalleled comfort and amenities.", "opts": ["capacity", "bargain", "structure", "design"], "ans": 0},
-{"q": "Aaronis a gourmet. Helikes totry foodwheneverhetravels inforeigncountries.", "opts": ["critic", "extrovert", "negative", "exotic"], "ans": 3},
-{"q": "If you’re traveling to the airport, the shuttle bus will only stop up to two more times after your pickup. By reducing the number of stops, we to provide a safer, more efficient, and more pleasant transportationexperience.", "opts": ["suggest", "strive", "support", "saunter"], "ans": 1},
-{"q": "Thecontroversial art exhibit was designedto thought anddiscussionamongits viewers.", "opts": ["provoke", "rotate", "quench", "numb"], "ans": 0},
-{"q": "Intheunfortunateevent ofagroupmember's accidentaldemiseduringaforeigntrip,itisnecessary to obtain an official from local authorities. This document is crucial for legal and administrativepurposes andis oftenrequiredbythedeceasedperson's homecountry.", "opts": ["quittingreport", "discoverystatement", "deathcertificate", "moralitydeclaration"], "ans": 2},
-{"q": "Taiwan is listed as one of the top 15 hot spring sites, possessing an impressive of springs suchas warm, cool,mud,andevenunderwaterhot springs.", "opts": ["variety", "scarcity", "monotony", "uniformity"], "ans": 0},
-{"q": "Experiencedwinetasters can subtleflavors andaromasthat a casual drinkermight miss.", "opts": ["ignore", "forget", "confuse", "detect"], "ans": 3},
-{"q": "Airportsecurityrulesstatethatpassengerscanonlybring itemsnolargerthan100mlintheir handluggage.", "opts": ["liquid", "lengthy", "explosive", "loose"], "ans": 0},
-{"q": "WhenyoucometoPenghu,youmaysignupforanisland-hoppingtourwitheverythingfromhalf-day tomulti-day available.", "opts": ["initiatives", "itineraries", "intuitions", "insurances"], "ans": 1},
-{"q": "Taiwan is totally open for travel. All COVID-related travel restrictions are finished. You just need tofindout if yourcountryis forvisa-free entry.", "opts": ["changeable", "eligible", "capable", "valuable"], "ans": 1},
-{"q": "Riding a scooter is one of the best ways to explore Taiwan. the offshore islands, going around scooteris practicallyessential.", "opts": ["In…on", "At …with", "For…on", "On…by"], "ans": 3},
-{"q": "Seniorscangeta cardwhichgivesthemsomesmalldiscountswhentransferringtrainsrides.", "opts": ["credit", "business", "concessionaire", "debit"], "ans": 2},
-{"q": "The documents required for applications of working holidays in Taiwan are based on the respective agreements betweencountries.", "opts": ["unrelated", "bilateral", "independent", "autonomous"], "ans": 1},
-{"q": "InTaiwan,Youbikeis virtually withpublicbikesharing.", "opts": ["similar", "same", "documentary", "synonymous"], "ans": 3},
-{"q": "Don’t forget to fill the before returning the car. This will save you extra fuel and service fees.", "opts": ["gas tank", "credit card", "waterbottle", "applicationform"], "ans": 0},
-{"q": "The politician proposed the loosening of restrictions foreigners serving in the hospitality and logistics sectors.", "opts": ["at", "with", "on", "to"], "ans": 2},
-{"q": "Wedecidedtoescapethe city’shustleandbustlebybookingaluxurious beachfront .", "opts": ["luggage", "resort", "seaside", "tourism"], "ans": 1},
-{"q": "The restaurant’s , including crispy calamari, stuffed mushrooms, and savory sliders, left us eagerlyanticipatingthe maincourse.", "opts": ["appetizers", "experiences", "illusions", "desserts"], "ans": 0},
-{"q": "With boarding, my parents were amongthe first to step onto the plane, ensuringa stress-free start ontheirjourney.", "opts": ["denied", "hindered", "priority", "regular"], "ans": 2},
-{"q": "Moreandmoregovernmentsaremakingcommitmentsto tourismbyprovidingeco-friendly accommodations, conservationefforts, and communityengagement initiatives.", "opts": ["fallacious", "intuitive", "sustainable", "territorial"], "ans": 2},
-{"q": "A: Is therea meal ontheflight? B: No,but there’s aselectionofrefreshments availableforasmall fee.", "opts": ["supportive", "complimentary", "domestic", "laboratory"], "ans": 1},
-{"q": "English became the dominant language in international business, communication among peoplefrom diverselinguisticbackgrounds inthe global market.", "opts": ["affiliating", "circulating", "eliminating", "facilitating"], "ans": 3},
-{"q": "Parks andrecreationstaff receivednumerous calls overtheweekendregarding anddamage at TheCentral Park.", "opts": ["feminism", "imperialism", "skepticism", "vandalism"], "ans": 3},
-{"q": "Inthetravelindustry,smartinvestorsmight morebudgettothosemonthswithholidaysand summervacation.", "opts": ["allocate", "conceal", "obscure", "suppress"], "ans": 0},
-{"q": "Themanagertriedveryhardtosqueezeusinforadelightfuldinner therestaurantwasfully booked,showing exceptional customerservice.", "opts": ["as such", "but", "evenif", "unless"], "ans": 2},
-{"q": "A: I heard the natural beauty of Hawaii is under threat due to its booming travel industry. How is this issueaddressed? B:", "opts": ["It maybeuseful ifthe authorities set laws toreducethepermanent residents.", "Ithinkit’s hightimethat thegovernment lure moretourists tovisit theislands.", "Oneapproachistobalanceeconomicbenefitswithprotectingtheuniqueenvironmentandculture.", "Perhapstheysufferfromtherapidlychangingclimatealongwithhomelessnessinthenearfuture."], "ans": 2},
-{"q": "Passenger: Hi, I’dliketo checkinformyflight to NewYork,please. Check-inAgent: Of course,mayIhave your ,please?", "opts": ["hotel reservation", "driver’s license", "passport ande-ticket", "shoppingreceipts"], "ans": 2},
-{"q": "Tour Leader: One of our guests absolutely loved the steak tonight. Is it possible to order an extra forhim? Waiter: Ofcourse! I’dbe happyto assist.Howwouldhelikeit cooked?", "opts": ["offering", "serving", "dish", "ratio"], "ans": 1},
-{"q": "Airline regulations insist on passengers using plastic bags for carryingpersonal belongings throughsecuritycheckpoints, ensuringswift inspectionandcompliance withsafetymeasures.", "opts": ["transparent", "biodegradable", "resealable", "composed"], "ans": 0},
-{"q": "Captain: We’re thrilled to have you with us today and hope you’re as excited as we are for this journeyahead.Our flight timetodayis tobeapproximatelyfivehours.", "opts": ["estimated", "prepared", "previewed", "enabled"], "ans": 0},
-{"q": "The iswhere youcanfill yourprescriptionsandpurchaseover-the-countermedicationsand health-relatedproducts.", "opts": ["supermarket", "gymnasium", "emergency", "pharmacy"], "ans": 3},
-{"q": "Understanding social is crucial when attending formal events to ensure one behaves appropriately.", "opts": ["wellness", "description", "merits", "etiquette"], "ans": 3},
-{"q": "During the tour, the guide highlighted the in case the group got separated in the crowded area.", "opts": ["assemblypoint", "resemblanceplace", "junctionarea", "unityzone"], "ans": 0},
-{"q": "Many people are to pollen, and they experience symptoms like sneezing and itchy eyes duringspring.", "opts": ["immune", "committed", "subject", "allergic"], "ans": 3},
-{"q": "InTaiwan,youdon’tneedtoworryabouttravelingfartofindeateriesthat inexpensivefood.", "opts": ["offer", "offers", "offering", "areoffered"], "ans": 0},
-{"q": "Hotels operated by chains normally provide ranging from budget to luxurious ones. However, there are still many privately owned inns and hotels that provide much less expensive rooms andmeals thanchainhotels.", "opts": ["arrangements", "adaptations", "affiliations", "accommodations"], "ans": 3},
-{"q": "Taiwanese night markets have evolved over the years from small, local gatherings to noisy streets linedwith whomust adheretoregulations placedontheir goods andactivities.", "opts": ["buyers", "salespersons", "monitors", "vendors"], "ans": 3},
-{"q": "Customer: Hello, can you send someone to look at the air conditioning in my room. It’s too noisy andit doesn’t seem tobe workingproperly. Receptionist: I’m sorry,sir. I’ll speaktothe department.", "opts": ["compliance", "indulgence", "maintenance", "negligence"], "ans": 2},
-{"q": "Clerk: Pleasemindthe betweenthetrainandtheplatform whenleavingthetrain.", "opts": ["bag", "exit", "curb", "gap"], "ans": 3},
-{"q": "Guestsmustnotinterferewiththeelectricalnetworkinthehotelroomswithoutthe consent ofthemanagement department.", "opts": ["principal", "princely", "prior", "prospect"], "ans": 2},
-{"q": "What time do people usually have to out of the hotel if they don’t want to pay for another day?", "opts": ["take", "check", "pay", "run"], "ans": 1},
-{"q": "Women are more by spa holidays than men. While spa usage among men is increasing, it wasestimatedthat over65%ofspacustomers are female.", "opts": ["attracted", "attiring", "advised", "attempted"], "ans": 0},
-{"q": "Manycities inJapanare quitepopularvacationdestinations becauseoftheir toTaiwan.", "opts": ["extremity", "proximity", "facility", "ambiguity"], "ans": 1},
-{"q": "Passenger:Excuseme,sir.Aretheretwoemptyseatsnexttoeachother? Myhusbandand Iwantto sit together. Flight Attendant: Holdonamoment,please. Let mechecktheseatingchart. Passenger: That’s fine.Pleasetake yourtime. Flight Attendant: Iam sorry,Madame, but all theseats are inthis flight.", "opts": ["enjoyed", "detected", "emptied", "occupied LongshanTemple, built in 1738, is located inWanhua,Taipei. It is one ofTaipei’s most famous and busiest temples and finest examples of Taiwan’s historical, architectural, and artistic heritage. Due to natural disaster and damages caused by humans, the temple has been restored several times. Its trove includes priceless paintings, carvings, and other skilled work of great artistic value. It is regarded as one oftheoldest andresplendent Buddhist temples inTaiwan. In Longshan Temple, there are three halls lined up back to back with the main hall in the middle of the temple complex, and two covered galleries running down either side. In total, the modular space is composed of 11 units. The complex sports a classical hipped roof with double-eave style. The restored façade wall is constructed of stones hauled all the way from Mt. Guanyin on the north coast along the Tamsui River.As with many EastAsian temples, it has three decorated gates, one inside the next. In the firstcourtyardisawaterfallstand,apointofablution.Carved,richlypainteddragonsguardtheentrances. The main hall was built with bronze dragons on right and left pillars symbolizing protections to the hall, and decorations of delicate sculptures, detailed wood carvings and gorgeous buddha statues settle in the main chamberwithan explosionofbrilliant color. Thetempleissettlednorthfacingsouth,worshippingtheGuanshiyinBuddhaandotherdivinespirits. Religious devotees, local believers, and general tourists come in great numbers, especially during the LunarNewYearperiod. It is animportant placeof worshipandhistorical value."], "ans": 3},
-{"q": "Whichofthefollowingis closest inmeaningtothewordrestored inthefirst paragraph?", "opts": ["Rebuilt", "Destroyed", "Deserted", "Rejected"], "ans": 0},
-{"q": "According to the passage, which of the following statements best explains “The complex sports a classical hippedroofwithdouble-eavestyle”inthesecondparagraph?", "opts": ["Thehippedroof withdouble-eavestyleofthe complex is usedforsports.", "Thecomplex boasts ofits classical hippedroof withdouble-eavestyle.", "Thecomplex hides itsclassical hippedroofwithdouble-eavestyle.", "Thecomplex exercises its classical hippedroof withtwoeaves."], "ans": 1},
-{"q": "Accordingtothepassage,whichofthefollowingstatements is NOTtrueabout LongshanTemple?", "opts": ["It is locatedinWanhua,Taipei.", "It has threedecorated gates.", "Its façadewall is madeofstones.", "It has beenpreserved intact sinceit was first built in1738."], "ans": 3},
-{"q": "Accordingtothepassage,whichofthefollowingstatements is true?", "opts": ["Thetempleis amongtherichest duetoinexhaustibledonations bydevotees.", "There are richlypaintedgorgons that guardthe entranceofeachofthetemplegates.", "Thetemple’s carvings canbe characterizedas slipshod andamateurish.", "Delicatesculptures,woodcarvings andvivid-coloredbuddhastatues sit inthecentral chamber."], "ans": 3},
-{"q": "Whichofthefollowingis NOTmentionedinthe passage?", "opts": ["Paintings andcarvings of LongshanTemple", "Thestructureofthe LongshanTemplecomplex", "Thehistorical valueof LongshanTemple", "Thecost ofbuildingthetemple Culinary tourism is one of the hottest trends in travel. Simply put, culinary tourism is the act of travelingtofindgreatfood,whichincludesanyexperiencewheretouristslearnabout,appreciate,consume, or indulge in food or drinks that reflect the local culture. While some people travel to see historic sights orhit theroadinsearch ofboutiques and souvenirs, more andmorepeople are gettingbit bythe culinary travel bug. It is not hard to see why; culinary tourism allows visitors to engage in a sensory, artistic expression of a destination’s culture. Experts estimate interest in gastronomic tours will increase more than16percent a yearforthenext ten years. Whether people plan to travel solely for delicious eats or just hope to pepper some delectable restaurantsintotheiritinerary,culinarytourismisessentialtomoderntravel.Culinarytourismisn’tsolely about tourists’food or the luxurious restaurants they splurge on. Instead, it’s about eating adventurously andseekingoutnovelculinaryexperiences.Thefurtherthedistancetraveled,themorecomprehensivethe rangeof culinaryopportunities. Culinary tourism is a cornerstone of the modern travel industry. It directly contributes to both the hospitality industry and the overall economy. The development of food culture can help a tourist destination draw new visitors. Since food often reflects an entire nation’s eating habits, culinary tourism can teach visitors valuable cultural lessons. Countries are often associated with particular foods—people will travel across the world to eat the best pizza in Italy or the best ramen in Japan. Every country and culture is an opportunity to try new and different foods. Culinary tourists are eager to learn more about different cultures through theirfoods. Travel has been trending increasingly towards authentic experiences. A recent report from World Food Travel found that 81 percent of surveyed tourists believe that local food helps them understand the culture of their travel destination. Eighty-two percent admit to spending more on food while on vacation thanathome.Eighty-threepercentsayfoodhelpscreatealastingimpressionofacountry.Peoplearemore eager than ever to connect with the real roots of their visiting places. Food is always a significant aspect of any trip—no matter how tired tourists might be, they’re going to sit down and have something to eat. And if they dine at a restaurant and enjoy local street food, they’re likely to take photos and capture the experience to share with friends. Looking back on their trip, they’ll never forget the food theytasted and theadventuresurroundingit."], "ans": 3},
-{"q": "Whichofthefollowingbest describes thepurpose ofthis passage?", "opts": ["Toprovideevidenceshowinghow foodis moreimportant thantheeconomy.", "Todemonstratethesignificanceofthetravelers’culinaryskills incooking.", "Tointerpret howauthenticandwell-cookedlocal foods maywintourists’hearts.", "Tocompromisethevalueofdomesticfoodinpopulartravel destinations."], "ans": 2},
-{"q": "Accordingtothepassage,whichofthefollowingis true?", "opts": ["Moreandmorepeopletravel toseehistoricsights ortosearchsouvenirs.", "Morethaneightypercent ofthesurveyedtourists connect local foodto culture.", "Most tourists still believethat touringtonewandwell-knownplaces is nonnegotiable.", "Culinarytourism contributes muchtothehospitalityindustry,but not to theoverall economy."], "ans": 1},
-{"q": "In the sentence “People are more eager than ever to connect with the real roots of their visiting places,”what does “thereal root”referto?", "opts": ["Local food", "Importedfood", "Historical sites", "Recreational centers"], "ans": 0},
-{"q": "Whichofthefollowinghas theclosest meaningto thewordgastronomicinthefirst paragraph?", "opts": ["Anorexia", "Carnivorous", "Fruitarian", "Gourmet"], "ans": 3},
-{"q": "Accordingtothepassage,whichofthefollowingexplainswhythelocalfoodhasbeenintoxicating?", "opts": ["Thetourists,tiredas theyare, are goingtosit downandhavesomethingtostophunger.", "Tourists havechances totravel adventurouslyandseekout novel cultural experiences.", "Culinarytourists areeagertolearnmore about different cultures through theirfoods.", "Culinarytourism is solelyspendinglavishlyon thefoodortheluxurious restaurants."], "ans": 2}
+const QUESTIONS = [
+  {q:`Wife: Did you make the airline reservation for our trip yet? Husband: ______`, opts:[`Sure, anytime.`, `Great, I’m looking forward to it.`, `Yes, I did that online.`, `Sure, it is my pleasure.`], ans:2},
+  {q:`To protect the houses from air pollution, a special coating was applied on the ______ surface of the walls for all the houses in the town.`, opts:[`exterior`, `revision`, `insanity`, `diarrhea`], ans:0},
+  {q:`During the tea-picking and making season, the ______ of tea permeates tea factories in the mountain.`, opts:[`freshness`, `flimsiness`, `fragrance`, `feature`], ans:2},
+  {q:`Waitress: How would you like your steak? ______ , medium or well done? Guest: Medium, please.`, opts:[`Rough`, `Softened`, `Rare`, `Smoked`], ans:2},
+  {q:`Caller: How much are your single rooms? Front Desk Clerk: The ______ vary depending upon the season and type of single rooms.`, opts:[`specials`, `rates`, `services`, `ranges`], ans:1},
+  {q:`Driver: We’re all set to go, sir. It’ll be about a 20-minute ______ to the hotel. Have you visited Taipei before? Guest: No, this is my first visit.`, opts:[`ride`, `race`, `passage`, `process`], ans:0},
+  {q:`Airports with international flights have customs and ______ facilities, which allow right of entry into a country.`, opts:[`authoritarian`, `immigration`, `segregation`, `sanitation`], ans:1},
+  {q:`The spiritual center of Japan’s culture and ______ , Kyoto is renowned for its abundance of green tea.`, opts:[`heritage`, `vintage`, `courage`, `pilgrimage`], ans:0},
+  {q:`The park’s landscape ______ unique coastal rock formations shaped by natural forces over several million years.`, opts:[`features`, `indulges`, `bargains`, `entreats`], ans:0},
+  {q:`The city was ______ by an exceptional high tide, which caused severe flood damage to bridges and roadways.`, opts:[`struck`, `sponged`, `elicited`, `objected`], ans:0},
+  {q:`The city of Kaohsiung in Taiwan has been performing a ______ job in enhancing its network of off-road bicycle trails, providing ample chances for leisure activities, family outings, and daily commutes.`, opts:[`terrible`, `mediocre`, `horrific`, `fantastic`], ans:3},
+  {q:`When you are faced with a ______ , raising your voice is never a successful way to settle the disagreement.`, opts:[`conflict`, `duration`, `lavatory`, `pamphlet`], ans:0},
+  {q:`When traveling to popular tourist destinations during peak season, encountering crowds is ______ a part of the experience.`, opts:[`rarely`, `inevitably`, `surprisingly`, `randomly`], ans:1},
+  {q:`When driving on curvy or ______ roads, do not fidget with phones and radios. It only takes a moment of inattention before we are out of the lane.`, opts:[`crooked`, `haughty`, `bullish`, `roasted`], ans:0},
+  {q:`The ______ of jungles and rainforests is critical to the survival of many species.`, opts:[`conservation`, `cancellation`, `consultation`, `condensation`], ans:0},
+  {q:`Due to increased demand, the national park started ______ more permits for overnight camping to accommodate more hikers.`, opts:[`collecting`, `issuing`, `engaging`, `decreasing`], ans:1},
+  {q:`Tourism is one of the city’s economic ______ and an important driver of economic growth that provides more employment opportunities to people.`, opts:[`mainstays`, `downturns`, `barbarians`, `reproaches`], ans:0},
+  {q:`Customs and Border Protection officers ______ three shipments containing various luxury items, which were deemed to be counterfeits.`, opts:[`seized`, `averted`, `groaned`, `eroded`], ans:0},
+  {q:`The view from the mountain peak was absolutely ______ , offering a panorama that took my breath away.`, opts:[`rotary`, `lame`, `sublime`, `prompt`], ans:2},
+  {q:`Travelers who bring food and other organic material back to their countries can often ______ carry pests and other risks.`, opts:[`unintentionally`, `disrespectfully`, `institutionally`, `sympathetically`], ans:0},
+  {q:`Dear guests, you are leaving Taiwan tomorrow morning. As your tour guide, I would like to inform you a few things concerning your ______ . First, your baggage pick-up time is 9:00 a.m. tomorrow morning, and please have all your baggage ready and put them outside your room by 9:00 a.m.`, opts:[`departure`, `department`, `compartment`, `apartment`], ans:0},
+  {q:`Those items in this show room are ______ in price and quality, so it’s really a matter of what your own preference is in weight and color.`, opts:[`comparable`, `compare`, `comparing`, `comparison`], ans:0},
+  {q:`Guest: Where is the fitness center? Front Desk Clerk: Go pass the sauna and turn right. The signs will ______ you there. You can’t miss it.`, opts:[`direct`, `detect`, `deduct`, `induct`], ans:0},
+  {q:`It is a good habit for students to keep a diary every day. However, it will be a ______ task for their teachers to review the diary and make some comments on it every week.`, opts:[`timekeeping`, `time-consuming`, `timesaving`, `time-releasing`], ans:1},
+  {q:`Tourist: Do you have any information on city tours? Front Desk Clerk: Certainly. Here is a guidebook and some ______ providing detailed information about the city and the city tours.`, opts:[`prescriptions`, `preferences`, `belongings`, `brochures`], ans:3},
+  {q:`Ladies and Gentlemen, as we are encountering some ______ , the cruising is not stable. Please return to your seat and fasten your seatbelt.`, opts:[`turbulence`, `vacancy`, `congestion`, `attention`], ans:0},
+  {q:`The new luxury hotel boasts a ______ of 500 guests, offering them unparalleled comfort and amenities.`, opts:[`capacity`, `bargain`, `structure`, `design`], ans:0},
+  {q:`Aaron is a gourmet. He likes to try ______ food whenever he travels in foreign countries.`, opts:[`critic`, `extrovert`, `negative`, `exotic`], ans:3},
+  {q:`If you’re traveling to the airport, the shuttle bus will only stop up to two more times after your pickup. By reducing the number of stops, we ______ to provide a safer, more efficient, and more pleasant transportation experience.`, opts:[`suggest`, `strive`, `support`, `saunter`], ans:1},
+  {q:`The controversial art exhibit was designed to ______ thought and discussion among its viewers.`, opts:[`provoke`, `rotate`, `quench`, `numb`], ans:0},
+  {q:`In the unfortunate event of a group member's accidental demise during a foreign trip, it is necessary to obtain an official ______ from local authorities. This document is crucial for legal and administrative purposes and is often required by the deceased person's home country.`, opts:[`quitting report`, `discovery statement`, `death certificate`, `morality declaration`], ans:2},
+  {q:`Taiwan is listed as one of the top 15 hot spring sites, possessing an impressive ______ of springs such as warm, cool, mud, and even underwater hot springs.`, opts:[`variety`, `scarcity`, `monotony`, `uniformity`], ans:0},
+  {q:`Experienced wine tasters can ______ subtle flavors and aromas that a casual drinker might miss.`, opts:[`ignore`, `forget`, `confuse`, `detect`], ans:3},
+  {q:`Airport security rules state that passengers can only bring ______ items no larger than 100ml in their hand luggage.`, opts:[`liquid`, `lengthy`, `explosive`, `loose`], ans:0},
+  {q:`When you come to Penghu, you may sign up for an island-hopping tour with everything from half-day to multi-day ______ available.`, opts:[`initiatives`, `itineraries`, `intuitions`, `insurances`], ans:1},
+  {q:`Taiwan is totally open for travel. All COVID-related travel restrictions are finished. You just need to find out if your country is ______ for visa-free entry.`, opts:[`changeable`, `eligible`, `capable`, `valuable`], ans:1},
+  {q:`Riding a scooter is one of the best ways to explore Taiwan. ______ the offshore islands, going around ______ scooter is practically essential.`, opts:[`In… on`, `At … with`, `For … on`, `On…by`], ans:3},
+  {q:`Seniors can get a ______ card which gives them some small discounts when transferring trains rides.`, opts:[`credit`, `business`, `concessionaire`, `debit`], ans:2},
+  {q:`The documents required for applications of working holidays in Taiwan are based on the respective ______ agreements between countries.`, opts:[`unrelated`, `bilateral`, `independent`, `autonomous`], ans:1},
+  {q:`In Taiwan, Youbike is virtually ______ with public bike sharing.`, opts:[`similar`, `same`, `documentary`, `synonymous`], ans:3},
+  {q:`Don’t forget to fill the ______ before returning the car. This will save you extra fuel and service fees.`, opts:[`gas tank`, `credit card`, `water bottle`, `application form`], ans:0},
+  {q:`The politician proposed the loosening of restrictions ______ foreigners serving in the hospitality and logistics sectors.`, opts:[`at`, `with`, `on`, `to`], ans:2},
+  {q:`We decided to escape the city’s hustle and bustle by booking a luxurious beachfront ______ .`, opts:[`luggage`, `resort`, `seaside`, `tourism`], ans:1},
+  {q:`The restaurant’s ______ , including crispy calamari, stuffed mushrooms, and savory sliders, left us eagerly anticipating the main course.`, opts:[`appetizers`, `experiences`, `illusions`, `desserts`], ans:0},
+  {q:`With ______ boarding, my parents were among the first to step onto the plane, ensuring a stress-free start on their journey.`, opts:[`denied`, `hindered`, `priority`, `regular`], ans:2},
+  {q:`More and more governments are making commitments to ______ tourism by providing eco-friendly accommodations, conservation efforts, and community engagement initiatives.`, opts:[`fallacious`, `intuitive`, `sustainable`, `territorial`], ans:2},
+  {q:`A: Is there a ______ meal on the flight? B: No, but there’s a selection of refreshments available for a small fee.`, opts:[`supportive`, `complimentary`, `domestic`, `laboratory`], ans:1},
+  {q:`English became the dominant language in international business, ______ communication among people from diverse linguistic backgrounds in the global market.`, opts:[`affiliating`, `circulating`, `eliminating`, `facilitating`], ans:3},
+  {q:`Parks and recreation staff received numerous calls over the weekend regarding ______ and damage at The Central Park.`, opts:[`feminism`, `imperialism`, `skepticism`, `vandalism`], ans:3},
+  {q:`In the travel industry, smart investors might ______ more budget to those months with holidays and summer vacation.`, opts:[`allocate`, `conceal`, `obscure`, `suppress`], ans:0},
+  {q:`The manager tried very hard to squeeze us in for a delightful dinner ______ the restaurant was fully booked, showing exceptional customer service.`, opts:[`as such`, `but`, `even if`, `unless`], ans:2},
+  {q:`A: I heard the natural beauty of Hawaii is under threat due to its booming travel industry. How is this issue addressed? B: ______`, opts:[`It may be useful if the authorities set laws to reduce the permanent residents.`, `I think it’s high time that the government lure more tourists to visit the islands.`, `One approach is to balance economic benefits with protecting the unique environment and culture.`, `Perhaps they suffer from the rapidly changing climate along with homelessness in the near future.`], ans:2},
+  {q:`Passenger: Hi, I’d like to check in for my flight to New York, please. Check-in Agent: Of course, may I have your ______ , please?`, opts:[`hotel reservation`, `driver’s license`, `passport and e-ticket`, `shopping receipts`], ans:2},
+  {q:`Tour Leader: One of our guests absolutely loved the steak tonight. Is it possible to order an extra ______ for him? Waiter: Of course! I’d be happy to assist. How would he like it cooked?`, opts:[`offering`, `serving`, `dish`, `ratio`], ans:1},
+  {q:`Airline regulations insist on passengers using ______ plastic bags for carrying personal belongings through security checkpoints, ensuring swift inspection and compliance with safety measures.`, opts:[`transparent`, `biodegradable`, `resealable`, `composed`], ans:0},
+  {q:`Captain: We’re thrilled to have you with us today and hope you’re as excited as we are for this journey ahead. Our flight time today is ______ to be approximately five hours.`, opts:[`estimated`, `prepared`, `previewed`, `enabled`], ans:0},
+  {q:`The ______ is where you can fill your prescriptions and purchase over-the-counter medications and health-related products.`, opts:[`supermarket`, `gymnasium`, `emergency`, `pharmacy`], ans:3},
+  {q:`Understanding social ______ is crucial when attending formal events to ensure one behaves appropriately.`, opts:[`wellness`, `description`, `merits`, `etiquette`], ans:3},
+  {q:`During the tour, the guide highlighted the ______ in case the group got separated in the crowded area.`, opts:[`assembly point`, `resemblance place`, `junction area`, `unity zone`], ans:0},
+  {q:`Many people are ______ to pollen, and they experience symptoms like sneezing and itchy eyes during spring.`, opts:[`immune`, `committed`, `subject`, `allergic`], ans:3},
+  {q:`In Taiwan, you don’t need to worry about traveling far to find eateries that ______ inexpensive food.`, opts:[`offer`, `offers`, `offering`, `are offered`], ans:0},
+  {q:`Hotels operated by chains normally provide ______ ranging from budget to luxurious ones. However, there are still many privately owned inns and hotels that provide much less expensive rooms and meals than chain hotels.`, opts:[`arrangements`, `adaptations`, `affiliations`, `accommodations`], ans:3},
+  {q:`Taiwanese night markets have evolved over the years from small, local gatherings to noisy streets lined with ______ who must adhere to regulations placed on their goods and activities.`, opts:[`buyers`, `salespersons`, `monitors`, `vendors`], ans:3},
+  {q:`Customer: Hello, can you send someone to look at the air conditioning in my room. It’s too noisy and it doesn’t seem to be working properly. Receptionist: I’m sorry, sir. I’ll speak to the ______ department.`, opts:[`compliance`, `indulgence`, `maintenance`, `negligence`], ans:2},
+  {q:`Clerk: Please mind the ______ between the train and the platform when leaving the train.`, opts:[`bag`, `exit`, `curb`, `gap`], ans:3},
+  {q:`Guests must not interfere with the electrical network in the hotel rooms without the ______ consent of the management department.`, opts:[`principal`, `princely`, `prior`, `prospect`], ans:2},
+  {q:`What time do people usually have to ______ out of the hotel if they don’t want to pay for another day?`, opts:[`take`, `check`, `pay`, `run`], ans:1},
+  {q:`Women are more ______ by spa holidays than men. While spa usage among men is increasing, it was estimated that over 65% of spa customers are female.`, opts:[`attracted`, `attiring`, `advised`, `attempted`], ans:0},
+  {q:`Many cities in Japan are quite popular vacation destinations because of their ______ to Taiwan.`, opts:[`extremity`, `proximity`, `facility`, `ambiguity`], ans:1},
+  {q:`Passenger: Excuse me, sir. Are there two empty seats next to each other? My husband and I want to sit together. Flight Attendant: Hold on a moment, please. Let me check the seating chart. Passenger: That’s fine. Please take your time. Flight Attendant: I am sorry, Madame, but all the seats are ______ in this flight.`, opts:[`enjoyed`, `detected`, `emptied`, `occupied`], ans:3},
+  {q:`Which of the following is closest in meaning to the word restored ______ in the first paragraph?`, opts:[`Rebuilt`, `Destroyed`, `Deserted`, `Rejected`], ans:0},
+  {q:`According to the passage, which of the following statements best explains “The complex sports a classical hipped roof with double-eave style” in the second paragraph?`, opts:[`The hipped roof with double-eave style of the complex is used for sports.`, `The complex boasts of its classical hipped roof with double-eave style.`, `The complex hides its classical hipped roof with double-eave style.`, `The complex exercises its classical hipped roof with two eaves.`], ans:1},
+  {q:`According to the passage, which of the following statements is NOT true about Longshan Temple?`, opts:[`It is located in Wanhua, Taipei.`, `It has three decorated gates.`, `Its façade wall is made of stones.`, `It has been preserved intact since it was first built in 1738.`], ans:3},
+  {q:`According to the passage, which of the following statements is true?`, opts:[`The temple is among the richest due to inexhaustible donations by devotees.`, `There are richly painted gorgons that guard the entrance of each of the temple gates.`, `The temple’s carvings can be characterized as slipshod and amateurish.`, `Delicate sculptures, wood carvings and vivid-colored buddha statues sit in the central chamber.`], ans:3},
+  {q:`Which of the following is NOT mentioned in the passage? Culinary tourism is a cornerstone of the modern travel industry. It directly contributes to both the hospitality industry and the overall economy. The development of food culture can help a tourist destination draw new visitors. Since food often reflects an entire nation’s eating habits, culinary tourism can teach visitors valuable cultural lessons. Countries are often associated with particular foods—people will travel across the world to eat the best pizza in Italy or the best ramen in Japan. Every country and culture is an opportunity to try new and different foods. Culinary tourists are eager to learn more about different cultures through their foods. Travel has been trending increasingly towards authentic experiences. A recent report from World Food Travel found that 81 percent of surveyed tourists believe that local food helps them understand the culture of their travel destination. Eighty-two percent admit to spending more on food while on vacation than at home. Eighty-three percent say food helps create a lasting impression of a country. People are more eager than ever to connect with the real roots of their visiting places. Food is always a significant aspect of any trip—no matter how tired tourists might be, they’re going to sit down and have something to eat. And if they dine at a restaurant and enjoy local street food, they’re likely to take photos and capture the experience to share with friends. Looking back on their trip, they’ll never forget the food they tasted and the adventure surrounding it.`, opts:[`Paintings and carvings of Longshan Temple`, `The structure of the Longshan Temple complex`, `The historical value of Longshan Temple`, `The cost of building the temple`], ans:3},
+  {q:`Which of the following best describes the purpose of this passage?`, opts:[`To provide evidence showing how food is more important than the economy.`, `To demonstrate the significance of the travelers’ culinary skills in cooking.`, `To interpret how authentic and well-cooked local foods may win tourists’ hearts.`, `To compromise the value of domestic food in popular travel destinations.`], ans:2},
+  {q:`According to the passage, which of the following is true?`, opts:[`More and more people travel to see historic sights or to search souvenirs.`, `More than eighty percent of the surveyed tourists connect local food to culture.`, `Most tourists still believe that touring to new and well-known places is nonnegotiable.`, `Culinary tourism contributes much to the hospitality industry, but not to the overall economy.`], ans:1},
+  {q:`In the sentence “People are more eager than ever to connect with the real roots of their visiting places,” what does “the real root” refer to?`, opts:[`Local food`, `Imported food`, `Historical sites`, `Recreational centers`], ans:0},
+  {q:`Which of the following has the closest meaning to the word gastronomic in the first paragraph?`, opts:[`Anorexia`, `Carnivorous`, `Fruitarian`, `Gourmet`], ans:3},
+  {q:`According to the passage, which of the following explains why the local food has been intoxicating?`, opts:[`The tourists, tired as they are, are going to sit down and have something to stop hunger.`, `Tourists have chances to travel adventurously and seek out novel cultural experiences.`, `Culinary tourists are eager to learn more about different cultures through their foods.`, `Culinary tourism is solely spending lavishly on the food or the luxurious restaurants.`], ans:2}
 ];
-const TOTAL_TIME=3600;
-let timeLeft=TOTAL_TIME,timerInterval=null,submitted=false;
-const answers=new Array(QUESTIONS.length).fill(-1);
-
-function init(){
-  const qa=document.getElementById('quiz-area');
-  const dots=document.getElementById('dots');
-  document.getElementById('totalQ').textContent=QUESTIONS.length;
-  qa.innerHTML='';dots.innerHTML='';
-  QUESTIONS.forEach((q,i)=>{
-    const dot=document.createElement('div');
-    dot.className='dot';dot.id='dot'+i;
-    dot.title='第'+(i+1)+'題';
-    dot.onclick=()=>document.getElementById('q'+i).scrollIntoView({behavior:'smooth',block:'center'});
-    dots.appendChild(dot);
-    const card=document.createElement('div');
-    card.className='question-card';card.id='q'+i;
-    const optsHtml=q.opts.map((o,j)=>`
-      <label class="opt-label" id="opt${i}_${j}">
-        <input type="radio" name="q${i}" value="${j}" onchange="selectAns(${i},${j})">
-        <span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span>
-      </label>`).join('');
-    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div>
-      <div class="q-text">${escHtml(q.q)}</div>
-      <div class="options">${optsHtml}</div>`;
-    qa.appendChild(card);
-  });
-  startTimer();
-}
-
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-
-function selectAns(qi,val){
-  answers[qi]=val;
-  document.getElementById('dot'+qi).classList.add('answered');
-  document.querySelectorAll(`#q${qi} .opt-label`).forEach((l,j)=>{
-    l.classList.toggle('selected',j===val);
+const KEYS = ['A','B','C','D'];
+const TOTAL_TIME = 4800;
+let timeLeft = TOTAL_TIME;
+let timerInterval;
+let userAnswers = new Array(QUESTIONS.length).fill(-1);
+let submitted = false;
+let startTime = Date.now();
+function buildQuiz() {
+  const form = document.getElementById('quizForm');
+  const dotGrid = document.getElementById('dotGrid');
+  form.innerHTML = ''; dotGrid.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot'; dot.id = `dot${i}`; dot.textContent = i+1;
+    dot.onclick = () => document.getElementById(`q${i}`).scrollIntoView({behavior:'smooth', block:'center'});
+    dotGrid.appendChild(dot);
+    const card = document.createElement('div');
+    card.className = 'q-card'; card.id = `q${i}`;
+    const qHtml = q.q.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題</div><div class="q-text">${qHtml}</div><div class="options" id="opts${i}">${q.opts.map((opt, j) => `<label class="option-label" id="lbl${i}_${j}" onclick="selectOption(${i},${j})"><input type="radio" name="q${i}" value="${j}"><span class="option-key">${KEYS[j]}</span><span>${opt}</span></label>`).join('')}</div>`;
+    form.appendChild(card);
   });
 }
-
-function startTimer(){
-  timerInterval=setInterval(()=>{
-    if(submitted)return;
+function selectOption(qi, oi) {
+  if (submitted) return;
+  userAnswers[qi] = oi;
+  for (let j = 0; j < 4; j++) document.getElementById(`lbl${qi}_${j}`).classList.toggle('selected', j === oi);
+  document.getElementById(`q${qi}`).classList.add('answered');
+  document.getElementById(`dot${qi}`).classList.add('done');
+  document.getElementById('answeredCount').textContent = userAnswers.filter(a => a !== -1).length;
+}
+function startTimer() {
+  timerInterval = setInterval(() => {
     timeLeft--;
-    const m=Math.floor(timeLeft/60),s=timeLeft%60;
-    const el=document.getElementById('timer');
-    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-    el.className='timer';
-    if(timeLeft<=300)el.classList.add('danger');
-    else if(timeLeft<=600)el.classList.add('warn');
-    if(timeLeft<=0){clearInterval(timerInterval);submitQuiz(true);}
-  },1000);
+    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+    document.getElementById('timerValue').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    document.getElementById('timerBar').style.width = (timeLeft / TOTAL_TIME * 100) + '%';
+    const box = document.getElementById('timerBox');
+    if (timeLeft <= 300) box.className = 'timer-box danger';
+    else if (timeLeft <= 600) box.className = 'timer-box warning';
+    if (timeLeft <= 0) { clearInterval(timerInterval); if (!submitted) { alert('⏰ 時間到！自動交卷。'); submitQuiz(true); } }
+  }, 1000);
 }
-
-function submitQuiz(timeout=false){
-  if(submitted)return;
-  const unanswered=answers.filter(a=>a===-1).length;
-  if(!timeout&&unanswered>0){
-    if(!confirm(`還有 ${unanswered} 題未作答，確定要交卷？`))return;
+function submitQuiz(forced=false) {
+  const unanswered = userAnswers.filter(a => a === -1).length;
+  if (!forced && unanswered > 0) {
+    document.getElementById('unansMsg').innerHTML = `<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？<br><button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button><button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button></div>`;
+    return;
   }
-  clearInterval(timerInterval);submitted=true;
-  document.getElementById('submit-wrap').classList.add('hidden');
-  document.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
-  showResults();
-}
-
-function showResults(){
-  let correct=0,wrong=0,skip=0;
-  QUESTIONS.forEach((q,i)=>{
-    if(answers[i]===-1)skip++;
-    else if(answers[i]===q.ans)correct++;
-    else wrong++;
+  submitted = true; clearInterval(timerInterval);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const em = Math.floor(elapsed / 60), es = elapsed % 60;
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const card = document.getElementById(`q${i}`);
+    if (userAnswers[i] === q.ans) {
+      correct++; card.className = 'q-card result-correct';
+      const badge = document.createElement('div'); badge.className = 'result-badge ok'; badge.innerHTML = '✅ 答對';
+      card.querySelector('.options').after(badge);
+    } else {
+      card.className = 'q-card result-wrong';
+      const badge = document.createElement('div'); badge.className = 'result-badge err'; badge.innerHTML = '❌ 答錯';
+      card.querySelector('.options').after(badge);
+      const note = document.createElement('div'); note.className = 'correct-note';
+      note.innerHTML = `✔ 正確答案：<strong>${KEYS[q.ans]}：${q.opts[q.ans]}</strong>`; badge.after(note);
+    }
+    for (let j = 0; j < 4; j++) {
+      const lbl = document.getElementById(`lbl${i}_${j}`); lbl.style.cursor = 'default';
+      if (j === q.ans) lbl.classList.add('correct-ans');
+      else if (j === userAnswers[i] && userAnswers[i] !== q.ans) lbl.classList.add('wrong-ans');
+    }
   });
-  const score=Math.round(correct/QUESTIONS.length*100);
-  const timeTaken=TOTAL_TIME-timeLeft;
-  const tm=Math.floor(timeTaken/60),ts=timeTaken%60;
-  let grade='',gradeClass='';
-  if(score>=80){grade='優秀';gradeClass='excellent'}
-  else if(score>=60){grade='及格';gradeClass='pass'}
-  else{grade='未及格';gradeClass='fail'}
-
-  document.getElementById('score-panel').innerHTML=`
-    <div class="score-big">${score} 分</div>
-    <div class="grade ${gradeClass}">${grade}</div>
-    <div class="stats">
-      <div class="stat-item"><div class="stat-num" style="color:#27ae60">${correct}</div><div>答對</div></div>
-      <div class="stat-item"><div class="stat-num" style="color:#e74c3c">${wrong}</div><div>答錯</div></div>
-      <div class="stat-item"><div class="stat-num" style="color:#888">${skip}</div><div>未作答</div></div>
-      <div class="stat-item"><div class="stat-num" style="color:#2c5f8a">${String(tm).padStart(2,'0')}:${String(ts).padStart(2,'0')}</div><div>用時</div></div>
-    </div>`;
-  document.getElementById('score-panel').classList.remove('hidden');
-  document.getElementById('filter-bar').classList.remove('hidden');
-  document.getElementById('reset-wrap').classList.remove('hidden');
-
-  const ra=document.getElementById('result-area');
-  ra.innerHTML='';
-  QUESTIONS.forEach((q,i)=>{
-    const userAns=answers[i];
-    const isCorrect=userAns===q.ans;
-    const isSkip=userAns===-1;
-    const card=document.createElement('div');
-    card.className='question-card'+(isCorrect?' correct':isSkip?'':' wrong');
-    card.id='rq'+i;
-    const optsHtml=q.opts.map((o,j)=>{
-      let cls='opt-label';
-      if(j===q.ans)cls+=' correct-ans';
-      else if(j===userAns&&!isCorrect)cls+=' wrong-ans';
-      return `<label class="${cls}"><span>${String.fromCharCode(65+j)}. ${escHtml(o)}</span></label>`;
-    }).join('');
-    const mark=isCorrect?'✅':isSkip?'⬜':'❌';
-    const hint=(!isCorrect&&!isSkip)?`<div class="correct-hint">✔ 正確答案：${String.fromCharCode(65+q.ans)}. ${escHtml(q.opts[q.ans])}</div>`:'';
-    card.innerHTML=`<div class="q-num">第 ${i+1} 題 <span class="result-mark">${mark}</span></div>
-      <div class="q-text">${escHtml(q.q)}</div>
-      <div class="options">${optsHtml}</div>${hint}`;
-    ra.appendChild(card);
+  const score = correct * (100 / QUESTIONS.length);
+  const wrong = QUESTIONS.length - correct - userAnswers.filter(a=>a===-1).length;
+  const skip = userAnswers.filter(a=>a===-1).length;
+  let grade, gradeColor;
+  if (score >= 80) { grade = '🏆 優秀'; gradeColor = '#276749'; }
+  else if (score >= 60) { grade = '✅ 及格'; gradeColor = '#2b6cb0'; }
+  else { grade = '❌ 未及格'; gradeColor = '#c53030'; }
+  document.getElementById('scoreVal').textContent = score.toFixed(0) + ' 分';
+  document.getElementById('scoreDetail').textContent = `共 ${QUESTIONS.length} 題・每題 1.25 分`;
+  const gradeEl = document.getElementById('scoreGrade');
+  gradeEl.textContent = grade; gradeEl.style.background = gradeColor + '22'; gradeEl.style.color = gradeColor;
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('statSkip').textContent = skip;
+  document.getElementById('statTime').textContent = String(em).padStart(2,'0') + ':' + String(es).padStart(2,'0');
+  document.getElementById('score-panel').style.display = 'block';
+  document.getElementById('unansMsg').innerHTML = '';
+  document.querySelector('.btn-submit').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'inline-block';
+  document.getElementById('score-panel').scrollIntoView({behavior:'smooth'});
+}
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q, i) => {
+    const card = document.getElementById(`q${i}`);
+    if (mode === 'all') card.style.display = '';
+    else if (mode === 'wrong') card.style.display = (userAnswers[i] !== q.ans) ? '' : 'none';
+    else if (mode === 'correct') card.style.display = (userAnswers[i] === q.ans) ? '' : 'none';
   });
 }
-
-function filterQ(type,btn){
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  QUESTIONS.forEach((q,i)=>{
-    const card=document.getElementById('rq'+i);
-    if(!card)return;
-    if(type==='all')card.classList.remove('hidden');
-    else if(type==='wrong')card.classList.toggle('hidden',answers[i]===q.ans);
-    else if(type==='correct')card.classList.toggle('hidden',answers[i]!==q.ans);
-  });
+function resetQuiz() {
+  submitted = false; userAnswers = new Array(QUESTIONS.length).fill(-1);
+  timeLeft = TOTAL_TIME; startTime = Date.now(); clearInterval(timerInterval);
+  document.getElementById('timerBox').className = 'timer-box';
+  document.getElementById('timerValue').textContent = '80:00';
+  document.getElementById('timerBar').style.width = '100%';
+  document.getElementById('score-panel').style.display = 'none';
+  document.querySelector('.btn-submit').style.display = 'inline-block';
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('unansMsg').innerHTML = '';
+  document.getElementById('answeredCount').textContent = '0';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-btn').classList.add('active');
+  buildQuiz(); startTimer(); window.scrollTo({top:0, behavior:'smooth'});
 }
-
-function resetQuiz(){
-  submitted=false;timeLeft=TOTAL_TIME;
-  answers.fill(-1);
-  document.getElementById('score-panel').classList.add('hidden');
-  document.getElementById('filter-bar').classList.add('hidden');
-  document.getElementById('reset-wrap').classList.add('hidden');
-  document.getElementById('result-area').innerHTML='';
-  init();
-  document.getElementById('submit-wrap').classList.remove('hidden');
-  window.scrollTo(0,0);
-}
-
-init();
+buildQuiz(); startTimer();
 </script>
 </body>
 </html>
