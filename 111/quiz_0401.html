@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>111年 外語領隊 領隊英語</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a4a70,#2c5f8a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3e5f5;color:#6a1b9a}
+.header h1{font-size:1rem;font-weight:700;flex:1}
+.timer{background:rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;min-width:70px;text-align:center}
+.timer.warn{background:rgba(255,180,0,.4)}
+.timer.danger{background:rgba(220,50,50,.5);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-wrap{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 16px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#666;cursor:pointer;transition:.15s}
+.dot.answered{background:#2c5f8a;color:#fff}
+.dot.correct{background:#27ae60;color:#fff}
+.dot.wrong{background:#e74c3c;color:#fff}
+.container{max-width:820px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:10px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.4}
+.opt:hover{border-color:#2c5f8a;background:#f0f6ff}
+.opt.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt.correct-ans{border-color:#27ae60;background:#e8f5e9!important}
+.opt.wrong-ans{border-color:#e74c3c;background:#fdecea!important}
+.opt-label{font-weight:700;min-width:18px;color:#2c5f8a}
+.result-msg{margin-top:8px;font-size:.82rem;padding:6px 10px;border-radius:6px}
+.result-msg.correct{background:#e8f5e9;color:#1e6b3d}
+.result-msg.wrong{background:#fdecea;color:#c0392b}
+.result-msg.special{background:#fff3cd;color:#856404}
+.submit-bar{text-align:center;padding:20px 0 40px}
+.btn-submit{background:#2c5f8a;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#1a4a70}
+.score-panel{display:none;background:#fff;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.12);text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:3rem;font-weight:900;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.pass{color:#27ae60}.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:24px;margin:12px 0;font-size:.85rem;color:#666}
+.filter-bar{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.btn-reset{background:#fff;color:#2c5f8a;border:2px solid #2c5f8a;border-radius:10px;padding:10px 30px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s}
+.btn-reset:hover{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+.year-label{font-size:.7rem;opacity:.8;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">外語領隊</span>
+  <h1>領隊英語<span class="year-label">111年</span></h1>
+  <div class="timer" id="timer">60:00</div>
+</div>
+<div class="progress-wrap">
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="container">
+  <div class="score-panel" id="scorePanel">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="grade" id="gradeLabel"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all')">全部</button>
+      <button class="filter-btn" onclick="filterCards('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterCards('correct')">只看對題</button>
+    </div>
+    <button class="btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+  <div id="quizArea"></div>
+  <div class="submit-bar" id="submitBar">
+    <button class="btn-submit" onclick="submitQuiz()">📋 交卷批改</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`If youtakethis , maybe youcan get tothe bus stationin15minutes.`,opts:[`shortcut`,`sign`,`angle`,`landmark`],ans:0},
+  {q:`Do youhavea(n) prooftoverifythat you haveenoughmoneytostayinthis country?`,opts:[`laborious`,`racial`,`healthy`,`financial`],ans:3},
+  {q:`Airlineagent: Arethere any items in your luggage,suchas hairsprayorscissors? Traveler: No,sir.Thereis none.`,opts:[`banned`,`disabled`,`refreshed`,`renewed`],ans:0},
+  {q:`Guest: Could youplease helpmeput mycarry-on bagintotheoverhead . Flight attendant: Yes,no problem.`,opts:[`obstacle`,`cabin`,`compartment`,`booth`],ans:2},
+  {q:`The coach is leaving Taipei on Fridayhalf an hour later, at a quarter seven in the morning, not aquarterpast six.`,opts:[`on`,`off`,`to`,`in`],ans:2},
+  {q:`Iprefertopack . Does yourhotel provide freetoiletries?`,opts:[`light`,`afield`,`atop`,`live`],ans:0},
+  {q:`Guest: Would thewhitewinego well with mymeal? Waiter: Yes, thewineshould it nicely.`,opts:[`compile`,`compete`,`complement`,`compliment`],ans:2},
+  {q:`Grandpa: Whereare your table ? Sit upstraight and get yourelbows offthetable. Grandson: Okay,mybad.`,opts:[`manners`,`matters`,`banners`,`trainers`],ans:0},
+  {q:`Ladiesandgentlemen,pleasereturntoyourseatsandfastenyourseatbelts.Wewillexperience soon.Pleaseremainseatedfor yourownsafety.`,opts:[`turbo`,`trouble`,`turbulence`,`tremble`],ans:2},
+  {q:`Howmuchis thetaxi from Kaohsiungto Taipei?`,opts:[`route`,`room`,`fair`,`fare`],ans:3},
+  {q:`Receptionist: Ourone-daypackagetourincludes a guidedtourofthecityandfree . Guest: That sounds perfect.`,opts:[`recommendation`,`operation`,`transportation`,`destination`],ans:2},
+  {q:`Guest: I’d like to shop at the night market if they accept payment such as Line Pay, Apple Pay,or GooglePay. Tourguide: Somevendors evenaccept TaiwanPayorJKOPay. Let’s give it atry.`,opts:[`device`,`engine`,`mobile`,`media`],ans:2},
+  {q:`Guest: Could Ipaywithtraveler’s checks? Clerk:Sorry,Sir.Traveler’schecksarenolongeraccepted.Theycan’tbeeasilycashed,evenatthe banks that them.`,opts:[`pursued`,`issued`,`rocked`,`tagged`],ans:1},
+  {q:`Foreign guest: Howcould Iusethis phoneto makea collect call? Tourleader: Pleasedial 108.`,opts:[`redundant`,`dramatic`,`parallel`,`public`],ans:3},
+  {q:`Tourist: I’dliketoreport atheft case. Police: Could you thesituation? I’ll create arecord for yourcase. Youmayneedtostopby thepolicestation.`,opts:[`decide`,`describe`,`deploy`,`decline`],ans:1},
+  {q:`Tourist: Sir,acaraccident just happenedacross thestreet. Police: Dotheyneedan ambulance? Tourist: No,Sir.But Ithinktheyneedhelp. Police: OK, I’ll a policesquad,andit will betherewithinfiveminutes.`,opts:[`dispatch`,`dismiss`,`disclose`,`disconnect`],ans:0},
+  {q:`In 1666, the Great Fire burnt for three days and destroyed most buildings in London. The famous architect,ChristopherWren, manybuildings aftertheGreat Fire.`,opts:[`designed`,`disobeyed`,`clarified`,`paralyzed`],ans:0},
+  {q:`Have you thenews report onthenewvariant ofCOVID-19?`,opts:[`moved`,`read`,`thrown`,`slipped`],ans:1},
+  {q:`Doorman: Goodday,Ma’am.Youlikewatermelon,don’t you? Guest: Yes, Ido. It tastes great andis inexpensive. This melon only me\$200 dollars.`,opts:[`spends`,`borrows`,`costs`,`pays`],ans:2},
+  {q:`International calls to mobile phones registered inanother countryare higher rates. The first zero of an international number must be deleted since it is a “trunk prefix” only for domestic calls withinmanycountries.`,opts:[`told`,`changed`,`elected`,`charged`],ans:3},
+  {q:`Traveler: Ithinkmyvisa is nolongervalid. Borderagent: Yes, youareright.Please totheimmigrationservicecounter.`,opts:[`plead`,`preach`,`proceed`,`process`],ans:2},
+  {q:`KaengKrachan Forest Complexis as aUNESCOWorldHeritageSitein2021.This areais locatedbetweentheHimalayan,Indochina,andSumatranfaunalwithrichbiodiversityandhometo manyendangeredplants andwildlifespecies.`,opts:[`designated`,`diminished`,`cemented`,`adjusted`],ans:0},
+  {q:`Thosewhooverstaytheirvisaneedtofill out anapplicationform,provideacopyofpassport,and aticket toleavethecountryin7days.`,opts:[`push`,`loose`,`hang`,`book`],ans:3},
+  {q:`Customer: Could you givemea30%discount for this shirt? Vendor: No. It is alreadyareal .That’s the best wecanoffer.`,opts:[`bargain`,`parade`,`circle`,`bill`],ans:0},
+  {q:`Yoursuitcase theweightlimitbytwokilograms.Youmightwanttogiveupsomeitems,or put them awayin yourcarry-onbag.`,opts:[`expresses`,`excludes`,`explores`,`exceeds`],ans:3},
+  {q:`Guest: I if Icouldhaveastrawforthejuice. Flight attendant: Sorry, Sir. Due to environmental concern, we do not provide straws to our customers.`,opts:[`wander`,`wonder`,`cheat`,`shout`],ans:1},
+  {q:`Guest: Howmuch doweneedtowait inlinebeforethetake-off? Flight attendant: It depends onhowmanyplanes areaheadofus.`,opts:[`greater`,`slower`,`lighter`,`longer`],ans:3},
+  {q:`Reclaim on Demand is an automated system designed for the future of . It gives passengers visibility into when and where their bags will appear. Passengers will be contacted via an in-app messagetocollect theirbags.`,opts:[`aircirculation`,`baggage claim`,`aircontrol`,`computerprogramming`],ans:1},
+  {q:`Guest: Do you chargehandlingfeefor foreignexchange? Cashier: Yes,wedo.We charge NT\$100dollars per .`,opts:[`sample`,`court`,`extention`,`transaction`],ans:3},
+  {q:`Customs officer: Do you haveanythingto ? Traveler: Yes, IhaveNT\$100,000dollars incash withme.`,opts:[`detect`,`depart`,`declare`,`develop`],ans:2},
+  {q:`Acellphoneparkinglot is aparkinglot wherepeoplewait fortheir friends tocompletetheir procedures.`,opts:[`validating`,`constructing`,`decreasing`,`landing`],ans:3},
+  {q:`Groundstaff: Youhavebeenselectedfor a luggagesearch.Please open yourluggage. Traveler: Sure,no problem.`,opts:[`resourceful`,`spacious`,`random`,`competent`],ans:2},
+  {q:`Tourist: I’velost mykeyand Ineedto get intomyroom. Can Iget a ?`,opts:[`trolley`,`patent`,`replacement`,`recipe`],ans:2},
+  {q:`HotelCustomer:Doyouprovide fordisabledpeople,suchasadjustablebeds,showerchairs, andbarrier-freepaths?`,opts:[`premises`,`facilities`,`members`,`chains`],ans:1},
+  {q:`Guest: Excuseme.Whereis thenearest drugstore? Tourleader:Turnrightwhenyouleavethehotel.Keepwalkingfor5minutes.Thedrugstoreisthree awayfrom thehotel.`,opts:[`bricks`,`blocks`,`tiles`,`curbs`],ans:1},
+  {q:`Foreign guest: Wherecould Ifind a(n) phone? Mycellphonedoesn’t workhere. Tourleader: Youcanprobablyfind oneat a gas stationoraconveniencestore.`,opts:[`direct`,`milky`,`milestone`,`pay`],ans:3},
+  {q:`If youarecallinga(n) from onecitytoanother, you needtodial the area code.`,opts:[`outline`,`headline`,`landline`,`online`],ans:2},
+  {q:`Receptionist: HowmayIdirect yourcall? Guest: Please mycall toaninternational operator. Receptionist: I’ll put you through.Onemoment,please.`,opts:[`transfer`,`transcend`,`transform`,`transcribe`],ans:0},
+  {q:`Doctor:Howlonghave youhadthese ? Patient: Iwas alright till this morning.`,opts:[`systems`,`syntheses`,`symbols`,`symptoms`],ans:3},
+  {q:`Ifyourpassportislostorstolenabroad,andyouneedtoreturntoTaiwanrightaway,youmayapply fora(n)“ CertificatefortheRepublicof ChinaNationals.”`,opts:[`Critical`,`Joint`,`Entry`,`Departure`],ans:2},
+  {q:`happens whenthereis not enoughwaterandrainfall.`,opts:[`Earthquake`,`Drought`,`Flood`,`Landslide`],ans:1},
+  {q:`Customer: Iwouldliketo myflight from Taipei to Los Angeles. Airlineagent: MayIhave yourname andticket number,please?`,opts:[`target`,`confirm`,`require`,`construct`],ans:1},
+  {q:`Flightattendant:Iamsorry.Yourbagistoolargetotakeonboard.Sincewehaveafullflighttoday, wehavetobestrict about . Passenger: But Ineverhadanyproblem withthis bagbefore. Flight attendant: Iam afraidwehavetocheckin yoursuitcaseat theboardinggate.`,opts:[`expansion`,`charge`,`commodity`,`allowance`],ans:3},
+  {q:`Flight attendant: Yourflight has beencancelledduetoahurricanein Florida. Passenger: Will theairlinecompanyarrange forus?`,opts:[`application`,`accommodation`,`charity`,`schedule`],ans:1},
+  {q:`Passenger: Could youshowmehowtooperatethein-flight ? Flight attendant: Youcan start bytouchingthescreen. It covers music,movies, news, information, videogames, TVshows, andradioprograms.You canalso switchlanguages onthescreen.`,opts:[`safety`,`newspaper`,`entertainment`,`brochure`],ans:2},
+  {q:`Passenger: Excuseme,sir. Flight attendant: HowmayIhelp you? Passenger: Ifeel likevomiting. Flight attendant: Here is a bag. Now, please cover your mouth and nose with it. Then, you couldbreatheslowlythrough yourmouthtill youfeel muchbetter.`,opts:[`hand`,`post`,`goodie`,`sickness`],ans:3},
+  {q:`Iherebycertifythat Ihavemadeatruthful . Iunderstandthatif Iprovidefalseinformation,I maybeissuedwithafixedpenaltynoticeand/or a directiontoreturnhome.`,opts:[`declaration`,`prescription`,`detection`,`detention`],ans:0},
+  {q:`Passenger: Excuse me. I would like to report a missing suitcase. I just arrived on flight 714 from Tokyo. Airlinerepresentative: Pleasefill out this form.We’ll you forupto \$100so that youcould buythethings youneed. Wewill tryourbest tolocate yoursuitcaseas quicklyaspossible.`,opts:[`relay`,`review`,`issue`,`restore`],ans:2},
+  {q:`Many hotels in New York provide free airport service. You could also take the subway if youarecomfortablewith publictransportation.`,opts:[`shuttle`,`chanting`,`shopping`,`catalog`],ans:0},
+  {q:`Receptionist: TheSheratonHotel.Howcan Ihelp you? Tourist: Iwouldliketoreserve aroom forthis weekend. Is thereanysuite ?`,opts:[`alone`,`available`,`aloft`,`adrift`],ans:1},
+  {q:`Traveler: Iwouldliketo checkout.Myroom numberis 608andhereis the room key. Receptionist: OK, sir. You paya deposit in advance to the reservation. In total, your bill is 800,includingtaxes and 15%service charge.Howwould youliketopay?`,opts:[`commit`,`secure`,`slide`,`occupy`],ans:1},
+  {q:`This particularrestaurant in Marriott features and serves Greekdishes.`,opts:[`insistent`,`tolerant`,`athletic`,`authentic`],ans:3},
+  {q:`Manyimmigrants livein Australia,so foodis verypopularhere.`,opts:[`impractical`,`ethnic`,`temporary`,`constant`],ans:1},
+  {q:`Visitor InformationCentercould regional tourism sinceit provides freeinformationand encourages tourists toparticipateinlocal events andvisit local attractions.`,opts:[`delay`,`juggle`,`retrieve`,`promote`],ans:3},
+  {q:`Tourist: Howmuchis this coat? Clerk: It’s 200dollars. Tourist: Onehundredandfifty.This is myfinal .`,opts:[`index`,`offer`,`reward`,`comment`],ans:1},
+  {q:`VisitorstotheEUmaybuygoodsfreeofVATatthecheck-out.Theclerkwillaskyoutoshowyour passport andfill out atax form.`,opts:[`independence`,`conduct`,`deduction`,`refund`],ans:3},
+  {q:`If youaresickwhentravelling, youcouldcallthe hospitalandscheduleanappointment.When you visit thehospital, youneedtobring yourhealth policydocuments.`,opts:[`notation`,`insurance`,`immigration`,`annotation`],ans:1},
+  {q:`If a traveler loses his or her passport, he or she needs to find his or her country’s to apply foratemporarypassport.`,opts:[`terminal`,`code`,`embassy`,`guardian`],ans:2},
+  {q:`InaJapaneserestaurant,yourpersonalchefbringsinthe andcooksthefoodinfrontofyou. Hethenserves thesteaminghot gourmet dish.`,opts:[`purses`,`ingredients`,`recipients`,`feathers`],ans:1},
+  {q:`There are many kinds of short-term jobs in the touring industry. People doing these jobs needtorespond todifferent challenges everyday.`,opts:[`apparent`,`souvenir`,`seasonal`,`signal`],ans:2},
+  {q:`Tourist: Hello, Iwouldliketoschedulean appointment tosee adoctor. Ihaveahigh fever andfeel terriblenow. Hospital staff: Pleasedirectlycometoour room now.`,opts:[`veterinary`,`fatal`,`changing`,`emergency`],ans:3},
+  {q:`Most people were vaccinated last year, but Mary refused to get the vaccination because she had a about needles.`,opts:[`demand`,`phobia`,`favor`,`fantasy`],ans:1},
+  {q:`Many factors to increased level of toxic gases and one factor which is often ignored by peopleis theemissions ofthepublictransportation.`,opts:[`align`,`contribute`,`happen`,`manage`],ans:1},
+  {q:`At publicplaces such as libraries, hotels, and airports,freeWi-Fi is veryconvenient but not secure. Travelers should avoid into bank accounts and entering passwords at these public areas becausesomeoneelsemight seethem.`,opts:[`reading`,`writing`,`loading`,`logging`],ans:3},
+  {q:`John:Somecustomers mentionedthat themeals are goodbut theyareabit expensive. Mary: We could provide them with some more side dishes such as salad. Most customers feel like gettingsomethingfree.`,opts:[`empty`,`covert`,`complimentary`,`controversial`],ans:2},
+  {q:`Receptionist: Goodafternoon.WelcometotheSheratonhotel.How can Ihelp you? Tourist: Goodafternoon. Ihavea fortwo nights andhereis myconfirmationnumber.`,opts:[`conversation`,`preservation`,`reservation`,`observation`],ans:2},
+  {q:`The ratebetween NewTaiwanDollars andtheEuros hasnot changedmuchrecently.`,opts:[`option`,`interchange`,`failure`,`exchange`],ans:3},
+  {q:`Travelers selectingProgram C (7+7+7days)are requiredtobe fully against COVID-19 for 14daysiftheywouldliketoenterTaiwan,asstipulatedbytheLunarNewYearquarantineprogram.`,opts:[`vaccinated`,`accused`,`charged`,`inflicted`],ans:0},
+  {q:`Pilots andairtrafficcontrollers areall inaviationEnglish as well as everydayEnglish.`,opts:[`adaptive`,`productive`,`proficient`,`ancient`],ans:2},
+  {q:`Passenger: Is thereanychancefora(n) to thebusiness class? Check-inclerk: Let mecheckifthereareanybusiness class seats available.`,opts:[`dismay`,`installment`,`upgrade`,`coverage It’s noon. You’re starving, and you need some food now—right now. Back in the old days, if you ordered some delivery, that food might come from a driver or bicycle deliveryperson. But this is the age of the drone. Therefore, your takeaway might not come with a knock at the door, but with a drone hoveringoutside yourwindow. Drone delivery hasn’t advanced to the point that it will fly up to your 14th floor office window, but inShanghai’sJinshanIndustrialPark,dronedeliveryhasalreadystarted.There,onlineretailgiantAlibaba directstheservicethroughitsEle.mefooddeliverybrand.Dronesflyalong17specificroutes.Customers can order from any one of 100 restaurants operating in the park. After the order is received and made, a member of the restaurant staff places the meal in the drone. It then flies to a delivery point nearest the customer. It is thenpickedupbyan Alibabaemployeeand carriedtherest oftheway. All of this takes just 20 minutes. Ele.me says the drone delivery method greatly reduces operating costs. Ifit’s fasterandcheaper, what’s not tolove about flyingfood?`],ans:2},
+  {q:`What is thepassagemainlyabout?`,opts:[`friedfood`,`newwaytodeliverfood`,`newfoodsoldinanamusingpark`,`machine-madefood`],ans:1},
+  {q:`What is “drone”?`,opts:[`dolphincruise`,`cameraeye`,`monitorsystem`,`unmannedplane`],ans:3},
+  {q:`Whichwordis closest inmeaningtothe word“hovering”inthepassage?`,opts:[`circling`,`hugging`,`hoping`,`waiting`],ans:0},
+  {q:`Whichis trueaccordingtothepassage?`,opts:[`Technologyhas made bigprogress todeliverfooduptothe14th floor.`,`Drones ofEle.meflyfixedpaths only.`,`Ele.mecooks all thefood.`,`Dronedeliverydoesn’t needahumantocompletethedeliveryjob.`],ans:1},
+  {q:`According to the passage, what may not be the incentive for people to use the service of Ele. me fooddelivery?`,opts:[`lowercost`,`fasterdelivery`,`betterpackaging`,`moreinnovativedeliverymethod Thebest title: Safety&hygienetourismtrends Whetheritisairlines,cruises,hotels,restaurantsorbars,sincetheoutbreakofCOVID-19,safetyand hygiene standards have been absolutely paramount. With this in mind, there are a number of tourism trends that are related to this, such as increased cleaning, socially distanced seating, providing hand gel andenforcingmasks insomesettings. This is also now a vital part of tourism marketing, with companies needing to make clear what their hygiene and safety policies are and what measures they are taking to keep customers safe. The threat of COVID-19has meant peoplearemorereluctant totravel andvisit tourism hot spots,so theywill needto bepersuadedthat it is safe. Shiftfrominternational tolocal Thevarioustravelrestrictionsandthereluctanceofmanypeopletotravelabroadhasmeantmanyin the tourism industryare having to focus on local customers, rather than international ones. This does not meangivinguponinternationaltravelersentirely,butitislikelytorequireachangeinyourcoremarketing strategies. With hotels, it could be best to highlight the kinds of facilities that may appeal to the local market, such as your restaurant, your gym facilities, your Wi-Fi and even the fact that your hotel rooms are ideal for remote work. Airlines and tourism management companies may also need to shift gears to domestic tourists. It is worth remembering that local customers are less likely to cancel too, as they will only have to payattentiontolocal restrictions andarenot as likelytohavetoquarantineaftertheirvisit. Virtual realitytourismtrends Virtual reality is another of the major tourism trends disrupting the industry and capitalizing on the technology can give you an edge over rivals who have not yet adopted it. Through online VR tours, customerscanexperiencehotelinteriors,restaurantinteriors,outdoortouristattractionsandmore,allfrom theirhome. Importantly, theyare able to do this at the decision-makingphase of the customer journey. This can then be the difference between customers completing a booking or backing out, and VR is especially useful within the contextof COVID-19, where customers mayhave second thoughts and mayneed extra encouragement topress aheadwiththeirplans.`],ans:2},
+  {q:`Whichis thebest titleofthewholepassage?`,opts:[`TheSecurityGuidelines forthe Local Tourism Industry`,`The Latest Trends intheTourism Industry`,`PromotingTourism IndustrythroughVirtual Reality`,`IncreasingContactless Payment duringthePandemic`],ans:1},
+  {q:`What does theword,“paramount,”inthefirst paragraphmean?`,opts:[`crucial`,`mentioned`,`total`,`evaluated`],ans:0},
+  {q:`Inparagraph5,whichof thefollowingwords is closest inmeaningto“quarantine”?`,opts:[`promise`,`qualification`,`separation`,`property`],ans:2},
+  {q:`What does the author mean “Virtual reality can give you an edge over rivals who have not yet adoptedit”?`,opts:[`Virtual realitypushes tourism industrytothe corner.`,`Virtual realitymakes tourism industryrecognizethereality.`,`Virtual realityis a goodmeans toincreasecompetitiveness.`,`Virtual realitybenefits enemies.`],ans:2},
+  {q:`If asimilarsectionis goingtobe addedtothis passage,whichis apossible sectiontofit in?`,opts:[`GrowthofContactless Payments`,`KnowingVarious PandemicPreventionPolicies`,`TakingActiontoKeepCustomers Safe`,`ClosingBusiness toAvoidFinancial Loss`],ans:0}
+];
+const TOTAL_Q = 80;
+const TOTAL_TIME = 3600;
+let selected = {};
+let submitted = false;
+let timerInterval;
+let timeLeft = TOTAL_TIME;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return "本題一律給分";
+  if (Array.isArray(q.ans)) return "正確答案：" + q.ans.map(i => "ABCD"[i]).join(" 或 ");
+  return "正確答案：" + "ABCD"[q.ans];
+}
+
+function buildDots() {
+  const grid = document.getElementById("dotGrid");
+  grid.innerHTML = "";
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.textContent = i + 1;
+    d.id = "dot" + i;
+    d.onclick = () => document.getElementById("q" + i).scrollIntoView({behavior:"smooth", block:"center"});
+    grid.appendChild(d);
+  });
+}
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.id = "q" + i;
+    card.dataset.result = "";
+    const labels = ["A","B","C","D"];
+    let optHtml = "";
+    q.opts.forEach((o, oi) => {
+      optHtml += `<div class="opt" id="opt${i}_${oi}" onclick="selectOpt(${i},${oi})"><span class="opt-label">${labels[oi]}</span><span>${o}</span></div>`;
+    });
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題（共 ${QUESTIONS.length} 題）</div><div class="q-text">${q.q}</div><div class="options">${optHtml}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (submitted) return;
+  const labels = ["A","B","C","D"];
+  labels.forEach((_, j) => {
+    const el = document.getElementById("opt" + qi + "_" + j);
+    if (el) el.classList.remove("selected");
+  });
+  const el = document.getElementById("opt" + qi + "_" + oi);
+  if (el) el.classList.add("selected");
+  selected[qi] = oi;
+  const dot = document.getElementById("dot" + qi);
+  if (dot && !submitted) dot.classList.add("answered");
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById("timer");
+    el.textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    el.className = "timer";
+    if (timeLeft <= 300) el.classList.add("warn");
+    if (timeLeft <= 60) el.classList.add("danger");
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(true); }
+  }, 1000);
+}
+
+function submitQuiz(timeout) {
+  const unanswered = QUESTIONS.length - Object.keys(selected).length;
+  if (!timeout && unanswered > 0) {
+    if (!confirm(`尚有 ${unanswered} 題未作答，確定要交卷嗎？`)) return;
+  }
+  clearInterval(timerInterval);
+  submitted = true;
+  document.getElementById("submitBar").classList.add("hidden");
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = selected[i];
+    const ok = (sel !== undefined) && isCorrect(q, sel);
+    const special = q.ans === -1 || Array.isArray(q.ans);
+    if (ok) correct++;
+    const card = document.getElementById("q" + i);
+    card.dataset.result = ok ? "correct" : "wrong";
+    const dot = document.getElementById("dot" + i);
+    if (dot) { dot.classList.remove("answered"); dot.classList.add(ok ? "correct" : "wrong"); }
+    ["A","B","C","D"].forEach((_, oi) => {
+      const el = document.getElementById("opt" + i + "_" + oi);
+      if (!el) return;
+      el.classList.remove("selected");
+      const isAns = q.ans === -1 ? true : (Array.isArray(q.ans) ? q.ans.includes(oi) : q.ans === oi);
+      if (sel === oi && ok) el.classList.add("correct-ans");
+      else if (sel === oi && !ok) el.classList.add("wrong-ans");
+      else if (isAns && !ok) el.classList.add("correct-ans");
+    });
+    let msg = "";
+    if (sel === undefined) {
+      msg = `<div class="result-msg wrong">⚠️ 未作答　${getCorrectLabel(q)}</div>`;
+    } else if (ok && special) {
+      msg = `<div class="result-msg special">✅ 正確　（${getCorrectLabel(q)}）</div>`;
+    } else if (ok) {
+      msg = `<div class="result-msg correct">✅ 正確</div>`;
+    } else {
+      msg = `<div class="result-msg wrong">❌ 錯誤　${getCorrectLabel(q)}</div>`;
+    }
+    card.querySelector(".options").insertAdjacentHTML("afterend", msg);
+  });
+  const total = QUESTIONS.length;
+  const score = Math.round(correct / total * 100);
+  const scoreEl = document.getElementById("scoreBig");
+  scoreEl.textContent = score + " 分";
+  const grade = document.getElementById("gradeLabel");
+  if (score >= 80) { grade.textContent = "🏆 優秀"; grade.className = "grade pass"; }
+  else if (score >= 60) { grade.textContent = "✅ 及格"; grade.className = "grade pass"; }
+  else { grade.textContent = "❌ 未及格"; grade.className = "grade fail"; }
+  document.getElementById("statsRow").textContent = `答對 ${correct} 題 ／ 答錯 ${total - correct} 題 ／ 共 ${total} 題`;
+  document.getElementById("scorePanel").classList.add("show");
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function filterCards(type) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll(".q-card").forEach(card => {
+    if (type === "all") card.classList.remove("hidden");
+    else if (type === "correct") card.classList.toggle("hidden", card.dataset.result !== "correct");
+    else if (type === "wrong") card.classList.toggle("hidden", card.dataset.result !== "wrong");
+  });
+}
+
+function resetQuiz() {
+  selected = {};
+  submitted = false;
+  timeLeft = TOTAL_TIME;
+  document.getElementById("scorePanel").classList.remove("show");
+  document.getElementById("submitBar").classList.remove("hidden");
+  buildDots();
+  buildQuiz();
+  clearInterval(timerInterval);
+  startTimer();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+buildDots();
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>

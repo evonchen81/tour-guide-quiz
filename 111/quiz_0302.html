@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>111年 華語領隊 領隊觀光資源概要</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a4a70,#2c5f8a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#e3f2fd;color:#1a4a70}
+.header h1{font-size:1rem;font-weight:700;flex:1}
+.timer{background:rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;min-width:70px;text-align:center}
+.timer.warn{background:rgba(255,180,0,.4)}
+.timer.danger{background:rgba(220,50,50,.5);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-wrap{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 16px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#666;cursor:pointer;transition:.15s}
+.dot.answered{background:#2c5f8a;color:#fff}
+.dot.correct{background:#27ae60;color:#fff}
+.dot.wrong{background:#e74c3c;color:#fff}
+.container{max-width:820px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.q-num{font-size:.75rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.6;margin-bottom:10px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:2px solid #e0e0e0;cursor:pointer;transition:.15s;font-size:.88rem;line-height:1.4}
+.opt:hover{border-color:#2c5f8a;background:#f0f6ff}
+.opt.selected{border-color:#2c5f8a;background:#e3f2fd}
+.opt.correct-ans{border-color:#27ae60;background:#e8f5e9!important}
+.opt.wrong-ans{border-color:#e74c3c;background:#fdecea!important}
+.opt-label{font-weight:700;min-width:18px;color:#2c5f8a}
+.result-msg{margin-top:8px;font-size:.82rem;padding:6px 10px;border-radius:6px}
+.result-msg.correct{background:#e8f5e9;color:#1e6b3d}
+.result-msg.wrong{background:#fdecea;color:#c0392b}
+.result-msg.special{background:#fff3cd;color:#856404}
+.submit-bar{text-align:center;padding:20px 0 40px}
+.btn-submit{background:#2c5f8a;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#1a4a70}
+.score-panel{display:none;background:#fff;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.12);text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:3rem;font-weight:900;color:#2c5f8a}
+.grade{font-size:1.2rem;font-weight:700;margin:8px 0}
+.grade.pass{color:#27ae60}.grade.fail{color:#e74c3c}
+.stats{display:flex;justify-content:center;gap:24px;margin:12px 0;font-size:.85rem;color:#666}
+.filter-bar{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.btn-reset{background:#fff;color:#2c5f8a;border:2px solid #2c5f8a;border-radius:10px;padding:10px 30px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s}
+.btn-reset:hover{background:#2c5f8a;color:#fff}
+.hidden{display:none!important}
+.year-label{font-size:.7rem;opacity:.8;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">華語領隊</span>
+  <h1>領隊觀光資源概要<span class="year-label">111年</span></h1>
+  <div class="timer" id="timer">60:00</div>
+</div>
+<div class="progress-wrap">
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+<div class="container">
+  <div class="score-panel" id="scorePanel">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="grade" id="gradeLabel"></div>
+    <div class="stats" id="statsRow"></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all')">全部</button>
+      <button class="filter-btn" onclick="filterCards('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterCards('correct')">只看對題</button>
+    </div>
+    <button class="btn-reset" onclick="resetQuiz()">🔄 重新作答</button>
+  </div>
+  <div id="quizArea"></div>
+  <div class="submit-bar" id="submitBar">
+    <button class="btn-submit" onclick="submitQuiz()">📋 交卷批改</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [
+  {q:`日治時期那一位醫師作家被稱為「臺灣新文學之父」、「臺灣的魯迅」，且留下「世間未許權存在，勇士 當為義鬥爭」、「滿腔碧血吾無吝，付與人間換自由」等慷愾悲歌的漢詩句？`,opts:[`王詩琅`,`吳濁流`,`賴和`,`呂赫若`],ans:2},
+  {q:`戰後臺灣經濟發展曾一度有「香蕉王國」、「拆船王國」之稱，但今日已盛況不再，下列那個港口可以見 證這兩個產業的歷史？`,opts:[`基隆港`,`臺北港`,`臺中港`,`高雄港`],ans:3},
+  {q:`一位遊客來到法國蘭斯的聖勒彌修院（AbbeyofSaint-Remi），發現一座國王受洗雕像，碑文說明此一國 王為鞏固統治而改宗基督教，與基督教會合作，並成為法蘭克王朝的基本國策。此國王是指：`,opts:[`丕平（Pippin）`,`克洛維（Clovis）`,`查理曼（Charlemagne）`,`鐵鎚查理（CharlesMartel）`],ans:1},
+  {q:`文藝復興建築反對哥德式建築風格，主張恢復古典希臘與羅馬風格，強調圓形穹頂、半圓形圓拱、水平橫 樑，結構上講求對稱。下列那一建築最具體表現出這種特色？`,opts:[`聖母百花大教堂（FlorenceCathedral）`,`聖母院（Notre-Dame）`,`科隆大教堂（CologneCathedral）`,`米蘭教堂（MilanCathedral）`],ans:0},
+  {q:`西元 1884～1885 年召開的柏林會議，歐洲各國達成瓜分與殖民非洲的協議，承認甲國將多哥蘭 （Togoland）、喀麥隆（Cameron）與西南非納入保護國；乙國占領突尼西亞和今剛果共和國的領土；丙 國占領名義上屬於鄂圖曼土耳其帝國的埃及，並得以控制蘇伊士運河（SuezCanal）。甲、乙、丙三國分 別是：`,opts:[`德國、法國、英國`,`法國、英國、德國`,`英國、德國、法國`,`法國、德國、英國`],ans:0},
+  {q:`有一個國家，其所在地區曾經是古代腓尼基人的商業殖民據點，後來先後被羅馬帝國與伊斯蘭帝國統治， 十九世紀帝國主義興起之後又成為法國的殖民地，最後終於在二十世紀中期以後又取得獨立的地位。此一 國家在何處？`,opts:[`非洲西部`,`非洲東部`,`非洲北部`,`非洲南部`],ans:2},
+  {q:`《神曲》是那一位義大利人文主義學者的作品？`,opts:[`薄伽丘`,`佩脫拉克`,`馬基維利`,`但丁`],ans:3},
+  {q:`那一位軍事天才大敗於滑鐵盧之役？`,opts:[`漢尼拔`,`拿破崙`,`威靈頓公爵`,`俾斯麥`],ans:1},
+  {q:`二十世紀曾出版《第二性》一書的法國作家為：`,opts:[`沙特`,`卡夫卡`,`伊莉諾羅斯福`,`西蒙波娃`],ans:3},
+  {q:`閱讀下列這份 1620 年的文件：「奉上帝之名，阿門。我們這些簽名的人……為了榮耀上帝，宣揚基督 教的信仰和向我們的國王和國家致敬，已啟航去維吉尼亞北方開創第一個殖民地。根據此文件，為了我們 更好的整頓與保全，以及推進前述目的，我們結盟，將自己團結為一個公民的政治團體」。其指涉的歷史 事件為何？`,opts:[`美國西部拓荒`,`哥倫布發現新大陸`,`耶穌會士在南美建立傳教村`,`清教徒移民美洲`],ans:3},
+  {q:`在歐洲國家殖民美洲的過程中，下列何國不曾在北美洲建立殖民地？`,opts:[`葡萄牙`,`英國`,`荷蘭`,`法國`],ans:0},
+  {q:`第二次世界大戰發生時，美國初期原遵守中立，其後卻加入戰局的轉捩點為何？`,opts:[`德國實施無限制潛艇政策`,`盟國的要求`,`日本偷襲珍珠港`,`經濟大恐慌對內政造成的影響`],ans:2},
+  {q:`美國自獨立建國以後，在對歐洲外交方面奉行何種原則，以避免捲入歐洲政治局勢或引來干涉？`,opts:[`門戶開放政策`,`杜魯門主義`,`不結盟運動`,`孤立主義`],ans:3},
+  {q:`1930年代美國總統羅斯福推行「新政」，推行此政策的時代背景為何？`,opts:[`美、蘇長期冷戰`,`發生經濟大恐慌`,`希特勒取得政權`,`黑奴解放後產生的經濟問題`],ans:1},
+  {q:`美洲古文明中沒有文字，而是用結繩與顏色做符號來記事的是那一文明？`,opts:[`阿茲提克文明`,`印加文明`,`馬雅文明`,`奧爾梅克文明`],ans:1},
+  {q:`十九世紀中、南美洲的歐洲殖民地紛紛進行獨立運動，就下列各選項中，找出促進這股潮流的原因有那 些？①美國獨立 ②法國大革命 ③拿破崙稱霸歐洲 ④維也納會議`,opts:[`①②③`,`②③④`,`①③④`,`①②④`],ans:0},
+  {q:`1965 年 9 月 30 日印尼發生軍事政變，而在政變過程中崛起，取代蘇卡諾（Sukarno）成為印尼第 2 任總 統的是：`,opts:[`蘇哈托（SuhartoorSoeharto）`,`瓦希德（AbdurrahmanWahid）`,`蘇西洛（SusiloBambangYudhoyono）`,`哈比比（BacharuddinJusufHabibe）`],ans:0},
+  {q:`西元1840年2月6日，英國與紐西蘭（NewZealand）原住民毛利人簽訂什麼條約，使英國獲得紐西蘭的 統治權？`,opts:[`瓦湯頤條約（WaitangiTreaty）`,`紐西蘭獨立宣言（ADeclarationofIndependenceofNewZealand）`,`聯防條約（ANZUSDefencePact）`,`德飛法案（Duff’sAct）`],ans:0},
+  {q:`有關十字軍（Crusade）的敘述，下列何者錯誤？`,opts:[`十字軍之發生與拜占庭帝國當時受穆斯林壓迫，陷入困境，被迫向教宗求援有關`,`十字軍象徵中古基督教世界的復甦及擴張，且此並非唯一反攻伊斯蘭世界的軍事活動`,`十字軍積極促進東西文化及貨物交流，並積極促成基督徒和穆斯林和解與友好`,`第一次十字軍能夠成功，與當時伊斯蘭世界內部陷入分裂，無法共同對抗外敵有關`],ans:2},
+  {q:`西元前5世紀希臘半島發生多次戰爭，歷史學者認為係不同文明的戰爭，也是希臘城邦的生存戰爭。當時 攻擊希臘城邦的大國是：`,opts:[`非洲北部的文明古國埃及`,`橫跨廣大西亞的波斯帝國`,`日耳曼部族的法蘭克王國`,`信仰伊斯蘭的鄂圖曼帝國`],ans:1},
+  {q:`他原來出身於十七世紀末義大利的米蘭，因為自幼嶄露繪畫天份，父母送他習畫；後來，他參與了耶穌 會，並開始為教堂繪製壁畫。十八世紀初，他熱衷於傳教，來到了東方的大清帝國。因為藝術上的才能受 到皇帝的賞識，他不僅避開了禁教的驅逐，也因為皇帝的要求和支持，留下了不少精美的寫實畫作。這位 義大利人是何人？`,opts:[`羅明堅`,`利瑪竇`,`郎世寧`,`潘廷章`],ans:2},
+  {q:`清朝有一位皇帝極獎勵學術，對藝術和科學也有濃厚興趣，曾向西方傳教士學習數學，在位期間敕令編纂 《古今圖書集成》、《皇輿全覽圖》等書。這位皇帝是：`,opts:[`康熙（清聖祖）`,`乾隆（清高宗）`,`嘉慶（清仁宗）`,`道光（清宣宗）`],ans:0},
+  {q:`每年東非動物大遷徙都是由斑馬打頭陣，緊接著是牛羚，最後是瞪羚。牠們逐水草而居，由坦尚尼亞的賽 倫蓋堤國家公園出發，遷移到肯亞的馬賽拉保留區；停留一、兩個月後，陸續返回坦尚尼亞。影響這些動 物每年遷徙的主要原因為何？`,opts:[`間熱帶輻合區季移`,`中緯度西風帶移入`,`冬夏季節季風交替`,`海洋氣團南北移動`],ans:0},
+  {q:`土耳其安納托利亞高原上的觀光勝地卡帕多西亞有凝灰岩石柱景觀。該景觀與下列那種作用力關係最密切？`,opts:[`酸雨侵蝕`,`火山噴發`,`風力侵蝕`,`冰河作用`],ans:1},
+  {q:`印度貧富差距大，但長期以來少有貧富階層對立的大型社會衝突。造成印度社會長期維持穩定狀態的原 因，和下列何者關係最密切？`,opts:[`社會主義`,`佛教信仰`,`多元族群`,`種姓制度`],ans:3},
+  {q:`某國家的簡介如下：「位於亞洲，天主教為主要宗教，是世界上第三大講英文的國家，文化景觀多元，同 時受到西班牙、美國等文化影響。目前的產業結構以農業及工業為主，日、韓、中紛紛前往設廠，發展食 品加工、紡織成衣以及電子、汽車零組件等輕工業。」該國的自然環境還具有下列那項特色？`,opts:[`地震颱風侵襲頻繁`,`熱帶雨林氣候廣布`,`灰化土壤分布普遍`,`稀土礦物資源豐富`],ans:0},
+  {q:`「馬來西亞雪邦賽道是東南亞舉辦世界一級方程式賽車（F1）的場地之一。對車手來說，在雪邦出賽，勝 負關鍵是如何因應比賽進行時賽道的高溫和突如其來的傾盆大雨。」上文中的傾盆大雨最可能是下列那一 種降水型態？`,opts:[`對流雨`,`地形雨`,`鋒面雨`,`颱風雨`],ans:0},
+  {q:`印尼蘇門答臘和加里曼丹的農民，每年均會以火焚的方式清理農地，煙霧隨風飄散至新加坡、馬來西亞、 汶萊等國，導致嚴重的空氣污染。根據風向及影響地區推測，以火焚的方式清理農地的時間最可能發生在 下列那個月份？`,opts:[`1月`,`4月`,`8月`,`12月`],ans:2},
+  {q:`日本首里城融合中國及日本築城文化的獨特建築樣式及石砌技巧，具有高度的文化與歷史價值。但於1945 年時遭受美軍的攻擊以致全數燒毀，其後展開修復工作。2000 年首里城作為「琉球王國城跡與相關遺產 群」，被列入日本第11個世界文化遺產。2019年又慘遭祝融，建築全毀，文物也都付之一炬。上述地點 位於日本何處？`,opts:[`長崎`,`沖繩`,`奈良`,`札幌`],ans:1},
+  {q:`蒂瓦希普納穆公園位於紐西蘭南島西南部，為聯合國教科文組織世界遺產之一。從其位置判斷，蒂瓦希普 納穆公園最可能以何種地形景觀聞名？`,opts:[`峽灣`,`岩漠`,`新月丘`,`石灰岩洞`],ans:0},
+  {q:`旅客在冬天從東京搭新幹線到北陸的金澤，下車後感受到天氣比東京還濕冷。造成此一現象的原因，主要 是因為金澤位於下列那一個季風的迎風面？`,opts:[`東北季風`,`東南季風`,`西北季風`,`西南季風`],ans:2},
+  {q:`臺灣有許多遠洋漁船在阿根廷東南部海域捕撈魷魚。該海域漁業資源豐富的原因，和那兩個洋流在此交會 有關？`,opts:[`福克蘭洋流、巴西洋流`,`本吉拉洋流、加那利洋流`,`秘魯洋流、阿拉斯加洋流`,`阿古拉斯洋流、幾內亞灣流`],ans:0},
+  {q:`下圖為某人去某都市旅遊時拍攝的照片，當時他以電話聯絡外地友人，兩地之間零時差。該友人最可能位 於下列何處？`,opts:[`首爾`,`臺北`,`曼谷`,`吉隆坡`],ans:0},
+  {q:`韓國的濟州島被聯合國列入世界自然遺產，其最具特色的地景包括城山日出峰、玄武岩組成的漢拏山 （Hallasan）、大浦海岸的柱狀節理等。根據這些地形特色判斷，濟州島的形成和下列那一作用有關？`,opts:[`堆積作用`,`火山作用`,`板塊碰撞作用`,`生物造礁作用`],ans:1},
+  {q:`美國黃石公園是世界第一座國家公園。該國家公園以下列那項景觀著稱？`,opts:[`冰河景觀`,`峽谷景觀`,`喀斯特景觀`,`地熱噴泉景觀`],ans:3},
+  {q:`香蕉黃葉病是出現在香蕉根部的傳染病，目前黃葉病病原菌在世界各重要香蕉產地傳播。黃葉病的蔓延， 最可能造成下列那個國家的農業經濟陷入危機？`,opts:[`亞洲的伊朗`,`歐洲的西班牙`,`非洲的烏干達`,`美洲的宏都拉斯`],ans:3},
+  {q:`位於秘魯北部沿海的昌昌城（ChanChan），是15世紀奇穆（Chimu）王國的政治和行政首都。這座城市 面積逾20平方公里，完全是以泥土為材料所建立。1986年起迄今，該座城市被聯合國教科文組織列為瀕 危的世界遺產，主要原因是土造建築與當地週期出現的特殊氣候現象，使該古城遺址易於腐爛與惡化。上 文中的特殊氣候現象最可能是指下列何者？`,opts:[`寒潮侵襲`,`異常酷暑`,`聖嬰現象`,`超級颶風`],ans:2},
+  {q:`世界最大的島嶼格陵蘭島，人口約只有六萬人，是內政獨立的自治區，但外交、國防和財政則由下列那個 國家代理？`,opts:[`丹麥`,`冰島`,`加拿大`,`俄羅斯`],ans:0},
+  {q:`大西洋的中洋脊是一條巨大的海底山脈，全長約 8,000 公里，其頂部的海深約為 2,000~2,700 公尺左右， 個別較高的地段則可露出水面。下列那一個島嶼或島群位於中洋脊上？`,opts:[`冰島`,`愛爾蘭島`,`加那利群島`,`巴哈馬群島`],ans:0},
+  {q:`某地過去利用終年盛行的西風轉動風車群，以用來碾磨穀物、鋸木、排除沼澤積水、控制海埔新生地的水 流。該地最可能位於下列何處？`,opts:[`捷克`,`荷蘭`,`摩洛哥`,`奈及利亞`],ans:1},
+  {q:`智利南部的百內國家公園，有著名的角峰地形。該地形的形成，主要與下列那一種外營力作用有關？`,opts:[`海水侵蝕`,`河流侵蝕`,`風力侵蝕`,`冰河侵蝕`],ans:3},
+  {q:`2019 年第六屆「世界互聯網大會」在烏鎮落下帷幕。烏鎮以河成街，橋街相連，各式民居、店鋪依河築 屋，有深宅大院，也有河埠廊坊，過街騎樓，是典型的「小橋、流水、人家」聚落。來自全球各地約1,500 名企業領導者齊聚於此，展示資訊技術創新成果。烏鎮最可能位於下列那個地區？`,opts:[`東北平原`,`華北平原`,`黃河三角洲`,`長江三角洲`],ans:3},
+  {q:`中國四川省北部的九寨溝風景區，以雪山、翠海、疊瀑、彩林組合成奇幻的自然風光而聞名，被譽為「童 話世界」與「人間仙境」。該地最可能是下列那個族群的聚集之處？`,opts:[`藏族`,`壯族`,`苗族`,`回族`],ans:0},
+  {q:`圖為 1920 到 1930 年所建立的中西合璧式的古厝群。目前在下列那個島嶼中，留存此類的古厝多達百餘 棟，成為該地的重要觀光資源？`,opts:[`金門`,`馬祖`,`蘭嶼`,`小琉球`],ans:0},
+  {q:`蘭陽平原上地名中常出現結、圍、鬮等字，這些地名的出現和下列何者關係最密切？`,opts:[`噶瑪蘭族的部落分布`,`漢人的土地墾殖組織`,`泰雅族群的獵場領域`,`日本人殖產興業內容`],ans:1},
+  {q:`前往登革熱流行區域旅遊，下列那一項提醒不是有效避免被蚊蟲叮咬的主要方法？`,opts:[`儘量穿著白色衣褲`,`多洗手`,`噴防蚊液`,`穿著長袖與長褲衣物`],ans:1},
+  {q:`下列那一項不是遊憩承載量之內涵？`,opts:[`遊憩體驗品質`,`遊憩經營管理`,`遊憩資源保護`,`地方經濟發展`],ans:3},
+  {q:`2015年9月聯合國成立70週年，各國領袖齊聚聯合國紐約總部發布了以宏觀的視野來解決世界上經濟成 長、社會進步與環境保護的相關課題，是下列那個目標？`,opts:[`開發中國家發展計畫（DevelopmentforGlobalSouth,DGS）`,`千禧年發展目標（TheMillenniumDevelopmentGoals,MDGs）`,`全球發展目標（GlobalDevelopmentGoals,GDGs）`,`永續發展目標（SustainableDevelopmentGoals,SDGs）`],ans:3},
+  {q:`聯合國環境規劃署（UNEP）2011年曾指出，全球暖化將在未來數十年改變人類的旅遊行為，有關下列觀 光遊憩衝擊的敘述何者錯誤？`,opts:[`溫室氣體減排政策將影響遊輪與航空業之需求`,`海平面上升促使海灘休閒業熱絡化`,`非洲半沙漠地帶，沙漠化程度正逐漸爬升，導致觀光旅館用水出現危機`,`北美的鳥類往北方與內陸遷徙的情況促使賞鳥活動受影響`],ans:1},
+  {q:`峇里島向來有度假天堂之稱，其觀光收入已經成為當地重要的經濟來源。下列何者反映出面對觀光發展上 的機會成本？`,opts:[`為了發展度假村，使得具象徵性的水梯田逐漸消失`,`居民需至村莊外取水或是購買瓶裝水的方式來取得所需的水資源，而且瓶裝水的價格在3年內上漲了 25％`,`當地供水成本增加，導致農業收成減少`,`施行「支付額外的稅金」以及進行「額外捐款」來協助改善峇里島水資源工程`],ans:0}
+];
+const TOTAL_Q = 50;
+const TOTAL_TIME = 3600;
+let selected = {};
+let submitted = false;
+let timerInterval;
+let timeLeft = TOTAL_TIME;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return "本題一律給分";
+  if (Array.isArray(q.ans)) return "正確答案：" + q.ans.map(i => "ABCD"[i]).join(" 或 ");
+  return "正確答案：" + "ABCD"[q.ans];
+}
+
+function buildDots() {
+  const grid = document.getElementById("dotGrid");
+  grid.innerHTML = "";
+  QUESTIONS.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.textContent = i + 1;
+    d.id = "dot" + i;
+    d.onclick = () => document.getElementById("q" + i).scrollIntoView({behavior:"smooth", block:"center"});
+    grid.appendChild(d);
+  });
+}
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.id = "q" + i;
+    card.dataset.result = "";
+    const labels = ["A","B","C","D"];
+    let optHtml = "";
+    q.opts.forEach((o, oi) => {
+      optHtml += `<div class="opt" id="opt${i}_${oi}" onclick="selectOpt(${i},${oi})"><span class="opt-label">${labels[oi]}</span><span>${o}</span></div>`;
+    });
+    card.innerHTML = `<div class="q-num">第 ${i+1} 題（共 ${QUESTIONS.length} 題）</div><div class="q-text">${q.q}</div><div class="options">${optHtml}</div>`;
+    area.appendChild(card);
+  });
+}
+
+function selectOpt(qi, oi) {
+  if (submitted) return;
+  const labels = ["A","B","C","D"];
+  labels.forEach((_, j) => {
+    const el = document.getElementById("opt" + qi + "_" + j);
+    if (el) el.classList.remove("selected");
+  });
+  const el = document.getElementById("opt" + qi + "_" + oi);
+  if (el) el.classList.add("selected");
+  selected[qi] = oi;
+  const dot = document.getElementById("dot" + qi);
+  if (dot && !submitted) dot.classList.add("answered");
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById("timer");
+    el.textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+    el.className = "timer";
+    if (timeLeft <= 300) el.classList.add("warn");
+    if (timeLeft <= 60) el.classList.add("danger");
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(true); }
+  }, 1000);
+}
+
+function submitQuiz(timeout) {
+  const unanswered = QUESTIONS.length - Object.keys(selected).length;
+  if (!timeout && unanswered > 0) {
+    if (!confirm(`尚有 ${unanswered} 題未作答，確定要交卷嗎？`)) return;
+  }
+  clearInterval(timerInterval);
+  submitted = true;
+  document.getElementById("submitBar").classList.add("hidden");
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = selected[i];
+    const ok = (sel !== undefined) && isCorrect(q, sel);
+    const special = q.ans === -1 || Array.isArray(q.ans);
+    if (ok) correct++;
+    const card = document.getElementById("q" + i);
+    card.dataset.result = ok ? "correct" : "wrong";
+    const dot = document.getElementById("dot" + i);
+    if (dot) { dot.classList.remove("answered"); dot.classList.add(ok ? "correct" : "wrong"); }
+    ["A","B","C","D"].forEach((_, oi) => {
+      const el = document.getElementById("opt" + i + "_" + oi);
+      if (!el) return;
+      el.classList.remove("selected");
+      const isAns = q.ans === -1 ? true : (Array.isArray(q.ans) ? q.ans.includes(oi) : q.ans === oi);
+      if (sel === oi && ok) el.classList.add("correct-ans");
+      else if (sel === oi && !ok) el.classList.add("wrong-ans");
+      else if (isAns && !ok) el.classList.add("correct-ans");
+    });
+    let msg = "";
+    if (sel === undefined) {
+      msg = `<div class="result-msg wrong">⚠️ 未作答　${getCorrectLabel(q)}</div>`;
+    } else if (ok && special) {
+      msg = `<div class="result-msg special">✅ 正確　（${getCorrectLabel(q)}）</div>`;
+    } else if (ok) {
+      msg = `<div class="result-msg correct">✅ 正確</div>`;
+    } else {
+      msg = `<div class="result-msg wrong">❌ 錯誤　${getCorrectLabel(q)}</div>`;
+    }
+    card.querySelector(".options").insertAdjacentHTML("afterend", msg);
+  });
+  const total = QUESTIONS.length;
+  const score = Math.round(correct / total * 100);
+  const scoreEl = document.getElementById("scoreBig");
+  scoreEl.textContent = score + " 分";
+  const grade = document.getElementById("gradeLabel");
+  if (score >= 80) { grade.textContent = "🏆 優秀"; grade.className = "grade pass"; }
+  else if (score >= 60) { grade.textContent = "✅ 及格"; grade.className = "grade pass"; }
+  else { grade.textContent = "❌ 未及格"; grade.className = "grade fail"; }
+  document.getElementById("statsRow").textContent = `答對 ${correct} 題 ／ 答錯 ${total - correct} 題 ／ 共 ${total} 題`;
+  document.getElementById("scorePanel").classList.add("show");
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function filterCards(type) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll(".q-card").forEach(card => {
+    if (type === "all") card.classList.remove("hidden");
+    else if (type === "correct") card.classList.toggle("hidden", card.dataset.result !== "correct");
+    else if (type === "wrong") card.classList.toggle("hidden", card.dataset.result !== "wrong");
+  });
+}
+
+function resetQuiz() {
+  selected = {};
+  submitted = false;
+  timeLeft = TOTAL_TIME;
+  document.getElementById("scorePanel").classList.remove("show");
+  document.getElementById("submitBar").classList.remove("hidden");
+  buildDots();
+  buildQuiz();
+  clearInterval(timerInterval);
+  startTimer();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+buildDots();
+buildQuiz();
+startTimer();
+</script>
+</body>
+</html>
