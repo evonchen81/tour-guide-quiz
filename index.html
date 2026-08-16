@@ -10,21 +10,51 @@ body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:
 .hero{background:linear-gradient(135deg,#1a4a70,#2c5f8a,#3a7abf);color:#fff;padding:32px 20px;text-align:center}
 .hero h1{font-size:1.6rem;font-weight:700;margin-bottom:8px}
 .hero p{font-size:.95rem;opacity:.9}
+
+/* ── 篩選列 ── */
+.filter-bar{
+  position:sticky;top:0;z-index:100;
+  background:#fff;
+  border-bottom:1px solid #dde3ec;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);
+  padding:12px 20px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-label{font-size:12px;color:#999;font-weight:600;min-width:32px;letter-spacing:.5px}
+.chip{
+  padding:5px 14px;border-radius:20px;font-size:13px;
+  border:1.5px solid #dde3ec;background:#fff;color:#555;
+  cursor:pointer;transition:all .15s;user-select:none;
+}
+.chip:hover{border-color:#2c5f8a;color:#2c5f8a}
+.chip.active-role-all  {background:#1a4a70;border-color:#1a4a70;color:#fff}
+.chip.active-leader    {background:#2c5f8a;border-color:#2c5f8a;color:#fff}
+.chip.active-guide     {background:#27ae60;border-color:#27ae60;color:#fff}
+.chip.active-year      {background:#1a4a70;border-color:#1a4a70;color:#fff}
+.chip.chip-year{padding:5px 10px}
+
 .container{max-width:900px;margin:0 auto;padding:24px 16px}
-.year-section{margin-bottom:32px}
+.year-section{margin-bottom:32px;transition:opacity .2s}
+.year-section.hidden{display:none}
 .year-title{font-size:1.2rem;font-weight:700;color:#1a4a70;border-left:5px solid #2c5f8a;padding-left:12px;margin-bottom:16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.1);text-decoration:none;color:#333;transition:.2s;border-top:4px solid #2c5f8a;display:flex;flex-direction:column;gap:6px}
 .card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.15)}
 .card.leader{border-top-color:#2c5f8a}
 .card.guide{border-top-color:#27ae60}
-.card.lang{border-top-color:#8e44ad}
+.card.lang-leader{border-top-color:#8e44ad}
+.card.lang-guide{border-top-color:#c0392b}
+.card.hidden{display:none}
 .card-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:4px}
 .badge-leader{background:#e3f2fd;color:#1a4a70}
 .badge-guide{background:#e8f5e9;color:#1e6b3d}
-.badge-lang{background:#f3e5f5;color:#6a1b9a}
+.badge-lang-leader{background:#f3e5f5;color:#6a1b9a}
+.badge-lang-guide{background:#fdecea;color:#b71c1c}
 .card-title{font-size:1rem;font-weight:700;line-height:1.3}
 .card-meta{font-size:.8rem;color:#888}
+.no-result{text-align:center;padding:48px 20px;color:#bbb;font-size:.95rem;display:none}
+.no-result.visible{display:block}
 .footer{text-align:center;padding:24px;color:#888;font-size:.8rem}
 </style>
 </head>
@@ -33,463 +63,488 @@ body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:
   <h1>🗺️ 導遊領隊考照題庫</h1>
   <p>線上測驗系統｜60分鐘計時｜即時批改</p>
 </div>
-<div class="container">
 
-  <div class="year-section">
+<!-- 篩選列 -->
+<div class="filter-bar">
+  <div class="filter-row">
+    <span class="filter-label">身份</span>
+    <span class="chip active-role-all" data-role="all">全部</span>
+    <span class="chip" data-role="leader">領隊</span>
+    <span class="chip" data-role="guide">導遊</span>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">年份</span>
+    <span class="chip chip-year active-year" data-year="all">全部</span>
+    <span class="chip chip-year" data-year="115">115</span>
+    <span class="chip chip-year" data-year="114">114</span>
+    <span class="chip chip-year" data-year="113">113</span>
+    <span class="chip chip-year" data-year="112">112</span>
+    <span class="chip chip-year" data-year="111">111</span>
+    <span class="chip chip-year" data-year="110">110</span>
+    <span class="chip chip-year" data-year="109">109</span>
+    <span class="chip chip-year" data-year="108">108</span>
+    <span class="chip chip-year" data-year="107">107</span>
+    <span class="chip chip-year" data-year="106">106</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="no-result" id="noResult">沒有符合條件的題庫</div>
+
+  <div class="year-section" data-year="115">
     <div class="year-title">📅 115年</div>
     <div class="grid">
-      <a class="card leader" href="115/quiz_1101.html">
+      <a class="card leader" data-role="leader" href="115/quiz_1101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="115/quiz_1301.html">
+      <a class="card guide" data-role="guide" href="115/quiz_1301.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="115/quiz_2101.html">
+      <a class="card leader" data-role="leader" href="115/quiz_2101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="115/quiz_2301.html">
+      <a class="card guide" data-role="guide" href="115/quiz_2301.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="115/quiz_3101.html">
+      <a class="card leader" data-role="leader" href="115/quiz_3101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="115/quiz_3301.html">
+      <a class="card guide" data-role="guide" href="115/quiz_3301.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="115/quiz_4201.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="115/quiz_4201.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="115/quiz_4401.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="115/quiz_4401.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="114">
     <div class="year-title">📅 114年</div>
     <div class="grid">
-      <a class="card leader" href="114/quiz_1101.html">
+      <a class="card leader" data-role="leader" href="114/quiz_1101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="114/quiz_1301.html">
+      <a class="card guide" data-role="guide" href="114/quiz_1301.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="114/quiz_2101.html">
+      <a class="card leader" data-role="leader" href="114/quiz_2101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="114/quiz_2301.html">
+      <a class="card guide" data-role="guide" href="114/quiz_2301.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="114/quiz_3201.html">
+      <a class="card leader" data-role="leader" href="114/quiz_3201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="114/quiz_3301.html">
+      <a class="card guide" data-role="guide" href="114/quiz_3301.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="114/quiz_4201.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="114/quiz_4201.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="114/quiz_4401.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="114/quiz_4401.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="113">
     <div class="year-title">📅 113年</div>
     <div class="grid">
-      <a class="card leader" href="113/quiz_1501.html">
+      <a class="card leader" data-role="leader" href="113/quiz_1501.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="113/quiz_1201.html">
+      <a class="card guide" data-role="guide" href="113/quiz_1201.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="113/quiz_2501.html">
+      <a class="card leader" data-role="leader" href="113/quiz_2501.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="113/quiz_2201.html">
+      <a class="card guide" data-role="guide" href="113/quiz_2201.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="113/quiz_3501.html">
+      <a class="card leader" data-role="leader" href="113/quiz_3501.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="113/quiz_3201.html">
+      <a class="card guide" data-role="guide" href="113/quiz_3201.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="113/quiz_4501.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="113/quiz_4501.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="113/quiz_4201.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="113/quiz_4201.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="112">
     <div class="year-title">📅 112年</div>
     <div class="grid">
-      <a class="card leader" href="112/quiz_0101.html">
+      <a class="card leader" data-role="leader" href="112/quiz_0101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="112/quiz_0102.html">
+      <a class="card guide" data-role="guide" href="112/quiz_0102.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="112/quiz_0201.html">
+      <a class="card leader" data-role="leader" href="112/quiz_0201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="112/quiz_0202.html">
+      <a class="card guide" data-role="guide" href="112/quiz_0202.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="112/quiz_0302.html">
+      <a class="card leader" data-role="leader" href="112/quiz_0302.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="112/quiz_0303.html">
+      <a class="card guide" data-role="guide" href="112/quiz_0303.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="112/quiz_0401.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="112/quiz_0401.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="112/quiz_0406.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="112/quiz_0406.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="111">
     <div class="year-title">📅 111年</div>
     <div class="grid">
-      <a class="card leader" href="111/quiz_0101.html">
+      <a class="card leader" data-role="leader" href="111/quiz_0101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="111/quiz_0102.html">
+      <a class="card guide" data-role="guide" href="111/quiz_0102.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="111/quiz_0201.html">
+      <a class="card leader" data-role="leader" href="111/quiz_0201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="111/quiz_0202.html">
+      <a class="card guide" data-role="guide" href="111/quiz_0202.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="111/quiz_0302.html">
+      <a class="card leader" data-role="leader" href="111/quiz_0302.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="111/quiz_0303.html">
+      <a class="card guide" data-role="guide" href="111/quiz_0303.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="111/quiz_0401.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="111/quiz_0401.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="111/quiz_0406.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="111/quiz_0406.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-
-  <div class="year-section">
+  <div class="year-section" data-year="110">
     <div class="year-title">📅 110年</div>
     <div class="grid">
-      <a class="card leader" href="110/quiz_0101.html">
+      <a class="card leader" data-role="leader" href="110/quiz_0101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="110/quiz_0102.html">
+      <a class="card guide" data-role="guide" href="110/quiz_0102.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="110/quiz_0201.html">
+      <a class="card leader" data-role="leader" href="110/quiz_0201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="110/quiz_0202.html">
+      <a class="card guide" data-role="guide" href="110/quiz_0202.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="110/quiz_0302.html">
+      <a class="card leader" data-role="leader" href="110/quiz_0302.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="110/quiz_0303.html">
+      <a class="card guide" data-role="guide" href="110/quiz_0303.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="110/quiz_0401.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="110/quiz_0401.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="110/quiz_0406.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="110/quiz_0406.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="109">
     <div class="year-title">📅 109年</div>
     <div class="grid">
-      <a class="card leader" href="109/quiz_0101.html">
+      <a class="card leader" data-role="leader" href="109/quiz_0101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="109/quiz_0102.html">
+      <a class="card guide" data-role="guide" href="109/quiz_0102.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="109/quiz_0201.html">
+      <a class="card leader" data-role="leader" href="109/quiz_0201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="109/quiz_0202.html">
+      <a class="card guide" data-role="guide" href="109/quiz_0202.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="109/quiz_0302.html">
+      <a class="card leader" data-role="leader" href="109/quiz_0302.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="109/quiz_0303.html">
+      <a class="card guide" data-role="guide" href="109/quiz_0303.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="109/quiz_0401.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="109/quiz_0401.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="109/quiz_0406.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="109/quiz_0406.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="108">
     <div class="year-title">📅 108年</div>
     <div class="grid">
-      <a class="card leader" href="108/quiz_0101.html">
+      <a class="card leader" data-role="leader" href="108/quiz_0101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="108/quiz_0102.html">
+      <a class="card guide" data-role="guide" href="108/quiz_0102.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="108/quiz_0201.html">
+      <a class="card leader" data-role="leader" href="108/quiz_0201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="108/quiz_0202.html">
+      <a class="card guide" data-role="guide" href="108/quiz_0202.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="108/quiz_0302.html">
+      <a class="card leader" data-role="leader" href="108/quiz_0302.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="108/quiz_0303.html">
+      <a class="card guide" data-role="guide" href="108/quiz_0303.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="108/quiz_0401.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="108/quiz_0401.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="108/quiz_0406.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="108/quiz_0406.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="107">
     <div class="year-title">📅 107年</div>
     <div class="grid">
-      <a class="card leader" href="107/quiz_0101.html">
+      <a class="card leader" data-role="leader" href="107/quiz_0101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="107/quiz_0102.html">
+      <a class="card guide" data-role="guide" href="107/quiz_0102.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="107/quiz_0201.html">
+      <a class="card leader" data-role="leader" href="107/quiz_0201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="107/quiz_0202.html">
+      <a class="card guide" data-role="guide" href="107/quiz_0202.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="107/quiz_0302.html">
+      <a class="card leader" data-role="leader" href="107/quiz_0302.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card guide" href="107/quiz_0303.html">
+      <a class="card guide" data-role="guide" href="107/quiz_0303.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card lang" href="107/quiz_0401.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="107/quiz_0401.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="107/quiz_0406.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="107/quiz_0406.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
     </div>
   </div>
 
-  <div class="year-section">
+  <div class="year-section" data-year="106">
     <div class="year-title">📅 106年</div>
     <div class="grid">
-      <a class="card leader" href="106/quiz_0101.html">
+      <a class="card leader" data-role="leader" href="106/quiz_0101.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業實務</div>
         <div class="card-meta">80題｜60分鐘</div>
       </a>
-      <a class="card guide" href="106/quiz_0102.html">
+      <a class="card guide" data-role="guide" href="106/quiz_0102.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊執業實務</div>
         <div class="card-meta">80題｜60分鐘</div>
       </a>
-      <a class="card leader" href="106/quiz_0201.html">
+      <a class="card leader" data-role="leader" href="106/quiz_0201.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊執業法規</div>
         <div class="card-meta">80題｜60分鐘</div>
       </a>
-      <a class="card guide" href="106/quiz_0202.html">
+      <a class="card guide" data-role="guide" href="106/quiz_0202.html">
         <span class="card-badge badge-guide">外語導遊</span>
         <div class="card-title">導遊執業法規</div>
         <div class="card-meta">50題｜60分鐘</div>
       </a>
-      <a class="card leader" href="106/quiz_0302.html">
+      <a class="card leader" data-role="leader" href="106/quiz_0302.html">
         <span class="card-badge badge-leader">華語領隊</span>
         <div class="card-title">領隊觀光資源概要</div>
         <div class="card-meta">80題｜60分鐘</div>
       </a>
-      <a class="card guide" href="106/quiz_0303.html">
+      <a class="card guide" data-role="guide" href="106/quiz_0303.html">
         <span class="card-badge badge-guide">華語導遊</span>
         <div class="card-title">導遊觀光資源概要</div>
         <div class="card-meta">80題｜60分鐘</div>
       </a>
-      <a class="card lang" href="106/quiz_0401.html">
-        <span class="card-badge badge-lang">外語領隊</span>
+      <a class="card lang-leader" data-role="leader" href="106/quiz_0401.html">
+        <span class="card-badge badge-lang-leader">外語領隊</span>
         <div class="card-title">領隊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
-      <a class="card lang" href="106/quiz_0406.html">
-        <span class="card-badge badge-lang">外語導遊</span>
+      <a class="card lang-guide" data-role="guide" href="106/quiz_0406.html">
+        <span class="card-badge badge-lang-guide">外語導遊</span>
         <div class="card-title">導遊英語</div>
         <div class="card-meta">80題｜80分鐘</div>
       </a>
@@ -498,5 +553,67 @@ body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:
 
 </div>
 <div class="footer">導遊領隊考照題庫線上測驗系統 © 2025</div>
+
+<script>
+(function(){
+  var selRole = 'all', selYear = 'all';
+
+  // 角色篩選按鈕
+  var roleChips = document.querySelectorAll('[data-role]');
+  roleChips.forEach(function(chip){
+    if(!chip.classList.contains('card')){
+      chip.addEventListener('click', function(){
+        selRole = this.dataset.role;
+        // 更新樣式
+        document.querySelectorAll('.filter-bar [data-role]').forEach(function(c){
+          c.classList.remove('active-role-all','active-leader','active-guide');
+        });
+        if(selRole==='all')  this.classList.add('active-role-all');
+        if(selRole==='leader') this.classList.add('active-leader');
+        if(selRole==='guide')  this.classList.add('active-guide');
+        applyFilter();
+      });
+    }
+  });
+
+  // 年份篩選按鈕
+  document.querySelectorAll('[data-year]').forEach(function(chip){
+    if(!chip.classList.contains('year-section')){
+      chip.addEventListener('click', function(){
+        selYear = this.dataset.year;
+        document.querySelectorAll('.filter-bar [data-year]').forEach(function(c){
+          c.classList.remove('active-year');
+        });
+        this.classList.add('active-year');
+        applyFilter();
+      });
+    }
+  });
+
+  function applyFilter(){
+    var sections = document.querySelectorAll('.year-section');
+    var anyVisible = false;
+
+    sections.forEach(function(sec){
+      var yearMatch = (selYear==='all') || (sec.dataset.year===selYear);
+      if(!yearMatch){ sec.classList.add('hidden'); return; }
+
+      // 篩選卡片
+      var cards = sec.querySelectorAll('.card');
+      var visibleCards = 0;
+      cards.forEach(function(card){
+        var roleMatch = (selRole==='all') || (card.dataset.role===selRole);
+        if(roleMatch){ card.classList.remove('hidden'); visibleCards++; }
+        else { card.classList.add('hidden'); }
+      });
+
+      if(visibleCards>0){ sec.classList.remove('hidden'); anyVisible=true; }
+      else { sec.classList.add('hidden'); }
+    });
+
+    document.getElementById('noResult').classList.toggle('visible', !anyVisible);
+  }
+})();
+</script>
 </body>
 </html>
