@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>106年 領隊英語（英語）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333}
+.header{background:linear-gradient(135deg,#5b2c8d,#7d3c98);color:#fff;padding:16px 20px}
+.header h1{font-size:1.2rem;font-weight:700}
+.header .meta{font-size:.85rem;opacity:.9;margin-top:4px}
+.timer-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:8px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.timer{font-size:1.4rem;font-weight:700;color:#5b2c8d;font-variant-numeric:tabular-nums}
+.timer.warning{color:#e74c3c}
+.progress-text{font-size:.85rem;color:#666}
+.container{max-width:860px;margin:0 auto;padding:20px 16px}
+.question-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.question-card.answered-correct{border-left:4px solid #27ae60}
+.question-card.answered-wrong{border-left:4px solid #e74c3c}
+.question-card.invalid{border-left:4px solid #95a5a6;opacity:.7}
+.q-num{font-size:.8rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.7;margin-bottom:14px;font-family:Georgia,serif}
+.q-blank{display:inline-block;border-bottom:2px solid #333;min-width:60px;margin:0 2px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;text-align:left;background:#fff;font-size:.9rem;line-height:1.5;font-family:Georgia,serif;transition:.15s}
+.option-btn:hover:not(:disabled){border-color:#7d3c98;background:#f8f0ff}
+.option-btn.selected{border-color:#7d3c98;background:#f3e5ff}
+.option-btn.correct{border-color:#27ae60;background:#e8f8ed;color:#1a6b3d}
+.option-btn.wrong{border-color:#e74c3c;background:#fdecea;color:#c0392b}
+.option-btn:disabled{cursor:default}
+.opt-label{font-weight:700;min-width:20px;font-family:"Microsoft JhengHei",Arial,sans-serif}
+.result-box{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;display:none}
+.result-box.correct{background:#e8f8ed;color:#1a6b3d;display:block}
+.result-box.wrong{background:#fdecea;color:#c0392b;display:block}
+.submit-area{text-align:center;padding:20px 0 40px}
+.submit-btn{background:#5b2c8d;color:#fff;border:none;padding:14px 40px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.submit-btn:hover{background:#4a236f}
+.score-bar{background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;text-align:center;display:none;position:sticky;bottom:0}
+.score-num{font-size:1.6rem;font-weight:700;color:#5b2c8d}
+.back-btn{display:inline-block;margin-top:8px;color:#7d3c98;text-decoration:none;font-size:.9rem}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;font-size:.85rem;background:#fff}
+.filter-btn.active{border-color:#7d3c98;background:#7d3c98;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>106年 外語領隊人員｜領隊英語</h1>
+  <div class="meta">共80題｜80分鐘</div>
+</div>
+<div class="timer-bar">
+  <div class="timer" id="timer">80:00</div>
+  <div class="progress-text" id="progress">已答 0 / 80 題</div>
+</div>
+<div class="container">
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <button class="filter-btn active" onclick="filterQ('all')">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong')">答錯</button>
+    <button class="filter-btn" onclick="filterQ('correct')">答對</button>
+    <button class="filter-btn" onclick="filterQ('unanswered')">未答</button>
+  </div>
+  <div id="quizContainer"></div>
+  <div class="submit-area" id="submitArea">
+    <button class="submit-btn" onclick="submitQuiz()">交卷</button>
+  </div>
+</div>
+<div class="score-bar" id="scoreBar">
+  <div class="score-num" id="scoreNum"></div>
+  <div id="scoreDetail"></div>
+  <a href="../index.html" class="back-btn">← 回首頁</a>
+</div>
+<script>
+const QUESTIONS = [{"num": 10, "text": "6 年專門職業及技術人員普通考試導遊人員、領隊人員考試試題 頁次：8－1 等 別：普通考試 類 科：外語領隊人員（英語） 科 目：外國語（英語） 1 小時20 考試時間： 分 座號： ※注意：", "opts": ["", "", "", ""], "ans": 1}, {"num": 1, "text": "If you plan your trip carefully and learn to take____ , you can relax and enjoy yourself.", "opts": ["precipitation [B]precautions [C]presentations [D]precedence", "", "", ""], "ans": 1}, {"num": 2, "text": "Having an important document ____ before or during your trip is the last thing you want to happen.", "opts": ["expire [B]exile [C]excel [D]exist", "", "", ""], "ans": 0}, {"num": 3, "text": "Unlike local people, you’ll carry guide books, ____ maps, take photos and look up at buildings.", "opts": ["refer to [B]hang up [C]agree with [D]stand by", "", "", ""], "ans": 0}, {"num": 4, "text": "How long before your ____ should you arrive at the airport?", "opts": ["depression [B]departure [C]deference [D]deficiency", "", "", ""], "ans": 1}, {"num": 5, "text": "Companies use social network sites like Facebook ____ people can share information about the brand.", "opts": ["nonetheless [B]although [C]afterwards [D]so that", "", "", ""], "ans": 3}, {"num": 6, "text": "Don’t ____trying to explain it to me. I’ll never understand.", "opts": ["pull my leg [B]see eye to eye [C]have a sweet tooth [D]waste your breath", "", "", ""], "ans": 3}, {"num": 7, "text": "If the beach and the desert lose their ____ , visitors can always go skiing at Ski Dubai, an indoor ski resort.", "opts": ["approach [B]appeal [C]apparatus [D]appendix", "", "", ""], "ans": 1}, {"num": 8, "text": "A: I’m so fed up! I lost my cell phone yesterday! B: ____", "opts": ["Cheer up. It’s not the end of the world. [B]Well done. Better late than never.", "You can say that again. I couldn’t stand it. [D]I’m sure it’s tough, but time will heal all wounds.", "", ""], "ans": 0}, {"num": 9, "text": "Tour operators regularly use ____ and the Internet to advertise their package holidays and tours.", "opts": ["brochures [B]brooches [C]brooks [D]brooms", "", "", ""], "ans": 0}, {"num": 10, "text": "Find out why customers have come on holidays, what they want to do, and then help them to ____ their dream.", "opts": ["alternate [B]achieve [C]authorize [D]amend", "", "", ""], "ans": 1}, {"num": 11, "text": "There is so much information to ____ through the Internet that it is easy not to find what you want.", "opts": ["aware [B]convince [C]browse [D]infer 代號：4601 頁次：8－2", "", "", ""], "ans": 2}, {"num": 12, "text": "____ is a sum of money that is paid back to you, especially because you have paid too much or you are not happy with something you have.", "opts": ["Premium [B]Interest [C]Loan [D]Refund", "", "", ""], "ans": 3}, {"num": 13, "text": "There is a ____ bus between the airport and the city center.", "opts": ["resort [B]shuttle [C]terminal [D]roundabout", "", "", ""], "ans": 1}, {"num": 14, "text": "A terminal is an airport building that has all the ____ for passengers that are arriving or departing.", "opts": ["packages [B]stopovers [C]facilities [D]hubbubs", "", "", ""], "ans": 2}, {"num": 15, "text": "If you want to change your booking, we will try to help you, but we cannot ____ that we will be able to do this.", "opts": ["assess [B]guarantee [C]propose [D]suppose", "", "", ""], "ans": 1}, {"num": 16, "text": "Passenger: Are there any window seats available? Airport worker:____", "opts": ["I’m afraid there aren’t. The flight’s full.", "Yes, of course. It’s just over there, next to the newsagent’s.", "Right, I’ll go there. Gate G, you say?", "Flight AZ402? Yes, that should be through by now."], "ans": 0}, {"num": 17, "text": "Passenger: ____ Airport worker: Yes. The cabin doors have been locked.", "opts": ["Is there any chance of an upgrade to First Class? [B]Is it too late to board?", "Can I go to the front queue? [D]Is it OK to take my guitar on as hand luggage?", "", ""], "ans": 1}, {"num": 18, "text": "Thinking about their medical needs ____ can save travelers a lot of time and trouble.", "opts": ["afterwards [B]irregularly [C]beforehand [D]abnormally", "", "", ""], "ans": 2}, {"num": 19, "text": "Many tourists in Europe are Europeans themselves, ____ others come largely from Asia and the Americas.", "opts": ["while [B]once [C]since [D]thus", "", "", ""], "ans": 0}, {"num": 20, "text": "When tourism is badly managed, it can destroy a place. Coasts, for example, are extremely ____.", "opts": ["voluntary [B]vulnerable [C]violent [D]various", "", "", ""], "ans": 1}, {"num": 21, "text": "Overconsumption is having a serious ____ on natural resources.", "opts": ["demand [B]efficiency [C]component [D]impact", "", "", ""], "ans": 3}, {"num": 22, "text": "As meat consumption grows, ____ the environmental and health consequences of producing it.", "opts": ["so do [B]so are [C]so have [D]so that 代號：4601 頁次：8－3", "", "", ""], "ans": 0}, {"num": 23, "text": "If you ____ an event, you realize in advance that it may happen and you are prepared for it.", "opts": ["constitute [B]illustrate [C]anticipate [D]enhance", "", "", ""], "ans": 2}, {"num": 24, "text": "An employee who can do business in more than one language is a valuable ____ to most companies.", "opts": ["asset [B]access [C]accent [D]alarm", "", "", ""], "ans": 0}, {"num": 25, "text": "Even though Mandarin may soon become an important world language, it probably won’t be the ____ language because the writing system is too difficult.", "opts": ["regulated [B]ultimate [C]assimilated [D]dominant", "", "", ""], "ans": 3}, {"num": 26, "text": "How many different kinds of ____ have you stayed in while traveling?", "opts": ["recommendation [B]organization [C]accommodation [D]complication", "", "", ""], "ans": 2}, {"num": 27, "text": "In less developed regions, ____ eating uncooked dairy products, vegetables and salads.", "opts": ["avoid [B]maintain [C]convert [D]separate", "", "", ""], "ans": 0}, {"num": 28, "text": "Anybody looking for a truly heavenly experience will think that they have walked into ____ at the Chocolate Show in New York.", "opts": ["lounge [B]paradise [C]festival [D]vision", "", "", ""], "ans": 1}, {"num": 29, "text": "Your local travel agent can make a booking. Your booking must be _____ by a 10 percent deposit of the total amount of the fee.", "opts": ["accommodated [B]accompanied [C]composted [D]conserved", "", "", ""], "ans": 1}, {"num": 30, "text": "Which dish sounds nicest to you, and which dish would you _____ like to try?", "opts": ["less [B]least [C]last [D]latest", "", "", ""], "ans": 1}, {"num": 31, "text": "Hungry visitors mean good business, not only for our restauranteurs, but also for the farmers and fishermen who are their ____.", "opts": ["spices [B]starters [C]suppliers [D]symbols", "", "", ""], "ans": 2}, {"num": 32, "text": "There is a piece of advice that responsible tourism organizations often give to travelers: “ Take only photographs; leave only ____”.", "opts": ["footprints [B]guidelines [C]leaflets [D]monuments", "", "", ""], "ans": 0}, {"num": 33, "text": "Hong Kong ____ two parts: Hong Kong Island and Kowloon, separated by Victoria Harbors.", "opts": ["makes up [B]longs for [C]consists of [D]deals with", "", "", ""], "ans": 2}, {"num": 34, "text": "A: Do you know____ tomorrow? B: I am afraid that it will have heavy showers.", "opts": ["what will the weather like [B]what the weather will be like", "what the weather will like [D]what will be the weather like 代號：4601 頁次：8－4", "", ""], "ans": 1}, {"num": 35, "text": "A: Which job might require some catering or ____ experience? B: Banquet server.", "opts": ["culinary [B]secretarial [C]engineering [D]political", "", "", ""], "ans": 0}, {"num": 36, "text": "Tourist:____ Receptionist: It’s free.", "opts": ["Do you have an English version? [B]What can I do for you, sir?", "What is the admission fee? [D]Are you ready to order?", "", ""], "ans": 2}, {"num": 37, "text": "Tourist: May I take pictures here? Receptionist:____", "opts": ["Uh-huh, that’s interesting. [B]Oh, sorry! That’s not allowed.", "Great! Here you go. [D]Yes, it’s on the second floor.", "", ""], "ans": 1}, {"num": 38, "text": "Tourist: I’d like to buy a ____ to take back for my girlfriend. What do you recommend? Shop assistant: Would you like to take a look at these earrings?", "opts": ["sculpture [B]signature [C]sausage [D]souvenir", "", "", ""], "ans": 3}, {"num": 39, "text": "Most visitors to Easter Island come specifically to see the 887 moai, _____ statues carved out of volcanic rock, scattered around the island.", "opts": ["instinctive [B]infinitesimal [C]enormous [D]encountered", "", "", ""], "ans": 2}, {"num": 40, "text": "Over the years, Red Square has witnessed some of the most dramatic scenes in Russia’s noble but troubled history, from joyous _____ to bloody executions.", "opts": ["innoculation [B]coronations [C]meteorites [D]infrastructure", "", "", ""], "ans": 1}, {"num": 41, "text": "Traveling from one city or country to another can _____ to the spread of disease.", "opts": ["contribute [B]object [C]subscribe [D]adhere", "", "", ""], "ans": 0}, {"num": 42, "text": "A medium of exchange is anything that is used to _____ value during the exchange of goods and services.", "opts": ["pursue [B]dominate [C]progress [D]determine", "", "", ""], "ans": 3}, {"num": 43, "text": "Homeless are, by definition, people who sleep in streets, parks, shelters, and places that were never _____ for living in, such as bus stations, lobbies, or empty buildings.", "opts": ["incorporated [B]evolved [C]engaged [D]intended", "", "", ""], "ans": 3}, {"num": 44, "text": "The green sulphur spring only in Beitou and in Japan is especially rare and has many _____ health effects.", "opts": ["disguised [B]pleatiful [C]affecting [D]beneficial 代號：4601 頁次：8－5", "", "", ""], "ans": 3}, {"num": 45, "text": "Cross India, poverty and a _____ environment are two increasingly difficult issues. Forests and glaciers are dwindling, air and land are being polluted, and coastlines are disappearing.", "opts": ["degraded [B]fermented [C]distinguished [D]fortified", "", "", ""], "ans": 0}, {"num": 46, "text": "Until the 1970s, the Inuit people of North Canada _____ isolated and traditional lives, untouched by modern media and high technology.", "opts": ["found [B]were [C]led [D]made", "", "", ""], "ans": 2}, {"num": 47, "text": "While both a social business and a business run by an _____ need to be profitable, the bottom line for a social business is how much impact it makes on society, not how much money it returns to the investors.", "opts": ["accelerator [B]entrepreneur [C]proponent [D]opponent", "", "", ""], "ans": 1}, {"num": 48, "text": "If you need some cash, the new credit card will allow you to _____ up to $300 a day from a cash dispenser.", "opts": ["withdraw [B]deposit [C]withhold [D]deliver", "", "", ""], "ans": 0}, {"num": 49, "text": "Our travel agent would love to _____ you that the contract covers all the details we’ve agreed.", "opts": ["individualize [B]reassure [C]interfere [D]recapitulate", "", "", ""], "ans": 1}, {"num": 50, "text": "The catering for all wedding _____ at Princeton Hall is often done by Joy Eats.", "opts": ["checks [B]exhibition [C]receptions [D]mangagement", "", "", ""], "ans": 2}, {"num": 51, "text": "His passport was _____ by the police to prevent him from leaving the country.", "opts": ["confiscated [B]released [C]conversed [D]relinquished", "", "", ""], "ans": 0}, {"num": 52, "text": "Escalators carry foot passengers from the _____ on the ground floor to gangway level where a covered walkway leads to the ship gangway.", "opts": ["concordance [B]collateral [C]collision [D]concourse", "", "", ""], "ans": 3}, {"num": 53, "text": "Fresh fruit and vegetables are an essential component of a healthy _____.", "opts": ["food [B]element [C]diet [D]consumption", "", "", ""], "ans": 2}, {"num": 54, "text": "One _____ flight per week commence in November and will run for an initial period of six months from Taipei to Tokyo.", "opts": ["charter [B]aircraft [C]lease [D]board", "", "", ""], "ans": 0}, {"num": 55, "text": "If you collect seven _____ from the grocery store, you can get a free mug.", "opts": ["checks [B]boosters [C]brands [D]coupons", "", "", ""], "ans": 3}, {"num": 56, "text": "We have some rooms _____ for this weekend. What is the exact date of your arrival?", "opts": ["available [B]assumed [C]unexpected [D]unattainable 代號：4601 頁次：8－6", "", "", ""], "ans": 0}, {"num": 57, "text": "In some parts of the world, sheep’s eyes are regarded as a great _____.", "opts": ["attraction [B]refinement [C]lightness [D]delicacy", "", "", ""], "ans": 3}, {"num": 58, "text": "It is a very old hotel. I still have to make calls _____ the operator.", "opts": ["for [B]toward [C]through [D]with", "", "", ""], "ans": 2}, {"num": 59, "text": "The native people used to collect _____ early in the morning from leaves in order to have water to drink.", "opts": ["snow [B]dew [C]frost [D]fog", "", "", ""], "ans": 1}, {"num": 60, "text": "In some countries in Southern Asia, the _____ is scorching hot all year round.", "opts": ["climate [B]rainfall [C]atmosphere [D]forecast", "", "", ""], "ans": 0}, {"num": 61, "text": "The hotel room was _____ and smelly so we opened all the windows and gave it a good airing.", "opts": ["drought [B]fluid [C]arid [D]damp", "", "", ""], "ans": 3}, {"num": 62, "text": "The unusually noxious _____ in Peijing was caused by several factors, including industrial pollution and auto emission trapped by cold and windless weather.", "opts": ["haze [B]steam [C]vapour [D]storm", "", "", ""], "ans": 0}, {"num": 63, "text": "In the UK, it is _____ to leave a tip of around 10-15% of the bill, for good service and food.", "opts": ["accidental [B]periodic [C]customary [D]obligatory", "", "", ""], "ans": 2}, {"num": 64, "text": "Plans to label genetically modified foods has led to _____ between the food industry and the government.", "opts": ["conflict [B]affect [C]extract [D]virtue", "", "", ""], "ans": 0}, {"num": 65, "text": "If you are up for a luxury _____ adventure, then try the fugu sashimi, which is made from the fresh of the poisonous puffer fish.", "opts": ["culinary [B]cookery [C]pleading [D]pleasure", "", "", ""], "ans": 0}, {"num": 66, "text": "The top-rated luxury hotel is located in downtown Chicago, so it is very convenient and is equipped with all of the _____.", "opts": ["creatures [B]amenities [C]suggestions [D]features", "", "", ""], "ans": 1}, {"num": 67, "text": "In the five-star resort with hot spring, the maximum _____ in the hot tub is ten people during the night time.", "opts": ["quality [B]amount [C]profile [D]capacity", "", "", ""], "ans": 3}, {"num": 68, "text": "The hotel only has a few _____ left and they are all for single rooms.", "opts": ["vacancies [B]facilities [C]utilities [D]contributions", "", "", ""], "ans": 0}, {"num": 69, "text": "People living in the _____ of the hurricane have been advised to leave their homes until it has passed.", "opts": ["storm [B]track [C]downfall [D]wind", "", "", ""], "ans": 1}, {"num": 70, "text": "In Europe, illegal immigrants are used to seek _____ in a local church.", "opts": ["confinement [B]satisfaction [C]sanctuary [D]continuum 代號：4601 頁次：8－7 No other city in India or in any country has a unique system like this. The men who make it work are called dabbawallas. In Hindi, the word dabba refers to lunch box and walla means carrier or deliver man.The 5000 dabbawallas carry lunch boxes—about 200,000 meals per day—to offices and workplaces throughout the city by lunch time in Mumbai. Every day, for a very modest fee (only 300 rupees per month), the dabbawallas collect freshly cooked meals from their customers’ home and deliver to the nearest train station by bicycle before 9:00 a.m.. At the train station, the dabbawallas sort through all the lunch boxes and put them onto trains that will bring them to the station nearest the customer’s office. The lunch boxes are delivered to the offices by bike. Each person gets their home-cooked meal by 12:30. To satisfy their customers, they use a complicated system of collection teams, sorting points and delivery zones, and a entirely manual system for routing the right meal to the right direction. In spite of difficult tasks like this, the organization has been recognized and celebrated for their incredible order accuracy 99.9999 percent. Recently, the organization makes their effort to assist Mumbai’s", "", "", ""], "ans": 2}, {"num": 20, "text": "0,000 slum by giving some of the food they deliver which is never eaten or barely touched. This idea indeed helps the poverty without too much cost.", "opts": ["", "", "", ""], "ans": 1}, {"num": 71, "text": "What is the best title for this passage?", "opts": ["The Transportation in Mumbai [B]Helping Slum in India", "Delivering lunches in Mumbai [D]The Development of Mumbai", "", ""], "ans": 2}, {"num": 72, "text": "According to the passage, what is the most essential requirement for a dabbawalla?", "opts": ["Being smart [B]Being diligent [C]Being nice [D]Being on time", "", "", ""], "ans": 3}, {"num": 73, "text": "Which of the following statements is true according to the passage?", "opts": ["People in Mumbai prefer to eat home-cooked meal.", "A dabbawalla makes lot of money.", "All of the lunch boxes are always eaten by receivers.", "The organization donates a lot of money to help people."], "ans": 0}, {"num": 74, "text": "Which of the followings is true about passage?", "opts": ["Dabbawallas don’t need bicycles for their job.", "The delivery service is not cheap.", "The organization is proud of their efficieny of delivery.", "Not many people need food in Mumbai."], "ans": 2}, {"num": 75, "text": "As indicated in this passage, the word “recognized” means _____.", "opts": ["welcomed [B]known [C]preferred [D]told 代號：4601 頁次：8－8 Geotourism provides an alternative to traditional mass tourism, the effects of which can be harmful to the local people as well as to the environment. Much of the infrastructure that supports mass tourism--large tourist hotels, restaurants, malls, tour companies--may be owned and operated by companies based on outside the tourist areas. Chain restaurants and stores may not always serve local food or sell local products. Large package tour companies may not always hire local experts and guides, who know the area’s history, environment, and culture. As a result, much of the money made from this type of tourism does not stay in the local community. Moreover, tourists whose only travel experience comes via big hotels, chain restaurants, or package tours typically have little contact with the local people, thus limiting their understanding of the nature and culture of the places they visit. In contrast, geotourism is like a partnership between travelers and locals. Geotravelers stay in locally owned hotels, managed by residents who care about protecting the area and environment. They buy from local merchants and craftspeople, hire local travel guides, and go to see traditional music, dance, and theater to broaden the scope of their understanding of the area’s history and culture. Geotravelers learn a lot from their close contact with local people while the money they spend stays in the community, helps local people earn a living, and helps preserve and sustain the area for future travelers. In this way, geotourism benefits both partners--travelers and residents.", "", "", ""], "ans": 1}, {"num": 76, "text": "What might be the best title for this excerpt?", "opts": ["Transport in Tourism [B]The New Face of Tourism", "What is Tourism? [D]Tourist Motivations", "", ""], "ans": 1}, {"num": 77, "text": "Which of the following statements is true about geotourism based on the excerpt?", "opts": ["Geotourism tends to ignore the culture of the places travelers visit.", "There are a lot of similarities between geotourism and mass tourism.", "Geotourism helps build a relationship between travelers and the locals.", "Geotourism does not encourage travelers to stay in locally owned hotels."], "ans": 2}, {"num": 78, "text": "Which of the followings might NOT contribute to traditional mass tourism based on the excerpt?", "opts": ["local tour experts [B]chain restaurants [C]package tours [D]malls", "", "", ""], "ans": 0}, {"num": 79, "text": "What does the word“via”mean?", "opts": ["for [B]from [C]about [D]through", "", "", ""], "ans": 3}, {"num": 80, "text": "What can be inferred based on the excerpt?", "opts": ["Local people might prefer geotourism to traditional mass tourism.", "Geotourism will replace traditional mass tourism soon.", "Traditional mass tourism should be abolished.", "Geotavelers are more experienced travelers than package tourists."], "ans": 0}];
+const TOTAL_TIME = 4800;
+const KEYS = ['A','B','C','D'];
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let userAnswers = {};
+let submitted = false;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return '本題一律給分';
+  if (Array.isArray(q.ans)) return '正確答案：' + q.ans.map(i => KEYS[i]).join(' 或 ');
+  return KEYS[q.ans] + '：' + q.opts[q.ans];
+}
+
+function renderQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (q.ans === -1 ? ' invalid' : '');
+    card.id = 'card-' + qi;
+    const opts = q.opts.map((opt, i) => {
+      return `<button class="option-btn" id="opt-${qi}-${i}" onclick="selectAnswer(${qi}, ${i})">
+        <span class="opt-label">${KEYS[i]}</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join('');
+    const qtext = q.text.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    card.innerHTML = `
+      <div class="q-num">Q${q.num}${q.ans === -1 ? ' (invalid)' : ''}</div>
+      <div class="q-text">${qtext}</div>
+      <div class="options">${opts}</div>
+      <div class="result-box" id="result-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, i) {
+  if (submitted) return;
+  userAnswers[qi] = i;
+  for (let k = 0; k < 4; k++) {
+    const btn = document.getElementById(`opt-${qi}-${k}`);
+    if (btn) btn.classList.remove('selected');
+  }
+  const selBtn = document.getElementById(`opt-${qi}-${i}`);
+  if (selBtn) selBtn.classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progress').textContent = `已答 ${answered} / ${QUESTIONS.length} 題`;
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+
+  let correct = 0, invalid = 0;
+  QUESTIONS.forEach((q, qi) => {
+    const sel = userAnswers[qi];
+    const card = document.getElementById('card-' + qi);
+    const result = document.getElementById('result-' + qi);
+
+    if (q.ans === -1) {
+      invalid++;
+      correct++;
+      result.className = 'result-box correct';
+      result.textContent = 'Invalid question — full credit awarded';
+      card.classList.add('answered-correct');
+    } else if (sel === undefined) {
+      result.className = 'result-box wrong';
+      result.textContent = 'Not answered. ' + getCorrectLabel(q);
+      card.classList.add('answered-wrong');
+    } else if (isCorrect(q, sel)) {
+      correct++;
+      card.classList.add('answered-correct');
+      result.className = 'result-box correct';
+      result.textContent = '✓ Correct!';
+    } else {
+      card.classList.add('answered-wrong');
+      result.className = 'result-box wrong';
+      result.textContent = '✗ Wrong. ' + getCorrectLabel(q);
+    }
+
+    for (let k = 0; k < 4; k++) {
+      const btn = document.getElementById(`opt-${qi}-${k}`);
+      if (!btn) continue;
+      btn.disabled = true;
+      if (q.ans !== -1 && (Array.isArray(q.ans) ? q.ans.includes(k) : q.ans === k)) {
+        btn.classList.add('correct');
+      } else if (sel === k && !isCorrect(q, k)) {
+        btn.classList.add('wrong');
+      }
+    }
+  });
+
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('scoreNum').textContent = `Score: ${correct} / ${total} (${pct}%)`;
+  document.getElementById('scoreDetail').textContent = `(Invalid: ${invalid})`;
+  document.getElementById('scoreBar').style.display = 'block';
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'flex';
+}
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    const sel = userAnswers[qi];
+    let show = true;
+    if (mode === 'wrong') show = card.classList.contains('answered-wrong');
+    else if (mode === 'correct') show = card.classList.contains('answered-correct');
+    else if (mode === 'unanswered') show = sel === undefined;
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (timeLeft <= 300) el.classList.add('warning');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
+  }, 1000);
+}
+
+renderQuestions();
+startTimer();
+</script>
+</body>
+</html>
