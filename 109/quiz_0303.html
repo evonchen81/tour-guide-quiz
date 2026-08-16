@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>109年 華語導遊 導遊觀光資源概要</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333}
+.header{background:linear-gradient(135deg deg,#1a4a70,#2c5f8a);color:#fff;padding:16px 20px}
+.header h1{font-size:1.2rem;font-weight:700}
+.header .meta{font-size:.85rem;opacity:.9;margin-top:4px}
+.timer-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:8px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.timer{font-size:1.4rem;font-weight:700;color:#1a4a70;font-variant-numeric:tabular-nums}
+.timer.warning{color:#e74c3c}
+.progress-text{font-size:.85rem;color:#666}
+.container{max-width:860px;margin:0 auto;padding:20px 16px}
+.question-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.question-card.answered-correct{border-left:4px solid #27ae60}
+.question-card.answered-wrong{border-left:4px solid #e74c3c}
+.question-card.invalid{border-left:4px solid #95a5a6;opacity:.7}
+.q-num{font-size:.8rem;color:#888;margin-bottom:6px}
+.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
+.q-blank{display:inline-block;border-bottom:2px solid #333;min-width:60px;margin:0 2px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;text-align:left;background:#fff;font-size:.95rem;line-height:1.5;transition:.15s}
+.option-btn:hover:not(:disabled){border-color:#2c5f8a;background:#f0f4f8}
+.option-btn.selected{border-color:#2c5f8a;background:#e8f0f8}
+.option-btn.correct{border-color:#27ae60;background:#e8f8ed;color:#1a6b3d}
+.option-btn.wrong{border-color:#e74c3c;background:#fdecea;color:#c0392b}
+.option-btn:disabled{cursor:default}
+.opt-label{font-weight:700;min-width:20px}
+.result-box{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;display:none}
+.result-box.correct{background:#e8f8ed;color:#1a6b3d;display:block}
+.result-box.wrong{background:#fdecea;color:#c0392b;display:block}
+.submit-area{text-align:center;padding:20px 0 40px}
+.submit-btn{background:#2c5f8a;color:#fff;border:none;padding:14px 40px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.submit-btn:hover{background:#1a4a70}
+.score-bar{background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;text-align:center;display:none;position:sticky;bottom:0}
+.score-num{font-size:1.6rem;font-weight:700;color:#1a4a70}
+.back-btn{display:inline-block;margin-top:8px;color:#2c5f8a;text-decoration:none;font-size:.9rem}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;font-size:.85rem;background:#fff}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>109年 華語導遊｜導遊觀光資源概要</h1>
+  <div class="meta">共50題｜60分鐘</div>
+</div>
+<div class="timer-bar">
+  <div class="timer" id="timer">60:00</div>
+  <div class="progress-text" id="progress">已答 0 / 50 題</div>
+</div>
+<div class="container">
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <button class="filter-btn active" onclick="filterQ('all')">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong')">答錯</button>
+    <button class="filter-btn" onclick="filterQ('correct')">答對</button>
+    <button class="filter-btn" onclick="filterQ('unanswered')">未答</button>
+  </div>
+  <div id="quizContainer"></div>
+  <div class="submit-area" id="submitArea">
+    <button class="submit-btn" onclick="submitQuiz()">交卷</button>
+  </div>
+</div>
+<div class="score-bar" id="scoreBar">
+  <div class="score-num" id="scoreNum"></div>
+  <div id="scoreDetail"></div>
+  <a href="../index.html" class="back-btn">← 回首頁</a>
+</div>
+<script>
+const QUESTIONS = [{"num": 1, "text": "荷治時期曾發生的漢人農民反抗事件，史稱為下列何者？", "opts": ["郭懷一事件 [B] 濱田彌兵衛事件 [C] 麻豆溪事件 [D] 二林事件", "", "", ""], "ans": 0}, {"num": 2, "text": "有一位導遊帶團抵達安平，參觀晚清洋行遺址，導遊說明當時臺南地區西方商人主要貿易內容是：", "opts": ["茶葉 [B] 染料 [C] 鹿角 [D] 糖", "", "", ""], "ans": 3}, {"num": 3, "text": "日治時期臺人最後一次武裝抗日為：", "opts": ["霧社事件 [B] 噍吧哖事件 [C] 牡丹社事件 [D] 北埔事件", "", "", ""], "ans": 0}, {"num": 4, "text": "1934 年 11 月 10 日，臺陽美術協會舉行成立大會。下列那一位畫家是臺陽美術協會的創始會員？", "opts": ["張大千 [B] 石川欽一郎 [C] 李石樵 [D] 齊白石", "", "", ""], "ans": 2}, {"num": 5, "text": "日治時期擔任第一任文官總督的田健治郎（任期 1919-1923 ），在臺推行內地延長主義。在內地延長主義 的大原則下，臺灣人可享有的權利是：", "opts": ["臺灣學力在日本獲承認", "臺灣訓練的醫師可在日本行醫", "臺灣仕紳可以獲選進入臺灣總督府評議會擔任評議會員並提供意見", "臺灣青年可以適用徵兵制並進入日本軍隊和日本人一起服兵役"], "ans": 2}, {"num": 6, "text": "日治初期，臺民的武裝抗日行動不斷，後遭日軍鎮壓而進入相對安定時期。然在此時期中卻又先後發生 下列那兩件大規模抗日事件？", "opts": ["北埔（蔡清琳）事件和林杞埔（劉乾、林啓禎）事件", "土庫（黃朝）事件和東勢角（賴來）事件", "西來庵（余清芳）事件和霧社（莫那魯道）事件", "苗栗（羅福星）事件和六甲（羅臭頭）事件"], "ans": 2}, {"num": 7, "text": "日治時期由於會社（公司）幾乎都是日資，加上會社決定作物的收購價格，因此民間有一句諺語說： 「第一戇（憨），種○○乎（給）會社磅（秤）。」這句話的○○為何種作物？", "opts": ["稻米 [B] 茶葉 [C] 樟腦 [D] 甘蔗", "", "", ""], "ans": 3}, {"num": 8, "text": "日本統治臺灣初期，臺灣總督府為了改善飲用水衛生問題，在各城市舖設自來水道。其中第一條自來水 道舖設於何地？", "opts": ["淡水 [B] 大稻埕 [C] 臺南 [D] 臺北城內", "", "", ""], "ans": 0}, {"num": 9, "text": "在日治時期的臺灣，下列那一項作物栽培曾被殖民政府實行的「原料採取區制」所約束？", "opts": ["茶 [B] 甘蔗 [C] 稻米 [D] 香蕉", "", "", ""], "ans": 1}, {"num": 10, "text": "臺灣處境深受國際情勢影響，在那一個文件中，美國聲明準備逐步減少對臺灣的武器出售？", "opts": ["上海公報 [B] 美國與中華人民共和國建交公報", "八一七公報 [D] 臺灣關係法", "", ""], "ans": 2}, {"num": 11, "text": "臺灣有許多選手在世界運動競賽揚名立萬，請問下列何者最早獲得奧運獎牌或世界排名前三？", "opts": ["曾雅妮 [B] 戴資穎 [C] 楊傳廣 [D] 朱木炎", "", "", ""], "ans": 2}, {"num": 12, "text": "政府當年曾因某個事件，提出「莊敬自強、處變不驚」的口號，日後許多團體活動因而冠上「自強活動」 之名。請問是何事件？", "opts": ["1978 年底美國宣布與中華民國斷交", "1971 年美國將釣魚臺與琉球群島行政權交予日本", "1958 年金門八二三砲戰", "1950 年韓戰 代號： 3201 頁次： 4 － 2"], "ans": 1}, {"num": 13, "text": "如果觀光客參訪雲林縣的李萬居精神啟蒙館，想進一步了解李萬居的生平事蹟，導遊可以介紹他所創立 的那一份新聞報紙？", "opts": ["臺灣日日新報 [B] 自立晚報 [C] 公論報 [D] 臺灣新生報", "", "", ""], "ans": 2}, {"num": 14, "text": "下列那個黨派在籌組之時，主要領導人即遭當時政府以「知匪不報」等罪名逮捕下獄而告失敗？", "opts": ["中國青年黨 [B] 中國民主黨 [C] 中國民主社會黨 [D] 臺灣省工作委員會", "", "", ""], "ans": 1}, {"num": 15, "text": "1950 年以後，許多大學在臺灣復校，重新辦學，下列何者屬此類？", "opts": ["國立成功大學 [B] 私立東吳大學 [C] 私立東海大學 [D] 國立中興大學", "", "", ""], "ans": 1}, {"num": 16, "text": "西元 1911 年臺灣開始適用日本貨幣法，其在貨幣制度上最大的變革為：", "opts": ["使用臺灣銀行券 [B] 臺灣貨幣轉換為金本位制", "以銀貨為交易媒介 [D] 創立發行貨幣的臺灣銀行", "", ""], "ans": 1}, {"num": 17, "text": "歷史課本在描述此時期臺灣的經濟快速發展，導致「金錢遊戲」流行，房地產被大肆炒作，使得努力一生 的白領階級無法置產，成為無殼蝸牛；股票市場經人炒作，使得一般小投資戶傾家蕩產，財富在一夕之間 化為烏有，因此有國外媒體形容中華民國（ Republic of China ）臺灣是賭博共和國（ Republic of Casino ）。 此一時期最有可能是：", "opts": ["1950 年代後期 [B] 1960 年代後期 [C] 1970 年代後期 [D] 1980 年代後期", "", "", ""], "ans": 3}, {"num": 18, "text": "有一個原住民族，擅於建造拼板舟，並以飛魚祭著稱，這個民族是：", "opts": ["泰雅族 [B] 卑南族 [C] 賽夏族 [D] 達悟族", "", "", ""], "ans": 3}, {"num": 19, "text": "泰雅族、布農族與賽夏族有一種共同的文化傳承，這是：", "opts": ["矮黑人 [B] 拼板舟 [C] 黥面 [D] 拔去犬齒", "", "", ""], "ans": 0}, {"num": 20, "text": "電影《國王與我》描述英國女教師前往暹羅 ( 今泰國 ) 擔任王室家庭教師，其所教導的太子後來登基為王， 成為現代化改革的重要領袖。請問該王為？", "opts": ["蒲美蓬 [B] 拉瑪四世 [C] 朱拉隆功 [D] 哇集拉隆功", "", "", ""], "ans": 2}, {"num": 21, "text": "一群關心都市歷史記憶的文化領航者，致力於結合新興文創與傳統產業，以讓大稻埕重拾往日榮光。大 稻埕的文創產業需要考慮納入下列那些傳統產業的要素？", "opts": ["米、糖、菸草 [B] 茶、糖、樟腦 [C] 絲、藺、陶瓷 [D] 茶、布、中藥", "", "", ""], "ans": 3}, {"num": 22, "text": "臺灣位處亞熱帶，但卻擁有如臺灣穗花杉、南湖柳葉菜、櫻花鉤吻鮭、山椒魚等冷溫帶特有種生物。這 些臺灣特有種動植物的出現，最可能與下列那一個原因有關？", "opts": ["島弧中樞物種遷徙要道 [B] 海陸交接地震發生頻仍", "板塊碰撞導致地形複雜 [D] 高山過去曾有冰河存在", "", ""], "ans": 3}, {"num": 23, "text": "新竹縣竹東鎮是臺灣沿山地區的重要市鎮之一，日治時期因某種貨物集散而日漸繁榮。該市鎮集散的貨 物以下列何者為最大宗？", "opts": ["煤礦 [B] 木材 [C] 水果 [D] 茶葉", "", "", ""], "ans": 1}, {"num": 24, "text": "國家公園具有保護野生物的功能。「鱟」是那個國家公園保育的重點生物？", "opts": ["台江國家公園 [B] 墾丁國家公園 [C] 金門國家公園 [D] 東沙環礁國家公園", "", "", ""], "ans": 2}, {"num": 25, "text": "圖為 2019 年臺灣某地方廟宇節慶宣傳海報的局部畫面，根據海報資訊判斷，該廟宇最可能為下列何者？", "opts": ["大甲鎮瀾宮", "南鯤鯓代天府", "大龍峒保安宮", "新竹都城隍廟"], "ans": 1}, {"num": 26, "text": "下列四個位於臺南市的名勝古蹟：①億載金城 ②臺南孔廟 ③臺灣文學館（前臺南州廳） ④熱蘭遮 城。若按照最初興建時間先後排列，其順序為何？", "opts": ["②④③① [B] ②①④③ [C] ④①②③ [D] ④②①③ 代號： 3201 頁次： 4 － 3", "", "", ""], "ans": 3}, {"num": 27, "text": "高雄田寮月世界一遇暴雨，表土常遭侵蝕流失，植物不易生長，俗稱惡地。下列何項地質背景是形塑月 世界成為惡地的關鍵因素？", "opts": ["泥岩 [B] 砂岩 [C] 板岩 [D] 石灰岩", "", "", ""], "ans": 0}, {"num": 28, "text": "自 2011 年開始，每年十月高雄市美濃區農會推出讓民眾可以預先認購白玉蘿蔔；待採收期來臨，民眾可 以親自下田採收，品嚐最新鮮的蘿蔔。依據前述說明，「白玉蘿蔔股東會」與下列那種經營方式的意涵 最吻合？", "opts": ["精緻農業 [B] 精準農業 [C] 休閒農業 [D] 有機農業", "", "", ""], "ans": 2}, {"num": 29, "text": "臺灣有些地方「搶孤」的民俗活動，會透過攀爬孤棚的形式來進行。上述活動主要在那些鄉鎮舉行？", "opts": ["新北平溪、高雄茂林 [B] 桃園觀音、臺南東山 [C] 新竹峨嵋、嘉義東石 [D] 宜蘭頭城、屏東恆春", "", "", ""], "ans": 3}, {"num": 30, "text": "某港口多鯖魚、鯊魚、鬼頭刀等漁產，每年舉辦鯖魚祭遊行活動，來推動美食與祭祀文化。過程中遊行 隊伍扛著紙糊的大鯖魚，從遊客服務中心出發，繞經漁港、寺廟及社區，終點來到內埤海灘進行火化， 以「鯖魚火化，回歸海洋」作為活動結尾。該港口最可能為下列何者？", "opts": ["雲林麥寮港 [B] 高雄左營港 [C] 花蓮和平港 [D] 宜蘭南方澳港", "", "", ""], "ans": 3}, {"num": 31, "text": "「大陂池」是因斷層而形成的濕地，池水來自於地下湧泉，水生植物茂密，是許多稀有候鳥生存繁殖的 棲息地。該池位於下列那一個地形區中？", "opts": ["埔里盆地 [B] 竹苗丘陵 [C] 恆春台地 [D] 花東縱谷", "", "", ""], "ans": 3}, {"num": 32, "text": "下圖為臺灣某地著名的地質景觀照片。該地質景觀的形成和下列何者關係最密切？", "opts": ["斷層作用", "火山作用", "褶曲作用", "岩溶作用"], "ans": 1}, {"num": 33, "text": "臺灣的原住民族工藝相當具有特色，不同的族群各自有不同的文化。其中以陶壺、琉璃珠與青銅刀聞名 的為下列那一個族群？", "opts": ["阿美族 [B] 達悟族 [C] 泰雅族 [D] 排灣族", "", "", ""], "ans": 3}, {"num": 34, "text": "圖為臺灣某地見到的販賣機，專門針對特定的宗教信徒所設置。該宗教最可能為下列何者？", "opts": ["佛教", "道教", "基督教", "伊斯蘭教"], "ans": 3}, {"num": 35, "text": "臺灣因高山峻嶺連綿，自古以來即開闢各種形式的道路以利東西聯繫。下列何者是臺灣在清代聯繫中央 山脈兩側地區的道路？", "opts": ["魚路古道 [B] 草嶺古道 [C] 能高越嶺古道 [D] 巴福越嶺古道", "", "", ""], "ans": 2}, {"num": 36, "text": "臺南市白河區推出的蓮子風味餐教學體驗 DIY ， 能讓遊客體驗剝蓮子的趣味。若要體驗採蓮剝子樂趣， 以那一個季節最合適？", "opts": ["春季 [B] 夏季 [C] 秋季 [D] 冬季", "", "", ""], "ans": 1}, {"num": 37, "text": "美中貿易戰發生以後，臺灣食品機械業者配合政府經貿政策，轉向農業人口較多，農業相關設備、技術 需求較殷的國家拓展市場。這些國家主要位於下列那個地區？", "opts": ["西亞 [B] 南歐 [C] 東南亞 [D] 北美洲 代號： 3201 頁次： 4 － 4", "", "", ""], "ans": 2}, {"num": 38, "text": "民間有句俗諺：「大道公風，媽祖婆雨」，是指每年保生大帝誕辰（農曆三月十五日）時若起風，則媽 祖誕辰（農曆三月廿三日）時常下雨，意指天氣不穩的現象。此俗諺的出現與下列那個天氣系統即將發 生關係最密切？", "opts": ["東北季風即將盛行 [B] 梅雨季節即將來臨 [C] 熱帶氣旋即將來襲 [D] 大陸冷氣團即將南下", "", "", ""], "ans": 1}, {"num": 39, "text": "下表為 2018 年臺灣和世界的降水資料。資料顯示：臺灣年平均降水量高於世界平均值，但臺灣平均每位 國民可分配降水量卻不到世界平均值的六分之一，以致臺灣被列為世界缺水國家之一。造成臺灣平均每 位國民可分配降水量遠低於世界平均值的原因為何？ 國 家 單位面積降水量（ mm/ 年） 每人每年分配之降水總量（立方公尺） 臺灣 2510 4595 世界 730 28300", "opts": ["降雨的強度大 [B] 河流含沙量大 [C] 河床曲流發達 [D] 島內地狹人稠", "", "", ""], "ans": 3}, {"num": 40, "text": "臺灣海拔 2500 公尺以上的地區，最容易見到下列那一種植物群落形成的純林？", "opts": ["茄冬 [B] 樟樹 [C] 冷杉 [D] 楓樹", "", "", ""], "ans": 2}, {"num": 41, "text": "近年來潛水成為生態旅遊的熱門活動，需要注意那些事項可降低意外發生？①獨自一人下水前，需加保 旅遊意外險，並全面的檢查裝備 ②找位熟悉當地潛水環境者擔任導潛 ③當感到身體不適，急速上升 至水面 ④攜帶潛水電表潛水", "opts": ["①② [B] ①③ [C] ③④ [D] ②④", "", "", ""], "ans": 3}, {"num": 42, "text": "海洋委員會海巡署與警察單位為維護民眾安全，於颱風期間加強海岸巡視並勸導遊客離開海岸，對於屢 勸不聽者，依下列何種法令處以新臺幣 5 ～ 25 萬元罰款？", "opts": ["發展觀光條例 [B] 災害防救法 [C] 社會秩序維護法 [D] 水域活動管理辦法", "", "", ""], "ans": 1}, {"num": 43, "text": "海洋文學作家廖鴻基感嘆「臺灣只剩下海鮮文化，而沒有海洋文化」，是因為他看到了那一種景象而發 出如此的感嘆？", "opts": ["因為翻車魚暴增，因此發展出曼波魚季 [B] 因為鯨豚族群穩定，而開始了賞鯨的活動", "因為秋冬海上風浪強勁，而發展出鏢旗魚的漁法 [D] 因為珊瑚的美麗，而發展出珊瑚漁業", "", ""], "ans": 0}, {"num": 44, "text": "生態旅遊的遊程安排，下列那項不可行？", "opts": ["維持 15 人或以下的小團體", "避免提供一次性的消耗用品", "安排在當地節慶時間造訪，以了解該社區文化", "安排遊客至高雄壽山餵食臺灣獼猴，以近距離了解動物生態"], "ans": 3}, {"num": 45, "text": "前往管制區域登山時需要申請，是依據下列那些法條？①國家公園法 ②申請進入自然保留區許可辦法 ③國家安全法第 5 條 ④森林法第 17-1 條 ⑤野生動物保護法 ⑥文化資產保存法", "opts": ["僅①② [B] 僅①②③④ [C] ①②③④⑤⑥ [D] 僅①②③④⑤", "", "", ""], "ans": 1}, {"num": 46, "text": "到玉山國家公園的塔塔加遊憩區步道健行須申請什麼證件？", "opts": ["入園證 [B] 入山證", "入園證及入山證都要申請 [D] 不需要申請入園證及入山證", "", ""], "ans": 3}, {"num": 47, "text": "墾丁國家公園境內何處可以參與騎乘沙灘車活動？", "opts": ["白砂 [B] 南灣 [C] 龍磐草原 [D] 全區禁止", "", "", ""], "ans": 3}, {"num": 48, "text": "臺灣原住民服飾，下列敘述何者正確？", "opts": ["泰雅族服裝材質主要以苧麻為主 [B] 排灣族的服飾在原住民中最為樸素", "魯凱族主要以獸皮和麻線為材質 [D] 布農族服飾以十字線繡及玻璃珠繡為主", "", ""], "ans": 0}, {"num": 49, "text": "在那一個保護區每年可以看到數量最多的保育類黑面琵鷺？", "opts": ["無尾港水鳥保護區 [B] 雙連埤野生動物保護區", "九九峰自然保護區 [D] 四草野生動物保護區", "", ""], "ans": 3}, {"num": 50, "text": "國軍退除役官兵輔導委員會所屬農場中，以下那一處農場可同時觀賞由蘋果、水梨與桃子同株稼接的果 樹，號稱三大果王之奇景？", "opts": ["福壽山農場 [B] 嘉義農場 [C] 清境農場 [D] 武陵農場", "", "", ""], "ans": 0}];
+const TOTAL_TIME = 3600;
+const KEYS = ['A','B','C','D'];
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let userAnswers = {};
+let submitted = false;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return '本題一律給分';
+  if (Array.isArray(q.ans)) return '正確答案：' + q.ans.map(i => KEYS[i]).join(' 或 ');
+  return KEYS[q.ans] + '：' + q.opts[q.ans];
+}
+
+function renderQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (q.ans === -1 ? ' invalid' : '');
+    card.id = 'card-' + qi;
+    const opts = q.opts.map((opt, i) => {
+      const blank_rendered = q.text.includes('______');
+      return `<button class="option-btn" id="opt-${qi}-${i}" onclick="selectAnswer(${qi}, ${i})" data-qi="${qi}" data-i="${i}">
+        <span class="opt-label">${KEYS[i]}</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join('');
+    const qtext = q.text.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    card.innerHTML = `
+      <div class="q-num">第 ${q.num} 題${q.ans === -1 ? '（本題無效）' : ''}</div>
+      <div class="q-text">${qtext}</div>
+      <div class="options">${opts}</div>
+      <div class="result-box" id="result-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, i) {
+  if (submitted) return;
+  const q = QUESTIONS[qi];
+  userAnswers[qi] = i;
+  // Update UI
+  for (let k = 0; k < 4; k++) {
+    const btn = document.getElementById(`opt-${qi}-${k}`);
+    if (btn) btn.classList.remove('selected');
+  }
+  const selBtn = document.getElementById(`opt-${qi}-${i}`);
+  if (selBtn) selBtn.classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progress').textContent = `已答 ${answered} / ${QUESTIONS.length} 題`;
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+
+  let correct = 0, invalid = 0;
+  QUESTIONS.forEach((q, qi) => {
+    const sel = userAnswers[qi];
+    const card = document.getElementById('card-' + qi);
+    const result = document.getElementById('result-' + qi);
+
+    if (q.ans === -1) {
+      invalid++;
+      result.className = 'result-box correct';
+      result.textContent = '本題無效，一律給分';
+      card.classList.add('answered-correct');
+      correct++;
+    } else if (sel === undefined) {
+      result.className = 'result-box wrong';
+      result.textContent = '未作答。' + getCorrectLabel(q);
+      card.classList.add('answered-wrong');
+    } else if (isCorrect(q, sel)) {
+      correct++;
+      card.classList.add('answered-correct');
+      result.className = 'result-box correct';
+      result.textContent = '✓ 答對了！';
+    } else {
+      card.classList.add('answered-wrong');
+      result.className = 'result-box wrong';
+      result.textContent = '✗ 答錯了。' + getCorrectLabel(q);
+    }
+
+    // Disable all options & show correct
+    for (let k = 0; k < 4; k++) {
+      const btn = document.getElementById(`opt-${qi}-${k}`);
+      if (!btn) continue;
+      btn.disabled = true;
+      if (q.ans !== -1 && (Array.isArray(q.ans) ? q.ans.includes(k) : q.ans === k)) {
+        btn.classList.add('correct');
+      } else if (sel === k && !isCorrect(q, k)) {
+        btn.classList.add('wrong');
+      }
+    }
+  });
+
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('scoreNum').textContent = `得分：${correct} / ${total} 題（${pct}%）`;
+  document.getElementById('scoreDetail').textContent = `（無效題：${invalid} 題）`;
+  document.getElementById('scoreBar').style.display = 'block';
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'flex';
+}
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    const sel = userAnswers[qi];
+    let show = true;
+    if (mode === 'wrong') {
+      show = card.classList.contains('answered-wrong') || (!submitted && sel === undefined);
+      if (!submitted) show = false;
+      show = card.classList.contains('answered-wrong');
+    } else if (mode === 'correct') {
+      show = card.classList.contains('answered-correct');
+    } else if (mode === 'unanswered') {
+      show = sel === undefined;
+    }
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (timeLeft <= 300) el.classList.add('warning');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
+  }, 1000);
+}
+
+renderQuestions();
+startTimer();
+</script>
+</body>
+</html>

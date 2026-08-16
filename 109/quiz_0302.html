@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>109年 華語領隊 領隊觀光資源概要</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333}
+.header{background:linear-gradient(135deg deg,#1a4a70,#2c5f8a);color:#fff;padding:16px 20px}
+.header h1{font-size:1.2rem;font-weight:700}
+.header .meta{font-size:.85rem;opacity:.9;margin-top:4px}
+.timer-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:8px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.timer{font-size:1.4rem;font-weight:700;color:#1a4a70;font-variant-numeric:tabular-nums}
+.timer.warning{color:#e74c3c}
+.progress-text{font-size:.85rem;color:#666}
+.container{max-width:860px;margin:0 auto;padding:20px 16px}
+.question-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.question-card.answered-correct{border-left:4px solid #27ae60}
+.question-card.answered-wrong{border-left:4px solid #e74c3c}
+.question-card.invalid{border-left:4px solid #95a5a6;opacity:.7}
+.q-num{font-size:.8rem;color:#888;margin-bottom:6px}
+.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
+.q-blank{display:inline-block;border-bottom:2px solid #333;min-width:60px;margin:0 2px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;text-align:left;background:#fff;font-size:.95rem;line-height:1.5;transition:.15s}
+.option-btn:hover:not(:disabled){border-color:#2c5f8a;background:#f0f4f8}
+.option-btn.selected{border-color:#2c5f8a;background:#e8f0f8}
+.option-btn.correct{border-color:#27ae60;background:#e8f8ed;color:#1a6b3d}
+.option-btn.wrong{border-color:#e74c3c;background:#fdecea;color:#c0392b}
+.option-btn:disabled{cursor:default}
+.opt-label{font-weight:700;min-width:20px}
+.result-box{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;display:none}
+.result-box.correct{background:#e8f8ed;color:#1a6b3d;display:block}
+.result-box.wrong{background:#fdecea;color:#c0392b;display:block}
+.submit-area{text-align:center;padding:20px 0 40px}
+.submit-btn{background:#2c5f8a;color:#fff;border:none;padding:14px 40px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.submit-btn:hover{background:#1a4a70}
+.score-bar{background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;text-align:center;display:none;position:sticky;bottom:0}
+.score-num{font-size:1.6rem;font-weight:700;color:#1a4a70}
+.back-btn{display:inline-block;margin-top:8px;color:#2c5f8a;text-decoration:none;font-size:.9rem}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;font-size:.85rem;background:#fff}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>109年 華語領隊｜領隊觀光資源概要</h1>
+  <div class="meta">共50題｜60分鐘</div>
+</div>
+<div class="timer-bar">
+  <div class="timer" id="timer">60:00</div>
+  <div class="progress-text" id="progress">已答 0 / 50 題</div>
+</div>
+<div class="container">
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <button class="filter-btn active" onclick="filterQ('all')">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong')">答錯</button>
+    <button class="filter-btn" onclick="filterQ('correct')">答對</button>
+    <button class="filter-btn" onclick="filterQ('unanswered')">未答</button>
+  </div>
+  <div id="quizContainer"></div>
+  <div class="submit-area" id="submitArea">
+    <button class="submit-btn" onclick="submitQuiz()">交卷</button>
+  </div>
+</div>
+<div class="score-bar" id="scoreBar">
+  <div class="score-num" id="scoreNum"></div>
+  <div id="scoreDetail"></div>
+  <a href="../index.html" class="back-btn">← 回首頁</a>
+</div>
+<script>
+const QUESTIONS = [{"num": 1, "text": "西元 1941 年，臺灣人林阿生受臺灣殖民政府徵召，前往海南島。他的身分最可能是下列那一項？", "opts": ["少年工 [B] 志願兵 [C] 義勇隊隊員 [D] 軍伕", "", "", ""], "ans": 3}, {"num": 2, "text": "西元 1990 年代以前，臺灣海峽兩岸關係的演變包括①民間交流、②軍事衝突、③政治對峙等三個階段。 這三個階段依時序排列應為：", "opts": ["①②③ [B] ②③① [C] ③①② [D] ③②①", "", "", ""], "ans": 1}, {"num": 3, "text": "名著《孤雛淚》描述英國工業革命後社會的狀況，這本書的作者應是：", "opts": ["洪堡德 [B] 馬克吐恩 [C] 格林兄弟 [D] 狄更斯", "", "", ""], "ans": 3}, {"num": 4, "text": "日耳曼教士馬丁路德批評天主教會，於那一年揭開宗教改革的序幕？", "opts": ["西元 1317 年 [B] 西元 1417 年 [C] 西元 1517 年 [D] 西元 1617 年", "", "", ""], "ans": 2}, {"num": 5, "text": "第二次世界大戰期間，日本占領新加坡後，將新加坡更名為下列那一個名稱？", "opts": ["石叻 [B] 馬來半島 [C] 北島 [D] 昭南島", "", "", ""], "ans": 3}, {"num": 6, "text": "第二次世界大戰以前，德國在希特勒主政期間進行許多重要變革，最重要的內容是：", "opts": ["強調凡爾賽和約 [B] 解散日耳曼邦聯 [C] 管制私營企業 [D] 推動與共黨合作", "", "", ""], "ans": 2}, {"num": 7, "text": "古埃及早期統治範圍可以區分為「上埃及」與「下埃及」兩個不同的政權。「下埃及」的範圍大約應在 現今那個區域？", "opts": ["西奈半島一帶 [B] 尼羅河三角洲一帶 [C] 埃及南邊一帶 [D] 蘇丹一帶", "", "", ""], "ans": 1}, {"num": 8, "text": "19 世紀有學者以「絲路」稱呼歷史上歐、亞之間長期存在的陸路貿易路線，這條貿易路線從中國西安一 直到東地中海。下列何處是「絲路」必經之地：", "opts": ["突尼西亞 [B] 中亞草原 [C] 白令海峽 [D] 千島群島", "", "", ""], "ans": 1}, {"num": 9, "text": "羅馬教廷受到宗教改革的衝擊，開始革新教會，以對抗新教。下列何人自組傳教團體，對外宣教？", "opts": ["奧古斯丁（ AugustineofHippo ） [B] 方濟（ FrancisofAssisi ）", "羅耀拉（ IgnatiusofLoyola ） [D] 本篤（ BenedictofNursia ）", "", ""], "ans": 2}, {"num": 10, "text": "某位史家曾指出：「羅馬帝國的衰亡，乃是過度的擴張帶來的自然、不可避免的結果。」這位十八世紀 啟蒙時代的英國史家指的是：", "opts": ["伯克（ EdmundBurke ） [B] 羅伯森（ WilliamRobertson ）", "休莫（ DavidHume ） [D] 吉朋（ EdwardGibbon ）", "", ""], "ans": 3}, {"num": 11, "text": "西元 19 世紀初，中南美洲獨立運動各地要求獨立時，爭相脫離何國的統治？", "opts": ["美國 [B] 英國 [C] 西班牙 [D] 法國", "", "", ""], "ans": 2}, {"num": 12, "text": "下列那一位政治人物曾參與美國開國初期憲法的制定，並發表一系列有關聯邦憲法理念的文章？", "opts": ["洛克（ JohnLocke ） [B] 林肯（ AbrahamLincoln ）", "潘恩（ ThomasPaine ） [D] 漢彌爾頓（ AlexanderHamilton ）", "", ""], "ans": 3}, {"num": 13, "text": "1963 年美國的民權運動領袖馬丁．路德．金恩（ Martin Luther King ）發起華府大遊行，為黑人爭取權利。 金恩在數十萬人前發表著名的演講，演講標題是：", "opts": ["〈我們絕不投降〉 [B] 〈我們這個時代的和平〉", "〈不自由，毋寧死〉 [D] 〈我有一個夢〉 代號： 3501 頁次： 4 － 2", "", ""], "ans": 3}, {"num": 14, "text": "1967 年，美國青年為表達反戰思想，成立「抵抗」（ The Resistance ）組織。他們鼓勵青年將徵兵卡交還 兵役機關，寧願被法律制裁，也拒絕被徵召服役。他們反對的是那一場戰爭？", "opts": ["韓戰 [B] 越戰 [C] 波斯灣戰爭 [D] 巴拿馬戰爭", "", "", ""], "ans": 1}, {"num": 15, "text": "美國建國後採行新的政治學理制定憲法，其最重要的精神是：", "opts": ["責任內閣 [B] 權力制衡 [C] 神權立國 [D] 中央集權", "", "", ""], "ans": 1}, {"num": 16, "text": "南美洲的最大國家巴西，使用葡萄牙語，與南美其他各國的語言不同，主要原因是：", "opts": ["1494 年教宗協調該地歸葡萄牙人經營", "拿破崙戰爭期間，法軍占領此地，禁止西班牙語", "該地脫離西班牙獨立，選擇葡萄牙文為國語", "二次大戰後，聯合國託管委員會辦理公投之結果"], "ans": 0}, {"num": 17, "text": "西元前六世紀，一個強權興起，不斷向外擴張並征服埃及等地，這個強權是：", "opts": ["波斯帝國 [B] 馬其頓王國 [C] 羅馬帝國 [D] 土耳其帝國", "", "", ""], "ans": 0}, {"num": 18, "text": "西元 1830 年慘烈的瓜哇戰爭（ Java War ；或稱狄波‧內哥羅起義 [Dipo Negoro Revolt] ）結束後，荷蘭殖 民政府為應付戰後經濟衰蔽，在印尼推行強迫種植制度，使荷蘭經濟迅速復甦。推動此一種植制度的是：", "opts": ["赫曼‧丹德爾（ HermannDaendells ） [B] 湯瑪斯‧萊佛士（ ThomasStamfordRaffles ）", "約翰‧波須（ JohannesVandenBosch ） [D] 霍維爾（ BaronHoevell ）", "", ""], "ans": 2}, {"num": 19, "text": "西元 1922 年，某人創立香港第一間電影製片公司－民新影片公司，畢生致力於以電影啟導民智，發揚文 化與藝術，被稱為「香港電影之父」，這人應是：", "opts": ["黎民偉 [B] 張善琨 [C] 邵逸夫 [D] 鄒文懷", "", "", ""], "ans": 0}, {"num": 20, "text": "西元 8 世紀中期，唐朝高仙芝的軍隊在某戰爭中，被穆斯林打敗，軍中的造紙工匠被俘虜後，技術乃逐 漸西傳。這場戰爭是：", "opts": ["發生於中亞地區的怛羅斯之役 [B] 發生於北非地區的迦太基戰爭", "發生於蒙古地區的準噶爾之役 [D] 發生於烏克蘭的克里米亞戰爭", "", ""], "ans": 0}, {"num": 21, "text": "明代初期，道教正式由官方劃分為兩大派，它們分別是：", "opts": ["正一道與全真道 [B] 五斗米道與太平道 [C] 太平道與全真道 [D] 一貫道與全真道", "", "", ""], "ans": 0}, {"num": 22, "text": "西魏北周時期，宇文泰為了與東魏北齊爭霸，組建一支新軍，此稱之為：", "opts": ["綠營兵制 [B] 北府兵制 [C] 府兵制 [D] 八旗兵制", "", "", ""], "ans": 2}, {"num": 23, "text": "好望角（ Cape of Good Hope ）位於南非西南端，其附近海域終年狂風巨浪而航行困難，在大航海時代曾 被葡萄牙航海家迪亞士（ B. Dias ）稱為「風暴角」。由好望角的位置判斷，海相惡劣除受洋流影響外， 還與該地位居那一個行星風帶有關？", "opts": ["西風 [B] 極地東風 [C] 東南信風 [D] 東北信風", "", "", ""], "ans": 0}, {"num": 24, "text": "東非肯亞的馬賽馬拉（ Masai Mara ）國家公園是著名的野生動物保護區，每年都有數以萬計的角馬、羚羊、 斑馬、水牛、牛羚與長頸鹿等動物從南方的賽倫蓋提（ Serengeti ）地區來到這裡，經過一到二個月的停留， 再循原路踏上歸程，形成世界知名的動物大遷徙景觀。動物大遷徙的景觀和下列何者關係最密切？", "opts": ["火山活動頻繁 [B] 地形平坦單調 [C] 行星風帶季移 [D] 草原植被單純", "", "", ""], "ans": 2}, {"num": 25, "text": "《印度的微光中》一書寫道：「種姓的價值之一，正是它的抗拒改變。種姓制度的中心是具宗教性的純 潔觀念。而純潔則依賴對『業』的信念：我們要對自己的前世負責。」種姓制度受到下列那一個宗教的 影響，而在印度社會中更加根深蒂固？", "opts": ["佛教 [B] 印度教 [C] 耆那教 [D] 錫克教", "", "", ""], "ans": 1}, {"num": 26, "text": "東南亞為東西往來的十字路口，也是海上絲路必經之處。在帆船貿易時代，每年五月到九月，來自印度 或阿拉伯的商旅便順風揚帆，而中國客商則飄送回航，此時吹送的風主要為下列何者？", "opts": ["東北信風 [B] 西北季風 [C] 東南信風 [D] 西南季風", "", "", ""], "ans": 3}, {"num": 27, "text": "曼谷市中心的四面佛是泰國居民信仰中的神祇梵天，常吸引臺灣、中國、港、澳等地旅客前往膜拜。此 一神祇顯示泰國信仰深受下列那國的影響？", "opts": ["中國 [B] 印度 [C] 越南 [D] 印尼 代號： 3501 頁次： 4 － 3", "", "", ""], "ans": 1}, {"num": 28, "text": "下列所述四個世界遺產位處於同一個國家 世界遺產 甲 此地發現包括遠古 巨人、猿人和直立人 描述 等化石。", "opts": ["越南 [B] 印尼", "", "", ""], "ans": 1}, {"num": 29, "text": "下列澳洲的野生動物中，那些是歐洲白人殖民時由外地引進的 尾熊", "opts": ["①②③ [B] ①③④", "", "", ""], "ans": 0}, {"num": 30, "text": "某段旅遊簡介寫到：「這裡被喻為 位置和嚴格的保護，讓它完整保留了原始自然環境 它有火山、峽灣、冰河、平原、 可能為下列何者？", "opts": ["冰島 [B] 帛琉", "", "", ""], "ans": 2}, {"num": 31, "text": "日本廣島縣向來以「雙世界遺產 神社 ③原爆紀念館 ④ 大和博物館", "opts": ["①② [B] ①③", "", "", ""], "ans": 2}, {"num": 32, "text": "日本國土南北狹長，許多地理現象的發生時序會隨著緯度高低而呈現南北漸次變化 那些現象開始的時間是由南向北發生", "opts": ["①②③ [B] ①②⑤", "", "", ""], "ans": 1}, {"num": 33, "text": "下圖是位於日本山口縣的秋芳洞 者？", "opts": ["安山岩", "玄武岩", "石灰岩", "大理岩"], "ans": 2}, {"num": 34, "text": "下文為旅行社某行程的注意事項 1. 採糧票制，每家餐廳菜色及菜量有限 2. 行程皆由政府核備，欲調整或取消 3. 禁止攜帶專業攝影機和長焦照相機 4. 攜手機及 3C 產品入境需申報， 5. 旅遊期間，要聽從導遊安排， 6. 該國國民非常敬仰領袖，民族自尊心強 該行程最可能前往何處？", "opts": ["平壤 [B] 哈瓦那", "", "", ""], "ans": 0}, {"num": 35, "text": "達爾文在下列那一個島上，因觀察到不同小鳥的喙各有不同的長度", "opts": ["大溪地島 [B] 復活節島", "", "", ""], "ans": 3}, {"num": 36, "text": "北美洲的森林資源豐富，該洲的森林分布以下列何地最為豐富", "opts": ["東北部大西洋沿岸", "西北部太平洋沿岸", "", ""], "ans": 2}, {"num": 37, "text": "從自然環境與歷史背景的角度判斷", "opts": ["柑橘、菸草 [B] 下列所述四個世界遺產位處於同一個國家，請判斷其最可能為那一個國家？ 乙 丙 此地發現包括遠古 由 猿人和直立人 甜菜 5 處水稻梯田與水 神廟組成。水神廟是 當地農民重要的信 仰中心，其建立的時 間可追溯至 9 境內有火山以及大 面積的雨林，擁有包 括犀牛在內的 世紀。 57 稀有動植物種。 印尼 [C] 泰國 那些是歐洲白人殖民時由外地引進的 ？①狗 ② 駱駝 ①③④ [C] ②④⑤ 這裡被喻為『世上最後的人間淨土』，是太平洋上純淨的島國 讓它完整保留了原始自然環境，國土有 30% 列入國家保護區 、瀑布、湖泊等自然景觀，來到此處彷彿世外桃源 帛琉 [C] 紐西蘭 雙世界遺產」吸引觀光客。下列那二處景點為該縣的世界遺產 大和博物館 ①③ [C] ②③ 許多地理現象的發生時序會隨著緯度高低而呈現南北漸次變化 那些現象開始的時間是由南向北發生 ？①梅雨 ②櫻花開花 ③楓葉變紅 ④ ①②⑤ [C] ②③⑤ 下圖是位於日本山口縣的秋芳洞，當地稱為「百枚皿」的地形景觀。構成此地形的岩層最可能為下列何 下文為旅行社某行程的注意事項： 每家餐廳菜色及菜量有限，當場無法變更菜色或菜量。 調整或取消，則由當地辦理人員決定。 禁止攜帶專業攝影機和長焦照相機、高倍望遠鏡，可攜帶常規攝影機、照相機 ，但無電信及網路訊號。 ，勿擅自脫團行動，不允許拍照處，請勿拍照。 民族自尊心強；勿對政府政策品頭論足。 哈瓦那 [C] 德黑蘭 因觀察到不同小鳥的喙各有不同的長度，而得到有關 復活節島 [C] 帛琉群島 該洲的森林分布以下列何地最為豐富？", "東南部墨西哥灣沿岸", "西南部加利福尼亞灣沿岸 從自然環境與歷史背景的角度判斷，中美洲種植最普遍的經濟作物為何？ 甜菜、蘋果 [C] 丁 境內有火山以及大 擁有包 咖啡、香蕉 57 由 種 30 座島嶼組成， 多為疏林草原景觀， 主要保護科摩多巨 蜥，以及多樣的海洋 生物。", "柬埔寨 駱駝 ③兔子 ④袋鼠 ⑤無", "③④⑤ 是太平洋上純淨的島國，因其遙遠的地理 列入國家保護區，地形樣貌多元豐富， 來到此處彷彿世外桃源、身處仙境。」該國最", "馬爾地夫 下列那二處景點為該縣的世界遺產 ？①廣島城 ②宮島", "③④ 許多地理現象的發生時序會隨著緯度高低而呈現南北漸次變化。下列五種地理現象， ④初雪 ⑤水稻收割", "③④⑤ 構成此地形的岩層最可能為下列何 照相機、手提電腦。 。", "大馬士革 而得到有關「生物演化」之啟示？", "加拉巴哥群島 西南部加利福尼亞灣沿岸", "橄欖、葡萄 代號： 3501 頁次： 4 － 4"], "ans": 2}, {"num": 38, "text": "歐洲各地的觀光業相當發達，其中那一個地區以日照充足和文化遺產眾多為吸引遊客的主要賣點？", "opts": ["東歐 [B] 西歐 [C] 南歐 [D] 北歐", "", "", ""], "ans": 2}, {"num": 39, "text": "地中海因半島或島嶼分隔， 而擁有許多海域。其中那一個海域內的大小島嶼星羅棋布，因而有「多島海」 之稱？", "opts": ["愛琴海 [B] 亞得里亞海 [C] 愛奧尼亞海 [D] 第勒尼安海", "", "", ""], "ans": 0}, {"num": 40, "text": "北歐斯堪地那維亞半島位於北極圈附近，緯度極高，但冬溫卻比其他地區高，沿海冬不結冰。此一事實 和下列那一因素關係最密切？", "opts": ["洋流 [B] 風速 [C] 地勢 [D] 距海遠近", "", "", ""], "ans": 0}, {"num": 41, "text": "「末日種子庫」為現代的糧食「諾亞方舟」，保存兩百多萬種全球的農作物種子。為確保發生氣候變化、 自然災害、核子戰爭等災難時，人們還可重新播種、種植穀物，種子庫建在海拔 130 公尺高的地方，即 使冰原溶化，海平面上升 7 公尺，也不會威脅到種子的安全。種子庫位在凍岩的最深處，利用天然條件 將種子保存在低於冰點的環境，不耗電力。考慮種子的保存與運送條件，此種子庫最可能位於那一緯線 附近？", "opts": ["北極圈 [B] 北緯 45 度 [C] 南回歸線 [D] 南緯 60 度", "", "", ""], "ans": 0}, {"num": 42, "text": "中國常有一些順口溜，呈現了某一時期環境生態的特性，例如：「天津市有一怪，地下水可以醃鹹菜」。 此順口溜可反映當時天津的何種環境問題？", "opts": ["沙漠化 [B] 海河斷流 [C] 海水入侵 [D] 鹽湖乾涸", "", "", ""], "ans": 2}, {"num": 43, "text": "依《山海經校注》一書的記載，瑤池金母的「瑤池」主要是位於下列那一座高山中？", "opts": ["泰山 [B] 太行山 [C] 崑崙山 [D] 阿爾泰山", "", "", ""], "ans": 2}, {"num": 44, "text": "圖為臺灣農產品銷售網站的內容，產品標榜來自臺灣最後淨土的好米，強調當地具有得天獨厚的環境， 符合下列五個好米生產條件，故能產出天生地養好米質。此網站販售的米最可能是下列何者？", "opts": ["蘭陽平原稻鴨米", "花東縱谷富麗米", "臺東平原埤南米", "東部海岸長濱米"], "ans": 1}, {"num": 45, "text": "黃牛拉著二輪牛車、載著蚵農，前往位於潮間帶蚵田工作的「耕海牛車」景象，最可能出現在下列那個 海岸聚落？", "opts": ["新北市石門區老梅 [B] 屏東縣枋山鄉楓港 [C] 臺東縣成功鎮都歷 [D] 彰化縣芳苑鄉王功", "", "", ""], "ans": 3}, {"num": 46, "text": "水域活動管理辦法規定帶客從事水域遊憩活動具營利性質者，應投保旅行責任保險及附加醫療險。下列 那個給付項目不屬於該辦法所訂傷害保險之給付項目？", "opts": ["財物損失給付 [B] 傷害醫療費用給付 [C] 死亡給付 [D] 失能給付", "", "", ""], "ans": 0}, {"num": 47, "text": "下列那一項違反無痕山林（ LNT ）之概念？", "opts": ["儘量減少行動電話的使用 [B] 在野生動物繁殖期時，避免進入棲息地", "果皮是自然物，可以遺留於當地做為養分 [D] 避免並排行走", "", ""], "ans": 2}, {"num": 48, "text": "可接受改變限度（ LimitsofAcceptableChange ）的規劃架構有九個程序，請問下列那一項不是該規劃架構 程序之一？", "opts": ["找出遊憩區需重視及考慮的議題 [B] 界定與描述遊憩機會類別", "選定資源及社會狀況之評估指標 [D] 進行 SWOT 分析", "", ""], "ans": 3}, {"num": 49, "text": "有效的生態旅遊衝擊管理策略與下列那項措施較無關係？", "opts": ["生態保育 [B] 環境監測 [C] 地方社區參與 [D] 郵輪產業", "", "", ""], "ans": 3}, {"num": 50, "text": "許多不當之遊憩行為常造成遊憩衝突，下列那項遊憩行為可減少衝突之發生？", "opts": ["帶團時使用小蜜蜂，大聲解說以讓遊客可以完全接受到相關訊息", "快速騎乘自行車穿梭於人行步道間", "在山上或露營地區架設 KTV ，享受在山中高歌一曲之感覺", " 沒有工業區的無汙染農村 山脈擋出適時的日光浴 不長不熱時間溫度將將好 滋養好米 純淨好水 來自秀姑巒溪源頭水 中央山脈群樹 隔絕汙染 養出後山的好空氣 黑褐黏土質 好米 僅在動力船泊活動區域範圍內進行相關需要動力器具之水上活動 Q 彈營養的秘密武器"], "ans": 3}];
+const TOTAL_TIME = 3600;
+const KEYS = ['A','B','C','D'];
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let userAnswers = {};
+let submitted = false;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return '本題一律給分';
+  if (Array.isArray(q.ans)) return '正確答案：' + q.ans.map(i => KEYS[i]).join(' 或 ');
+  return KEYS[q.ans] + '：' + q.opts[q.ans];
+}
+
+function renderQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (q.ans === -1 ? ' invalid' : '');
+    card.id = 'card-' + qi;
+    const opts = q.opts.map((opt, i) => {
+      const blank_rendered = q.text.includes('______');
+      return `<button class="option-btn" id="opt-${qi}-${i}" onclick="selectAnswer(${qi}, ${i})" data-qi="${qi}" data-i="${i}">
+        <span class="opt-label">${KEYS[i]}</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join('');
+    const qtext = q.text.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    card.innerHTML = `
+      <div class="q-num">第 ${q.num} 題${q.ans === -1 ? '（本題無效）' : ''}</div>
+      <div class="q-text">${qtext}</div>
+      <div class="options">${opts}</div>
+      <div class="result-box" id="result-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, i) {
+  if (submitted) return;
+  const q = QUESTIONS[qi];
+  userAnswers[qi] = i;
+  // Update UI
+  for (let k = 0; k < 4; k++) {
+    const btn = document.getElementById(`opt-${qi}-${k}`);
+    if (btn) btn.classList.remove('selected');
+  }
+  const selBtn = document.getElementById(`opt-${qi}-${i}`);
+  if (selBtn) selBtn.classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progress').textContent = `已答 ${answered} / ${QUESTIONS.length} 題`;
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+
+  let correct = 0, invalid = 0;
+  QUESTIONS.forEach((q, qi) => {
+    const sel = userAnswers[qi];
+    const card = document.getElementById('card-' + qi);
+    const result = document.getElementById('result-' + qi);
+
+    if (q.ans === -1) {
+      invalid++;
+      result.className = 'result-box correct';
+      result.textContent = '本題無效，一律給分';
+      card.classList.add('answered-correct');
+      correct++;
+    } else if (sel === undefined) {
+      result.className = 'result-box wrong';
+      result.textContent = '未作答。' + getCorrectLabel(q);
+      card.classList.add('answered-wrong');
+    } else if (isCorrect(q, sel)) {
+      correct++;
+      card.classList.add('answered-correct');
+      result.className = 'result-box correct';
+      result.textContent = '✓ 答對了！';
+    } else {
+      card.classList.add('answered-wrong');
+      result.className = 'result-box wrong';
+      result.textContent = '✗ 答錯了。' + getCorrectLabel(q);
+    }
+
+    // Disable all options & show correct
+    for (let k = 0; k < 4; k++) {
+      const btn = document.getElementById(`opt-${qi}-${k}`);
+      if (!btn) continue;
+      btn.disabled = true;
+      if (q.ans !== -1 && (Array.isArray(q.ans) ? q.ans.includes(k) : q.ans === k)) {
+        btn.classList.add('correct');
+      } else if (sel === k && !isCorrect(q, k)) {
+        btn.classList.add('wrong');
+      }
+    }
+  });
+
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('scoreNum').textContent = `得分：${correct} / ${total} 題（${pct}%）`;
+  document.getElementById('scoreDetail').textContent = `（無效題：${invalid} 題）`;
+  document.getElementById('scoreBar').style.display = 'block';
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'flex';
+}
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    const sel = userAnswers[qi];
+    let show = true;
+    if (mode === 'wrong') {
+      show = card.classList.contains('answered-wrong') || (!submitted && sel === undefined);
+      if (!submitted) show = false;
+      show = card.classList.contains('answered-wrong');
+    } else if (mode === 'correct') {
+      show = card.classList.contains('answered-correct');
+    } else if (mode === 'unanswered') {
+      show = sel === undefined;
+    }
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (timeLeft <= 300) el.classList.add('warning');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
+  }, 1000);
+}
+
+renderQuestions();
+startTimer();
+</script>
+</body>
+</html>

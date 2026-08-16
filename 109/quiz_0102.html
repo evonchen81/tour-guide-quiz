@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>109年 華語導遊 導遊執業實務</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333}
+.header{background:linear-gradient(135deg deg,#1a4a70,#2c5f8a);color:#fff;padding:16px 20px}
+.header h1{font-size:1.2rem;font-weight:700}
+.header .meta{font-size:.85rem;opacity:.9;margin-top:4px}
+.timer-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:8px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.timer{font-size:1.4rem;font-weight:700;color:#1a4a70;font-variant-numeric:tabular-nums}
+.timer.warning{color:#e74c3c}
+.progress-text{font-size:.85rem;color:#666}
+.container{max-width:860px;margin:0 auto;padding:20px 16px}
+.question-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.question-card.answered-correct{border-left:4px solid #27ae60}
+.question-card.answered-wrong{border-left:4px solid #e74c3c}
+.question-card.invalid{border-left:4px solid #95a5a6;opacity:.7}
+.q-num{font-size:.8rem;color:#888;margin-bottom:6px}
+.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
+.q-blank{display:inline-block;border-bottom:2px solid #333;min-width:60px;margin:0 2px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;text-align:left;background:#fff;font-size:.95rem;line-height:1.5;transition:.15s}
+.option-btn:hover:not(:disabled){border-color:#2c5f8a;background:#f0f4f8}
+.option-btn.selected{border-color:#2c5f8a;background:#e8f0f8}
+.option-btn.correct{border-color:#27ae60;background:#e8f8ed;color:#1a6b3d}
+.option-btn.wrong{border-color:#e74c3c;background:#fdecea;color:#c0392b}
+.option-btn:disabled{cursor:default}
+.opt-label{font-weight:700;min-width:20px}
+.result-box{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;display:none}
+.result-box.correct{background:#e8f8ed;color:#1a6b3d;display:block}
+.result-box.wrong{background:#fdecea;color:#c0392b;display:block}
+.submit-area{text-align:center;padding:20px 0 40px}
+.submit-btn{background:#2c5f8a;color:#fff;border:none;padding:14px 40px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.submit-btn:hover{background:#1a4a70}
+.score-bar{background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;text-align:center;display:none;position:sticky;bottom:0}
+.score-num{font-size:1.6rem;font-weight:700;color:#1a4a70}
+.back-btn{display:inline-block;margin-top:8px;color:#2c5f8a;text-decoration:none;font-size:.9rem}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;font-size:.85rem;background:#fff}
+.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>109年 華語導遊｜導遊執業實務</h1>
+  <div class="meta">共50題｜60分鐘</div>
+</div>
+<div class="timer-bar">
+  <div class="timer" id="timer">60:00</div>
+  <div class="progress-text" id="progress">已答 0 / 50 題</div>
+</div>
+<div class="container">
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <button class="filter-btn active" onclick="filterQ('all')">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong')">答錯</button>
+    <button class="filter-btn" onclick="filterQ('correct')">答對</button>
+    <button class="filter-btn" onclick="filterQ('unanswered')">未答</button>
+  </div>
+  <div id="quizContainer"></div>
+  <div class="submit-area" id="submitArea">
+    <button class="submit-btn" onclick="submitQuiz()">交卷</button>
+  </div>
+</div>
+<div class="score-bar" id="scoreBar">
+  <div class="score-num" id="scoreNum"></div>
+  <div id="scoreDetail"></div>
+  <a href="../index.html" class="back-btn">← 回首頁</a>
+</div>
+<script>
+const QUESTIONS = [{"num": 1, "text": "依據衛生福利部食品藥物管理署提供國人老年期營養的建議說明，為了避免銀髮族旅客攝取過高的膽固 醇，應該減少攝取下列何種食品？", "opts": ["五穀米 [B] 魷魚 [C] 豆腐 [D] 青花菜", "", "", ""], "ans": 1}, {"num": 2, "text": "王先生由火災現場被救出後，有聲音嘶啞、覺得沒有辦法呼吸，最有可能的問題為何？", "opts": ["水份不足喉嚨太乾 [B] 呼吸道可能嗆傷 [C] 一氧化碳中毒 [D] 情緒太過緊張", "", "", ""], "ans": 1}, {"num": 3, "text": "關於瘧疾的敘述，下列何者錯誤？", "opts": ["瘧疾主要是由雌性瘧蚊叮咬，如甘比亞瘧蚊、矮小瘧蚊等", "最好的預防方式是施打瘧疾疫苗", "使用防蚊液、穿著長袖衣物、少出入蚊蟲滋生區域可以減少感染機會", "引起人類瘧疾的瘧原蟲感染，可分為： 惡性瘧原蟲、間日瘧原蟲、卵形瘧原蟲和三日瘧原蟲"], "ans": 1}, {"num": 4, "text": "關於自動體外心臟電擊去顫器（ AED ）的敘述，下列何者錯誤？", "opts": ["當第二施救者取得 AED 且到達現場後，需立即開啟電源、貼上電擊貼片，不必等第一施救者完成一個 循環（ 30 下胸部按壓）後才準備", "電擊貼片一個應貼在左側乳頭側邊、一個貼在右鎖骨下方（右上左下）", "AED 分析心律時，仍應持續胸部按壓，不可中斷", "電擊後繼續 CPR2 分鐘"], "ans": 2}, {"num": 5, "text": "下列何者是預防急性高山症的第一線用藥？", "opts": ["普拿疼（ Acetaminophen ） [B] 銀杏（ Ginko ）", "丹木斯（ Acetazolamide ） [D] 紅景天（ Rhodiolaeherb ）", "", ""], "ans": 2}, {"num": 6, "text": "碧潭是北臺灣有名的景點，主要是因為那一條溪流經過而出現曲流及岩壁等景觀？", "opts": ["北勢溪 [B] 新店溪 [C] 淡水河 [D] 基隆河", "", "", ""], "ans": 1}, {"num": 7, "text": "下列何者不屬於台江國家公園範圍內重要的濕地？", "opts": ["曾文溪口濕地 [B] 四草濕地 [C] 高美濕地 [D] 七股鹽田濕地", "", "", ""], "ans": 2}, {"num": 8, "text": "臺灣傳統食物中，在不同場合有著不同的意義，下列食物所代表的意義何者錯誤？", "opts": ["紅龜粿：小孩滿周歲時，一腳踩一個，代表長壽如龜", "收涎餅：嬰兒滿月時，以米麩製的圈圈餅做成一串，掛在嬰兒頸間，表示圓滿如意", "油飯：代表祝福嬰兒頭殼硬，身體健康好養育", "外媽圓：由米做成的紅圓仔，祝嬰兒終身圓圓滿滿"], "ans": -1}, {"num": 9, "text": "帶團解說時，必須仔細考量並選擇每個解說的景點。下列敘述何者錯誤？", "opts": ["停留的地點要與主題和主旨有關 [B] 停留的地點要能容納所有的聽眾", "停留的地點要避免噪音或雜亂 [D] 停留的地點要有攤販供應冷熱飲", "", ""], "ans": 3}, {"num": 10, "text": "臺灣燈會已成為最受國際觀光客喜愛的臺灣節慶，「 2020 臺灣燈會」的舉辦地點在：", "opts": ["新竹 [B] 臺中 [C] 屏東 [D] 臺東", "", "", ""], "ans": 1}, {"num": 11, "text": "108 年交通部觀光局以「臺灣 10+ 島」為活動品牌，建構島嶼生態觀光旅遊，透過「本島 + 離島」的觀光 模式，帶動臺灣的整體觀光及在地產業共榮。下列何者不屬於上述之「臺灣 10+ 島」？", "opts": ["小琉球 [B] 七美 [C] 東莒 [D] 南竿 代號： 1201 頁次： 4 － 2", "", "", ""], "ans": 3}, {"num": 12, "text": "阿明得知明年過年有長假的消息，即上網找尋相對便宜的機票，這種作法是屬於下列何種消費決策階段？", "opts": ["問題認知 [B] 資訊蒐集 [C] 替代方案評估 [D] 購買決策", "", "", ""], "ans": 1}, {"num": 13, "text": "有關雪霸國家公園導覽解說之敘述，下列何者錯誤？", "opts": ["以雪山山脈的生態景觀為主軸，區內的高峰以雪山及大霸尖山著名", "區內國寶級的櫻花鉤吻鮭是冰河時期的孑遺生物，目前部分棲息在七家灣溪", "區內武陵、觀霧及雪見三個遊憩區之遊客中心可提供各項遊憩資訊及解說服務", "區內為泰雅與賽德克兩族原住民文化的發祥地"], "ans": 3}, {"num": 14, "text": "下列解說工具，何者最適合運用在遊客中心、露天劇場或自然教室，且適合服務大量的遊客？", "opts": ["解說牌誌 [B] 自導式步道 [C] 解說出版品 [D] 視聽設備", "", "", ""], "ans": 3}, {"num": 15, "text": "解說主旨（ theme ）就是指任何解說內容的中心思想或主要概念。有關主旨的敘述，下列敘述何者錯誤？", "opts": ["是簡潔扼要且完整的句子 [B] 只包含一個概念", "可揭示整場解說的目的 [D] 要以被動式的文言文做說明", "", ""], "ans": 3}, {"num": 16, "text": "促使遊客獲得遊憩體驗的最佳解說方式為：", "opts": ["媒體介紹 [B] 解說標示牌 [C] 出版刊物 [D] 解說員之導覽解說", "", "", ""], "ans": 3}, {"num": 17, "text": "下列何者不屬於導遊主要任務？", "opts": ["提供旅客所需之旅行資料 [B] 擔任團體成員中之仲裁者", "引導及介紹各地風光名勝 [D] 安排遊程及導遊翻譯說明", "", ""], "ans": 1}, {"num": 18, "text": "兒童解說與成人解說有本質上的差異，下列敘述何者錯誤？", "opts": ["第一個發展階段（ 2~6 歲）的兒童在活動中較專注於資源的有形元素，因此活動要簡短，並且可以用小 團體的方式進行", "第二個發展階段（ 7~12 歲）的兒童可以接受問題的引導，也可以接受行為規範的管理", "第三個發展階段（ 12~14 歲）的兒童喜歡受到眾人的注目，也喜歡跟別人不一樣", "第四個發展階段，應該用對待大人的方式來對待青少年，藉由引導式的活動鼓勵他們獨自探索資源"], "ans": 2}, {"num": 19, "text": "解說之父 FreemanTilden 曾說解說是一種教育性活動，但與教育並不相同，解說的目的不在教導，而是著 重在下列何者？", "opts": ["感受 [B] 體驗 [C] 啟發 [D] 行動", "", "", ""], "ans": 2}, {"num": 20, "text": "設計遊客中心功能配置時，下列何者不是最應考量事項？", "opts": ["座位空間 [B] 豪華座椅 [C] 螢幕大小 [D] 放映室動線", "", "", ""], "ans": 1}, {"num": 21, "text": "下列何者不是國家公園之遊客中心資訊服務項目？", "opts": ["代訂車票 [B] 交通資訊 [C] 食宿資訊 [D] 景點介紹", "", "", ""], "ans": 0}, {"num": 22, "text": "外籍旅客被美麗風景吸引來臺灣觀光之動機，屬於下列何者？", "opts": ["推力動機 [B] 拉力動機 [C] 社會動機 [D] 文化動機", "", "", ""], "ans": 1}, {"num": 23, "text": "外籍旅客因喜愛好客友善環境來臺灣旅遊，是屬於下列何種旅遊需求類型？", "opts": ["理性酬償 [B] 社會酬償 [C] 自我滿足酬償 [D] 知識酬償", "", "", ""], "ans": 1}, {"num": 24, "text": "交通部觀光局與第三方訂房網站合作以增加曝光度，可以讓旅客對旅遊目的地更有興趣，長期穩定的到 訪，代表消費者對旅遊目的地，產生下列何種涉入感受？", "opts": ["高度涉入 [B] 低度涉入 [C] 情勢涉入 [D] 持久涉入", "", "", ""], "ans": 3}, {"num": 25, "text": "旅行動機是為了深度體驗原住民部落的文化，以追求自我的價值感。這是為了滿足馬斯洛（ Maslow ）需 求理論的那一種需求？", "opts": ["生理 [B] 自我實踐 [C] 歸屬感 [D] 安全", "", "", ""], "ans": 1}, {"num": 26, "text": "愈來愈多的消費者從旅遊推薦網站、旅遊經驗分享網站的遊記或推薦資料來決定是否購買旅遊商品，最 主要想避免下列何種風險？", "opts": ["功能風險 [B] 社會風險 [C] 心理風險 [D] 便利風險 代號： 1201 頁次： 4 － 3", "", "", ""], "ans": 0}, {"num": 27, "text": "在早上 11 點前或晚上 8 點後，高鐵提供平日離峰優惠，屬於下列何種定價策略？", "opts": ["心理定價 [B] 地理定價 [C] 差別定價 [D] 附件定價", "", "", ""], "ans": 2}, {"num": 28, "text": "當旅館大廳服務人員能夠即時快速的解決顧客問題，代表旅館服務品質符合下列何種特性？", "opts": ["可靠性 [B] 回應性 [C] 可及性 [D] 有形性", "", "", ""], "ans": 1}, {"num": 29, "text": "2019 年國際上有三大航空聯盟，我國的中華航空與長榮航空參加的聯盟依序是：", "opts": ["寰宇一家（ OneworldAlliance ）與天合聯盟（ SkyTeam ）", "天合聯盟（ SkyTeam ）與寰宇一家（ OneworldAlliance ）", "星空聯盟（ StarAlliance ）與天合聯盟（ SkyTeam ）", "天合聯盟（ SkyTeam ）與星空聯盟（ StarAlliance ）"], "ans": 3}, {"num": 30, "text": "機票的條件註記欄位寫明 Non-Transferable 是指：", "opts": ["不可將機票改變行程 [B] 不可將機票轉讓他人使用", "不可將機票轉讓搭乘另一家航空公司 [D] 不可將機票退票否則作廢", "", ""], "ans": 1}, {"num": 31, "text": "北極航線適用於 TC-2 與 TC-3 之兩城市間的行程，且須經過北美洲北緯多少度以上的任何城市？", "opts": ["60 度 [B] 50 度 [C] 40 度 [D] 30 度", "", "", ""], "ans": 0}, {"num": 32, "text": "受邀參加正式西餐晚宴時，主人準備紅、白葡萄酒各一，此時餐桌桌面上之飲料杯由左至右順序應為下 列何者？", "opts": ["紅酒杯、白酒杯、水杯 [B] 白酒杯、紅酒杯、水杯", "水杯、紅酒杯、白酒杯 [D] 紅酒杯、水杯、白酒杯", "", ""], "ans": 2}, {"num": 33, "text": "配件為黑白相間斜紋領帶及灰色背心，是指下列何種男士禮服？", "opts": ["WhiteTie [B] MorningCoat [C] BlackTie [D] SwallowTail", "", "", ""], "ans": 1}, {"num": 34, "text": "下列何者為品酒的正確順序？①確認酒的氣味 ②品嚐一口葡萄酒 ③看酒的顏色", "opts": ["①②③ [B] ①③② [C] ③①② [D] ③②①", "", "", ""], "ans": 2}, {"num": 35, "text": "如需在旅館內接待訪客（至親好友除外），下列何者不適宜？", "opts": ["自己臥房內 [B] 咖啡廳 [C] 大廳 [D] 餐廳", "", "", ""], "ans": 0}, {"num": 36, "text": "依照國際禮儀，男女同行時，當行人靠右邊人行道行走時，男士應該在女士的那一邊？", "opts": ["左 [B] 右 [C] 右前 [D] 右後", "", "", ""], "ans": 0}, {"num": 37, "text": "主人親自開吉普車來接你時，你應該坐在那個座位？", "opts": ["主人旁邊的座位 [B] 主人右後方的座位 [C] 主人正後方的座位 [D] 後座中間的座位", "", "", ""], "ans": 0}, {"num": 38, "text": "有關公共場所游泳池的使用禮節，下列敘述何者正確？", "opts": ["一般游泳池畔，不宜跳水", "可以穿著海灘鞋，或者免費的薄底棉、不織布拖鞋", "為怕曬傷，入池前要多多抹上厚厚防曬油", "要撐大陽傘遮陽"], "ans": 0}, {"num": 39, "text": "有關商務往來之禮儀，下列敘述何者較不適當？", "opts": ["若非本人親送之禮品，應在禮品上書寫贈送人姓名或附上有“ WithDeepestSympathy ”的名片", "出席會議，應關機或採用震動模式，以免妨礙會議進行", "商務瞬息萬變，故有任何商業機會，應約好時間再行拜訪，以免徒勞往返", "書寫公務電子郵件須遵從商業書信規範，使用招呼語和結尾敬語之適當格式"], "ans": 0}, {"num": 40, "text": "有關社交禮儀，雙方介紹時，下列敘述何者錯誤？", "opts": ["晚輩應先被介紹給長輩 [B] 男士應先被介紹給女士", "客人應先被介紹給主人 [D] 已婚應先被介紹給未婚 代號： 1201 頁次： 4 － 4", "", ""], "ans": 3}, {"num": 41, "text": "旅客如生病住院，下列那一件事不需要導遊處理？", "opts": ["安排陪同照顧 [B] 安排後續返國事宜", "負擔醫療費用 [D] 通報家屬、公司及有關單位", "", ""], "ans": 2}, {"num": 42, "text": "旅客在旅途中不慎發生意外，送醫不治。下列帶團人員處理程序何者錯誤？", "opts": ["須請醫師直接開立死亡證明 [B] 須向警方報案尋求協助", "由法院法醫開立驗屍證明文件 [D] 由警方開立報案證明文件", "", ""], "ans": 0}, {"num": 43, "text": "導遊為鼓勵遊客參與自費行程，便主動提議幫所有旅客保管護照與錢包，然導遊被歹徒盯上，趁機搶走 她裝有旅客重要物品的手提包，因此全團旅客被帶往警察局報案，行程亦因而延誤了半天，下列敘述何 者較不正確？", "opts": ["旅行社應盡到妥善保管旅客重要物品的責任，故旅客可以跟臺灣接待旅行社要求現金損失的賠償", "同意導遊協助看管貴重物品的旅客，也需要承擔一部分的責任", "依照旅遊契約之規定，旅行社應負責賠償遊客半天的旅遊費用之違約金", "因導遊主動提出要協助看顧旅客護照，故其需連帶負責賠償護照重辦費用之責任"], "ans": 0}, {"num": 44, "text": "導遊遇到旅客留置於飯店房間內的貴重物品失竊，有關處理程序，下列何者最為重要？", "opts": ["請領隊一起協助尋找並安撫旅客 [B] 請旅客先列出失竊財物損失清單", "請飯店管理者協助並打電話報警 [D] 打電話回公司報備處理", "", ""], "ans": 2}, {"num": 45, "text": "旅遊團體在機場辦理登機手續時，如果遇到航空公司機位超賣，帶團人員應依照正常作業程序儘量爭取 機位；這種航空公司機位超賣的英文應如何表達？", "opts": ["Overhead [B] Overload [C] Oversold [D] Overbought", "", "", ""], "ans": 2}, {"num": 46, "text": "為避免緊急事故發生或減少事故造成之傷亡，下列領團人員之行為，何者最不恰當？", "opts": ["雖然在開放時間之內，但沒有救生員在場值班，領團人員阻止團員進入游泳池", "領團人員請團員空出遊覽車第一排位置，乘坐時繫上安全帶", "搭乘渡輪時，看到右側有特殊風景，趕緊請全部團員到右側來欣賞及拍照", "帶領團員在路上行走時，選擇較遠但寬敞安全的人行道"], "ans": 2}, {"num": 47, "text": "護照在旅遊過程中是必備文件，下列何者為保管護照的正確方法？", "opts": ["導遊值得信賴，應該統一將護照交由導遊保管", "客人應自行保管護照，並且攜帶額外照片，但帶團人員可持有團體護照及簽證之影本", "客人應自行保管護照，最安全的方法就是將護照放在託運行李裡面", "帶團人員最熟悉當地的風土民情，較瞭解保管方法，因此應統一將護照交由帶團人員保管"], "ans": 1}, {"num": 48, "text": "帶團人員抵達機場提領行李，發現行李遺失或破損時，應立即向相關航空公司的那個部門提出賠償要求？", "opts": ["CargoDepartment [B] PassengerDepartment", "BaggageHandlingDepartment [D] Lost&FoundDepartment", "", ""], "ans": 3}, {"num": 49, "text": "下列有關 OEA （ OverseasEmergencyAssistance ）的敘述，何者錯誤？", "opts": ["OEA 興起於歐洲，若在海外遇到緊急狀況時，可尋求協助", "旅客名冊應載明之事項應有：旅客生日、護照號碼", "如遇法律訴訟， OEA 並不支付或負擔訴訟費用", "OEA 係透過國際性救援中心，獲得之緊急救援服務"], "ans": 2}, {"num": 50, "text": "有關旅客從事浮潛活動，下列敘述何者較為適當？", "opts": ["有潛水裝備就可以進行潛水活動", "會游泳的旅客，可以不用穿救生衣", "一定要在岸邊先練習使用呼吸面具才可以下水", "有浮潛經驗的旅客，可以不用再聆聽浮潛教練解說，直接下水從事潛水活動"], "ans": 2}];
+const TOTAL_TIME = 3600;
+const KEYS = ['A','B','C','D'];
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let userAnswers = {};
+let submitted = false;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return '本題一律給分';
+  if (Array.isArray(q.ans)) return '正確答案：' + q.ans.map(i => KEYS[i]).join(' 或 ');
+  return KEYS[q.ans] + '：' + q.opts[q.ans];
+}
+
+function renderQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (q.ans === -1 ? ' invalid' : '');
+    card.id = 'card-' + qi;
+    const opts = q.opts.map((opt, i) => {
+      const blank_rendered = q.text.includes('______');
+      return `<button class="option-btn" id="opt-${qi}-${i}" onclick="selectAnswer(${qi}, ${i})" data-qi="${qi}" data-i="${i}">
+        <span class="opt-label">${KEYS[i]}</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join('');
+    const qtext = q.text.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    card.innerHTML = `
+      <div class="q-num">第 ${q.num} 題${q.ans === -1 ? '（本題無效）' : ''}</div>
+      <div class="q-text">${qtext}</div>
+      <div class="options">${opts}</div>
+      <div class="result-box" id="result-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, i) {
+  if (submitted) return;
+  const q = QUESTIONS[qi];
+  userAnswers[qi] = i;
+  // Update UI
+  for (let k = 0; k < 4; k++) {
+    const btn = document.getElementById(`opt-${qi}-${k}`);
+    if (btn) btn.classList.remove('selected');
+  }
+  const selBtn = document.getElementById(`opt-${qi}-${i}`);
+  if (selBtn) selBtn.classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progress').textContent = `已答 ${answered} / ${QUESTIONS.length} 題`;
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+
+  let correct = 0, invalid = 0;
+  QUESTIONS.forEach((q, qi) => {
+    const sel = userAnswers[qi];
+    const card = document.getElementById('card-' + qi);
+    const result = document.getElementById('result-' + qi);
+
+    if (q.ans === -1) {
+      invalid++;
+      result.className = 'result-box correct';
+      result.textContent = '本題無效，一律給分';
+      card.classList.add('answered-correct');
+      correct++;
+    } else if (sel === undefined) {
+      result.className = 'result-box wrong';
+      result.textContent = '未作答。' + getCorrectLabel(q);
+      card.classList.add('answered-wrong');
+    } else if (isCorrect(q, sel)) {
+      correct++;
+      card.classList.add('answered-correct');
+      result.className = 'result-box correct';
+      result.textContent = '✓ 答對了！';
+    } else {
+      card.classList.add('answered-wrong');
+      result.className = 'result-box wrong';
+      result.textContent = '✗ 答錯了。' + getCorrectLabel(q);
+    }
+
+    // Disable all options & show correct
+    for (let k = 0; k < 4; k++) {
+      const btn = document.getElementById(`opt-${qi}-${k}`);
+      if (!btn) continue;
+      btn.disabled = true;
+      if (q.ans !== -1 && (Array.isArray(q.ans) ? q.ans.includes(k) : q.ans === k)) {
+        btn.classList.add('correct');
+      } else if (sel === k && !isCorrect(q, k)) {
+        btn.classList.add('wrong');
+      }
+    }
+  });
+
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('scoreNum').textContent = `得分：${correct} / ${total} 題（${pct}%）`;
+  document.getElementById('scoreDetail').textContent = `（無效題：${invalid} 題）`;
+  document.getElementById('scoreBar').style.display = 'block';
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'flex';
+}
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    const sel = userAnswers[qi];
+    let show = true;
+    if (mode === 'wrong') {
+      show = card.classList.contains('answered-wrong') || (!submitted && sel === undefined);
+      if (!submitted) show = false;
+      show = card.classList.contains('answered-wrong');
+    } else if (mode === 'correct') {
+      show = card.classList.contains('answered-correct');
+    } else if (mode === 'unanswered') {
+      show = sel === undefined;
+    }
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (timeLeft <= 300) el.classList.add('warning');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
+  }, 1000);
+}
+
+renderQuestions();
+startTimer();
+</script>
+</body>
+</html>

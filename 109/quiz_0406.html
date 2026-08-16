@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>109年 導遊英語（英語）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333}
+.header{background:linear-gradient(135deg,#5b2c8d,#7d3c98);color:#fff;padding:16px 20px}
+.header h1{font-size:1.2rem;font-weight:700}
+.header .meta{font-size:.85rem;opacity:.9;margin-top:4px}
+.timer-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:8px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.timer{font-size:1.4rem;font-weight:700;color:#5b2c8d;font-variant-numeric:tabular-nums}
+.timer.warning{color:#e74c3c}
+.progress-text{font-size:.85rem;color:#666}
+.container{max-width:860px;margin:0 auto;padding:20px 16px}
+.question-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.question-card.answered-correct{border-left:4px solid #27ae60}
+.question-card.answered-wrong{border-left:4px solid #e74c3c}
+.question-card.invalid{border-left:4px solid #95a5a6;opacity:.7}
+.q-num{font-size:.8rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.7;margin-bottom:14px;font-family:Georgia,serif}
+.q-blank{display:inline-block;border-bottom:2px solid #333;min-width:60px;margin:0 2px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;text-align:left;background:#fff;font-size:.9rem;line-height:1.5;font-family:Georgia,serif;transition:.15s}
+.option-btn:hover:not(:disabled){border-color:#7d3c98;background:#f8f0ff}
+.option-btn.selected{border-color:#7d3c98;background:#f3e5ff}
+.option-btn.correct{border-color:#27ae60;background:#e8f8ed;color:#1a6b3d}
+.option-btn.wrong{border-color:#e74c3c;background:#fdecea;color:#c0392b}
+.option-btn:disabled{cursor:default}
+.opt-label{font-weight:700;min-width:20px;font-family:"Microsoft JhengHei",Arial,sans-serif}
+.result-box{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;display:none}
+.result-box.correct{background:#e8f8ed;color:#1a6b3d;display:block}
+.result-box.wrong{background:#fdecea;color:#c0392b;display:block}
+.submit-area{text-align:center;padding:20px 0 40px}
+.submit-btn{background:#5b2c8d;color:#fff;border:none;padding:14px 40px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.submit-btn:hover{background:#4a236f}
+.score-bar{background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;text-align:center;display:none;position:sticky;bottom:0}
+.score-num{font-size:1.6rem;font-weight:700;color:#5b2c8d}
+.back-btn{display:inline-block;margin-top:8px;color:#7d3c98;text-decoration:none;font-size:.9rem}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;font-size:.85rem;background:#fff}
+.filter-btn.active{border-color:#7d3c98;background:#7d3c98;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>109年 外語導遊人員｜導遊英語</h1>
+  <div class="meta">共80題｜80分鐘</div>
+</div>
+<div class="timer-bar">
+  <div class="timer" id="timer">80:00</div>
+  <div class="progress-text" id="progress">已答 0 / 80 題</div>
+</div>
+<div class="container">
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <button class="filter-btn active" onclick="filterQ('all')">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong')">答錯</button>
+    <button class="filter-btn" onclick="filterQ('correct')">答對</button>
+    <button class="filter-btn" onclick="filterQ('unanswered')">未答</button>
+  </div>
+  <div id="quizContainer"></div>
+  <div class="submit-area" id="submitArea">
+    <button class="submit-btn" onclick="submitQuiz()">交卷</button>
+  </div>
+</div>
+<div class="score-bar" id="scoreBar">
+  <div class="score-num" id="scoreNum"></div>
+  <div id="scoreDetail"></div>
+  <a href="../index.html" class="back-btn">← 回首頁</a>
+</div>
+<script>
+const QUESTIONS = [{"num": 10, "text": "9 年專門職業及技術人員普通考試導遊人員、領隊人員考試試題 頁次：7－1 等 別：普通考試 類 科：外語導遊人員（英語） 科 目：外國語（英語） 考試時間：1 小時20 分 座號：", "opts": ["", "", "", ""], "ans": 0}, {"num": 1, "text": "Reservation: Hello, Hotel Four Corners. How may I help you? John: Hello, I would like to a room for three days.", "opts": ["place [B]order [C]book [D]conserve", "", "", ""], "ans": 2}, {"num": 2, "text": "Local tour guide: Good morning everyone. Today, I will take you touring the city to some famous , such as Taipei 101, National Palace Museum, Chiang Kai Sheck Memorial Park, and many more.", "opts": ["areas [B]shops [C]restaurants [D]landmarks", "", "", ""], "ans": 3}, {"num": 3, "text": "Visitor: How often does the bus run from here to the airport? Receptionist:", "opts": ["The plane leaves in an hour. [B]Every 20 minutes.", "It will take off very soon. [D]The bus goes straight to the airport.", "", ""], "ans": 1}, {"num": 4, "text": "Visitor: I’d like some information about accommodations, please. Information center:", "opts": ["The hotel price in this area ranges from 2,000 to 3,000 NT dollars.", "There are a lot of foreign visitors from Japan and Korea.", "You might want to stay for a few more days.", "The room service is 24 hours a day."], "ans": 0}, {"num": 5, "text": "Guest: I’d like to reserve a table for a party of five tonight at 7 o’clock, please. Receptionist:", "opts": ["Yes, it is 120 dollars.", "Oh, that will be too much.", "Sorry, I’m afraid we are all booked up for tonight.", "No, can you come back tomorrow?"], "ans": 2}, {"num": 6, "text": "Person A: Is the next seat taken? Person B:", "opts": ["Don’t worry. [B]You don’t want to know.", "I prefer to sit by myself. [D]That’s a problem.", "", ""], "ans": 2}, {"num": 7, "text": "Today’s lunch special is beef lasagna. It a medium coke.", "opts": ["looks into [B]takes over [C]comes with [D]gives in", "", "", ""], "ans": 2}, {"num": 8, "text": "In some restaurants, there may be a . You cannot just turn up with your shorts and sandals.", "opts": ["reservation [B]dress code [C]reception [D]popular starter 代號：4201 頁次：7－2", "", "", ""], "ans": 1}, {"num": 9, "text": "Willie coffee. He must drink at least five cups of coffee every day.", "opts": ["is dedicated to [B]is irritated by [C]is confused with [D]is addicted to", "", "", ""], "ans": 3}, {"num": 10, "text": "Chinese New Year is . I have a lot of shopping to do in just a few days.", "opts": ["around the corner [B]months away [C]drawing new [D]cutting the corner", "", "", ""], "ans": 0}, {"num": 11, "text": "I will keep you the weather condition tomorrow.", "opts": ["aware [B]beware of [C]updated with [D]dated of", "", "", ""], "ans": 2}, {"num": 12, "text": "that a monster called ‘Nian’ attacked people and animals in the village.", "opts": ["It said [B]Hearing [C]Rumor has it [D]Saying", "", "", ""], "ans": 2}, {"num": 13, "text": "People decorate their homes with plastic firecrackers to bad luck.", "opts": ["wait for [B]disguise as [C]look for [D]ward off", "", "", ""], "ans": 3}, {"num": 14, "text": "At the end of the tour, you’ll see a with replicas of almost every item in the exhibit.", "opts": ["restroom [B]souvenir shop [C]ticket counter [D]information center", "", "", ""], "ans": 1}, {"num": 15, "text": "Inside the museum, flash photography is strictly .", "opts": ["allowed [B]maintained [C]prohibited [D]encouraged", "", "", ""], "ans": 2}, {"num": 16, "text": "If you wish to return the product within 7 days, most stores will give you a ____ with no questions asked.", "opts": ["check [B]refund [C]payment [D]answer", "", "", ""], "ans": 1}, {"num": 17, "text": "a campfire is the most classic outdoor activity for camping.", "opts": ["Setting up [B]Setting aside [C]Going off [D]Putting out", "", "", ""], "ans": 0}, {"num": 18, "text": "We are , so we want to plan a vacation that doesn’t cost too much.", "opts": ["on a tight budget [B]in a tight budget [C]in a big hurry [D]in a tight schedule", "", "", ""], "ans": 0}, {"num": 19, "text": "You can get a lower rate when taking a vacation during the .", "opts": ["holiday season [B]low season [C]peak season [D]high season", "", "", ""], "ans": 1}, {"num": 20, "text": "for a vacation is a nightmare. I wish someone could do it for me. It took me so long to get everything needed in place.", "opts": ["Looking [B]Packing [C]Waiting [D]Walking", "", "", ""], "ans": 1}, {"num": 21, "text": "When you tell the driver to “keep the change,” you are giving the change as a .", "opts": ["bonus [B]tax [C]fare [D]tip", "", "", ""], "ans": 3}, {"num": 22, "text": "Guest: Why is my order taking so long? Server: I’m sorry, sir.", "opts": ["I’ll check on it right now. It shouldn’t be too long.", "I have nothing to do with this delay.", "What can I do for you?", "Can I get you anything?"], "ans": 0}, {"num": 23, "text": "Guest: Is the tip included in the bill? Server:", "opts": ["The tip is extra, sir. [B]Tipping is appreciated.", "The bill is excluded. [D]A tip is possible. 代號：4201 頁次：7－3", "", ""], "ans": 0}, {"num": 24, "text": "One simplest way to mean splitting the bill can be “ .”", "opts": ["On the house [B]Go Dutch [C]Pay cash [D]Cash or charge", "", "", ""], "ans": 1}, {"num": 25, "text": "A: Excuse me. I ordered a Big Mac, not a chicken sandwich. B: I’ll get your order fixed right now.", "opts": ["What did you say? [B]Did you say that?", "Sorry about that. [D]That’s not my fault.", "", ""], "ans": 2}, {"num": 26, "text": "A: Would you like anything to drink? B: please.", "opts": ["To go, please. [B]Sure, it is free. [C]Sorry about that. [D]Yes, a coke,", "", "", ""], "ans": 3}, {"num": 27, "text": "A: How big is the memory card? B:", "opts": ["It is 128 kg. [B]It is 36 megapixels.", "Twice the size. [D]As large as it can be.", "", ""], "ans": 1}, {"num": 28, "text": "Usually the hotel offers guests with two bottles of drinking water free of charge. They are .", "opts": ["complimentary [B]complete [C]commentary [D]commencement", "", "", ""], "ans": 0}, {"num": 29, "text": "A: I’m kind of in a hurry. Could you please drive a little faster? B: Sorry, I’m already going very fast, close to the .", "opts": ["curb side [B]tunnel end [C]police car [D]speed limit", "", "", ""], "ans": 3}, {"num": 30, "text": "When shopping for clothing, you can try the items on in before buying them.", "opts": ["fitting rooms [B]restrooms [C]sitting rooms [D]waiting rooms", "", "", ""], "ans": 0}, {"num": 31, "text": "The pants I bought yesterday are too long. I would like to have them .", "opts": ["changed [B]shortened [C]ironed [D]cut", "", "", ""], "ans": 1}, {"num": 32, "text": "The Taipei Rapid Transit Corporation planned to change the harsh mechanical beeping of the card readers at the entry gates to the Taipei Metro system to a piano tone, thereby making a small change in the soundscape design of the city.", "opts": ["rough [B]high [C]soft [D]hoarse", "", "", ""], "ans": 2}, {"num": 33, "text": "Taiwan Railways Administration offers bento, the Japanese name for a boxed meal, transporting memories, for home, and tales of goodness.", "opts": ["crowd [B]rush [C]blame [D]nostalgia", "", "", ""], "ans": 3}, {"num": 34, "text": "Taiwan’s North Coast provides a special cycling experience because it features a winding coastline, geologic , and marvelously shaped rocks.", "opts": ["landscapes [B]volcanos [C]patties [D]villages", "", "", ""], "ans": 0}, {"num": 35, "text": "The procession for the goddess Mazu is a century-old tradition that the collective memories of Taiwanese people.", "opts": ["extends [B]embodies [C]prolongs [D]refreshes", "", "", ""], "ans": 1}, {"num": 36, "text": "Chishang’s Autumn Rice Harvest Arts Festival is not merely an arts event, but also a meaningful one its locality.", "opts": ["celebrated [B]celebrating [C]celebrates [D]celebrate 代號：4201 頁次：7－4", "", "", ""], "ans": 1}, {"num": 37, "text": "Glove puppetry is Taiwan’s cultural treasure that we should respect and .", "opts": ["resemble [B]cherish [C]inscribe [D]propel", "", "", ""], "ans": 1}, {"num": 38, "text": "Bamboo furniture is popular in Latin America as a result of bamboo-weaving craftsmanship from Taiwan.", "opts": ["transcribed [B]transferred [C]assigned [D]assembled", "", "", ""], "ans": 1}, {"num": 39, "text": "The Trending Taiwan channel on YouTube in 2015 presents short films that share the impressive scenes of Taiwan and its people with people around the globe.", "opts": ["launched [B]appeared [C]illuminated [D]counted", "", "", ""], "ans": 0}, {"num": 40, "text": "To share the sights of his native Taiwan, Chen Guan-zhou used over 40,000 Lego pieces to make Long-shan Temple, which made him to fame in the field.", "opts": ["rocket [B]rockets [C]rocketed [D]rocketing", "", "", ""], "ans": 0}, {"num": 41, "text": "The National Taiwan Museum as the gateway to 228 Memorial Park tells Taiwan’s stories, her history, and serves as a museum truly for and about the people.", "opts": ["confronts [B]encounters [C]records [D]revives", "", "", ""], "ans": 2}, {"num": 42, "text": "The airport is a huge , a central area where many flights come and connect to other flights.", "opts": ["destination [B]concourse [C]hub [D]lounge", "", "", ""], "ans": 2}, {"num": 43, "text": "Customs officer: What is the purpose of your visit? Tourist: Customs officer: No problem.", "opts": ["My uncle lives here. [B]I've booked a hotel for my trip.", "My friend will pick me up. [D]I was just here to transit.", "", ""], "ans": 3}, {"num": 44, "text": "If you drove to a hotel, there might be a , who will take your car and park it for you.", "opts": ["vendor [B]valet [C]cashier [D]retailer", "", "", ""], "ans": 1}, {"num": 45, "text": "A hotel usually has a , who will help you organize a local tour, make a restaurant reservation, buy tickets to the theatre or sports games－anything you want to do outside the hotel.", "opts": ["concierge [B]porter [C]bellhop [D]maid", "", "", ""], "ans": 0}, {"num": 46, "text": "In addition to your passport, you need a that lets you pass through security and into the airport.", "opts": ["reservation card [B]carry-on backpack [C]boarding pass [D]baggage tag", "", "", ""], "ans": 2}, {"num": 47, "text": "A: Excuse me. Could you please tell me the way to the Empire State Building? B:", "opts": ["It’s in the heart of the city. [B]Bus number 24 goes there.", "A railway station is nearby. [D]Take exit 4 and you'll see it across the street.", "", ""], "ans": 3}, {"num": 48, "text": "A: B: Go down this street, turn left, and you should see it on your right.", "opts": ["Excuse me. How do I get to the modern gallery center by bus?", "I’m going to the city library. Can you show me which train to take?", "Hi, do you know where the nearest subway station is?", "What’s the best way to the airport? 代號：4201 頁次：7－5"], "ans": 2}, {"num": 49, "text": "A:Excuse me. Where can I find some jackets? B: A: Medium should be fine.", "opts": ["Do you want to request a refund?", "What size do you wear?", "Would you like to apply for a store credit card?", "Do you like to try them on?"], "ans": 1}, {"num": 50, "text": "A: Do I need tickets for Taiwan Culinary Exhibition? B:", "opts": ["We would be delighted to see you there. [B]You can donate five dollars to the museum.", "It's free and open to the public. [D]They also have a regular exhibition.", "", ""], "ans": 2}, {"num": 51, "text": "Before entering the museum, please all valuables and bags at the cloakroom.", "opts": ["check in [B]request [C]set up [D]provide", "", "", ""], "ans": 0}, {"num": 52, "text": "Let me remind you that all children must be by an adult in the art center.", "opts": ["sponsored [B]inspected [C]connected [D]accompanied", "", "", ""], "ans": 3}, {"num": 53, "text": "Visiting the museum of modern art, a lady turned to an attendant nearby and asked about the painting.", "opts": ["stood [B]stand [C]standing [D]stands", "", "", ""], "ans": 2}, {"num": 54, "text": "A: Where does the tour start off? B:", "opts": ["It begins at 1:30. [B]We'll join the group at 2 o'clock.", "At the main entrance. [D]Please keep up with the schedule.", "", ""], "ans": 2}, {"num": 55, "text": "The museum offers concessions for students and elders.", "opts": ["agreement [B]lower price [C]higher price [D]disagreement", "", "", ""], "ans": 1}, {"num": 56, "text": "I heard books are on sale in the store this month. Maybe we can get a good there.", "opts": ["specialty [B]account [C]bargain [D]clearance", "", "", ""], "ans": 2}, {"num": 57, "text": "You can get a 15% discount if you buy it today. I can it’s the lowest you will get.", "opts": ["prove [B]guarantee [C]contend [D]regret", "", "", ""], "ans": 1}, {"num": 58, "text": "This new type of smart phone is very easy to operate. It is .", "opts": ["functional [B]user-friendly [C]complicated [D]sophisticated", "", "", ""], "ans": 1}, {"num": 59, "text": "May I have immigration card and custom card?", "opts": ["definition [B]declaration [C]delivery [D]departure", "", "", ""], "ans": 1}, {"num": 60, "text": "Please fasten your seatbelt and remain .", "opts": ["sit [B]seated [C]sitting [D]seat", "", "", ""], "ans": 1}, {"num": 61, "text": "We are now crossing a zone of . Please return to your seats and keep your seat belts fastened.", "opts": ["atmosphere [B]airflow [C]turbulence [D]circulation", "", "", ""], "ans": 2}, {"num": 62, "text": "A: My suitcase didn't appear on the . B: Do you have your claim ticket? I need to get your tag number.", "opts": ["circle [B]carousel [C]delivery [D]carriage 代號：4201 頁次：7－6", "", "", ""], "ans": 1}, {"num": 63, "text": "I am not feeling . Is there a hospital nearby?", "opts": ["tired [B]well [C]ill [D]busy", "", "", ""], "ans": 1}, {"num": 64, "text": "No worries. The doctor gave him a/an for his cold.", "opts": ["operation [B]transition [C]prescription [D]identification", "", "", ""], "ans": 2}, {"num": 65, "text": "A: Do you need anything else? B: No, that will be . Thanks.", "opts": ["nice [B]all [C]mine [D]sure", "", "", ""], "ans": 1}, {"num": 66, "text": "This is a routine stop check. Your driver's license and vehicle card, please.", "opts": ["registration [B]translation [C]nationality [D]society", "", "", ""], "ans": 0}, {"num": 67, "text": "A: I lost my passport! B: Did you notice anyone ?", "opts": ["hesitant [B]reluctant [C]skeptical [D]suspicious", "", "", ""], "ans": 3}, {"num": 68, "text": "If you find your baggage after the arrival of your flight, report to the Airport Service Office immediately.", "opts": ["damaged [B]damages [C]damage [D]damaging", "", "", ""], "ans": 0}, {"num": 69, "text": "Customs officer: How long will you be staying? Tourist: .", "opts": ["A week [B]New York [C]Once a week [D]Tomorrow", "", "", ""], "ans": 0}, {"num": 70, "text": "Caoling was attacked by the 1999’s Jiji Earthquake, but its new “flying mountain” and barrier lake attracted the attention of the general public, sparking a new wave of .", "opts": ["disorder [B]rescue [C]tourism [D]perspective For some museums in the world, love is in the air all year round. The Palazzo Filomela in Venice is better known as the Museum of Love. This museum was once the 16th-century private home of a famous singer. On the walls, you can see paintings of legendary lovers, such as the god Cupid and his lover, Psyche. For many, love and chocolate go hand in hand, so a visit to the Chocolate Museum in Cologne, Germany, makes sense. There, visitors can learn about the history of chocolate and watch chocolate bars being made. The museum also gives out wafers that were dipped in chocolate from a three-meter-high chocolate fountain. What is more, the Diamond Museum Amsterdam in Holland is the place to go when your’re ready to take your love to the next level. At this museum, you can learn about diamonds, including how to tell a real one from a fake one. You may also get some ideas about which diamond to buy when you’re getting engaged. Shakespeare once wrote, “Love looks not with the eyes, but with the mind.” Thanks to these special museums, we can all open our minds to, and fill our hearts with, love. 16th", "", "", ""], "ans": 2}, {"num": 71, "text": "Where is the museum which was once the home of a famous century singer?", "opts": ["Amsterdam [B]Cologne [C]Venice [D]Shakespeare 代號：4201 頁次：7－7", "", "", ""], "ans": 2}, {"num": 72, "text": "What do you think Shakespeare means in “ Love looks not with the eyes, but with the mind?”", "opts": ["Love is blind and irrational.", "Love is not what you see neither what you think.", "Love is not seeing the appearance but the inside of a person.", "Love at first sight is not reliable."], "ans": 2}, {"num": 73, "text": "According to the article, which museum would you go if you were about to ask someone to marry you?", "opts": ["Palazzo Filomela [B]Chocolate Museum", "Museum of Relationship [D]Diamond Museum Amsterdam", "", ""], "ans": 3}, {"num": 74, "text": "Why is the author writing about a chocolate museum in this article?", "opts": ["Because people love to learn the history of chocolate.", "Because handmade chocolate is the best way to express love.", "Because there is a huge chocolate fountain.", "Because many people believe that love and chocolate are closely connected."], "ans": 3}, {"num": 75, "text": "In the article, what do you think “Love is in the air” mean?", "opts": ["Love is everywhere. [B]Love is like the air.", "Love is invisible. [D]Love is so unreliable. As a flood of news headlines highlighting overtourism, it's easy to think that the planet is simply full. But away from the well-worn tourist trails, you'll discover another travel story entirely different. In much of the world, there are places that are eager to welcome tourists. Based on the most recent data by the United Nations World Tourism Organization (UNWTO), in 2017, nearly 87 million international tourists arrived in France; yet mere 2,000 international tourists visited the South Pacific country of Tuvalu, where it's easy to find a beach -- or even an entire island -- to yourself. The same data reflect many of the world's least-visited countries and territories, where you'll find gorgeous natural beauty, culture and history without pushing through sticks. bunches of selfie Imagine lounging on Sierra Leone beaches, exploring Liechtenstein's mountaintop castles or shipwreck diving in the South Pacific! How rewarding it can be to leave the popular sites behind. If you can't picture a week in Kiribati or imagine the flavor of Timor Leste's traditional cuisine, it's OK. By about, you'll infuse the journey spinning the globe and booking a flight to a country you know little with a sense of wonder. That, after all, is what travel is for.", "", ""], "ans": 0}, {"num": 76, "text": "The number shown in the data of UNWTO concerning international tourists to France is an indication of .", "opts": ["Wonderful trip [B]Romantic tour [C]Overtourism [D]Gorgeous experience", "", "", ""], "ans": 2}, {"num": 77, "text": "What is common between Sierra Lione and Tuvalu, as described in this passage?", "opts": ["Sandy beaches [B]Traditional cuisine [C]Shipwreck diving [D]Mountain trails", "", "", ""], "ans": 0}, {"num": 78, "text": "“Bunches of selfie sticks” is an indication of .", "opts": ["high technology [B]tourist crowd [C]tourist attraction [D]tour information", "", "", ""], "ans": 1}, {"num": 79, "text": "In the article, the author seems to encourage the reader to .", "opts": ["visit well-worn trails [B]travel to least-visited countries", "go to the beaches [D]go mountain hiking", "", ""], "ans": 1}, {"num": 80, "text": "“Spinning the globe and booking a flight to a country you know little about” is a promotion of .", "opts": ["business travel [B]cruise travel [C]holiday travel [D]adventure travel", "", "", ""], "ans": 3}];
+const TOTAL_TIME = 4800;
+const KEYS = ['A','B','C','D'];
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let userAnswers = {};
+let submitted = false;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return '本題一律給分';
+  if (Array.isArray(q.ans)) return '正確答案：' + q.ans.map(i => KEYS[i]).join(' 或 ');
+  return KEYS[q.ans] + '：' + q.opts[q.ans];
+}
+
+function renderQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (q.ans === -1 ? ' invalid' : '');
+    card.id = 'card-' + qi;
+    const opts = q.opts.map((opt, i) => {
+      return `<button class="option-btn" id="opt-${qi}-${i}" onclick="selectAnswer(${qi}, ${i})">
+        <span class="opt-label">${KEYS[i]}</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join('');
+    const qtext = q.text.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    card.innerHTML = `
+      <div class="q-num">Q${q.num}${q.ans === -1 ? ' (invalid)' : ''}</div>
+      <div class="q-text">${qtext}</div>
+      <div class="options">${opts}</div>
+      <div class="result-box" id="result-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, i) {
+  if (submitted) return;
+  userAnswers[qi] = i;
+  for (let k = 0; k < 4; k++) {
+    const btn = document.getElementById(`opt-${qi}-${k}`);
+    if (btn) btn.classList.remove('selected');
+  }
+  const selBtn = document.getElementById(`opt-${qi}-${i}`);
+  if (selBtn) selBtn.classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progress').textContent = `已答 ${answered} / ${QUESTIONS.length} 題`;
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+
+  let correct = 0, invalid = 0;
+  QUESTIONS.forEach((q, qi) => {
+    const sel = userAnswers[qi];
+    const card = document.getElementById('card-' + qi);
+    const result = document.getElementById('result-' + qi);
+
+    if (q.ans === -1) {
+      invalid++;
+      correct++;
+      result.className = 'result-box correct';
+      result.textContent = 'Invalid question — full credit awarded';
+      card.classList.add('answered-correct');
+    } else if (sel === undefined) {
+      result.className = 'result-box wrong';
+      result.textContent = 'Not answered. ' + getCorrectLabel(q);
+      card.classList.add('answered-wrong');
+    } else if (isCorrect(q, sel)) {
+      correct++;
+      card.classList.add('answered-correct');
+      result.className = 'result-box correct';
+      result.textContent = '✓ Correct!';
+    } else {
+      card.classList.add('answered-wrong');
+      result.className = 'result-box wrong';
+      result.textContent = '✗ Wrong. ' + getCorrectLabel(q);
+    }
+
+    for (let k = 0; k < 4; k++) {
+      const btn = document.getElementById(`opt-${qi}-${k}`);
+      if (!btn) continue;
+      btn.disabled = true;
+      if (q.ans !== -1 && (Array.isArray(q.ans) ? q.ans.includes(k) : q.ans === k)) {
+        btn.classList.add('correct');
+      } else if (sel === k && !isCorrect(q, k)) {
+        btn.classList.add('wrong');
+      }
+    }
+  });
+
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('scoreNum').textContent = `Score: ${correct} / ${total} (${pct}%)`;
+  document.getElementById('scoreDetail').textContent = `(Invalid: ${invalid})`;
+  document.getElementById('scoreBar').style.display = 'block';
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'flex';
+}
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    const sel = userAnswers[qi];
+    let show = true;
+    if (mode === 'wrong') show = card.classList.contains('answered-wrong');
+    else if (mode === 'correct') show = card.classList.contains('answered-correct');
+    else if (mode === 'unanswered') show = sel === undefined;
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (timeLeft <= 300) el.classList.add('warning');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
+  }, 1000);
+}
+
+renderQuestions();
+startTimer();
+</script>
+</body>
+</html>
