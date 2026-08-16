@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>107年 導遊英語（英語）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333}
+.header{background:linear-gradient(135deg,#5b2c8d,#7d3c98);color:#fff;padding:16px 20px}
+.header h1{font-size:1.2rem;font-weight:700}
+.header .meta{font-size:.85rem;opacity:.9;margin-top:4px}
+.timer-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:8px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.timer{font-size:1.4rem;font-weight:700;color:#5b2c8d;font-variant-numeric:tabular-nums}
+.timer.warning{color:#e74c3c}
+.progress-text{font-size:.85rem;color:#666}
+.container{max-width:860px;margin:0 auto;padding:20px 16px}
+.question-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.question-card.answered-correct{border-left:4px solid #27ae60}
+.question-card.answered-wrong{border-left:4px solid #e74c3c}
+.question-card.invalid{border-left:4px solid #95a5a6;opacity:.7}
+.q-num{font-size:.8rem;color:#888;margin-bottom:6px}
+.q-text{font-size:.95rem;line-height:1.7;margin-bottom:14px;font-family:Georgia,serif}
+.q-blank{display:inline-block;border-bottom:2px solid #333;min-width:60px;margin:0 2px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;text-align:left;background:#fff;font-size:.9rem;line-height:1.5;font-family:Georgia,serif;transition:.15s}
+.option-btn:hover:not(:disabled){border-color:#7d3c98;background:#f8f0ff}
+.option-btn.selected{border-color:#7d3c98;background:#f3e5ff}
+.option-btn.correct{border-color:#27ae60;background:#e8f8ed;color:#1a6b3d}
+.option-btn.wrong{border-color:#e74c3c;background:#fdecea;color:#c0392b}
+.option-btn:disabled{cursor:default}
+.opt-label{font-weight:700;min-width:20px;font-family:"Microsoft JhengHei",Arial,sans-serif}
+.result-box{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;display:none}
+.result-box.correct{background:#e8f8ed;color:#1a6b3d;display:block}
+.result-box.wrong{background:#fdecea;color:#c0392b;display:block}
+.submit-area{text-align:center;padding:20px 0 40px}
+.submit-btn{background:#5b2c8d;color:#fff;border:none;padding:14px 40px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.submit-btn:hover{background:#4a236f}
+.score-bar{background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;text-align:center;display:none;position:sticky;bottom:0}
+.score-num{font-size:1.6rem;font-weight:700;color:#5b2c8d}
+.back-btn{display:inline-block;margin-top:8px;color:#7d3c98;text-decoration:none;font-size:.9rem}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;font-size:.85rem;background:#fff}
+.filter-btn.active{border-color:#7d3c98;background:#7d3c98;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>107年 外語導遊人員｜導遊英語</h1>
+  <div class="meta">共80題｜80分鐘</div>
+</div>
+<div class="timer-bar">
+  <div class="timer" id="timer">80:00</div>
+  <div class="progress-text" id="progress">已答 0 / 80 題</div>
+</div>
+<div class="container">
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <button class="filter-btn active" onclick="filterQ('all')">全部</button>
+    <button class="filter-btn" onclick="filterQ('wrong')">答錯</button>
+    <button class="filter-btn" onclick="filterQ('correct')">答對</button>
+    <button class="filter-btn" onclick="filterQ('unanswered')">未答</button>
+  </div>
+  <div id="quizContainer"></div>
+  <div class="submit-area" id="submitArea">
+    <button class="submit-btn" onclick="submitQuiz()">交卷</button>
+  </div>
+</div>
+<div class="score-bar" id="scoreBar">
+  <div class="score-num" id="scoreNum"></div>
+  <div id="scoreDetail"></div>
+  <a href="../index.html" class="back-btn">← 回首頁</a>
+</div>
+<script>
+const QUESTIONS = [{"num": 10, "text": "7 年專門職業及技術人員普通考試導遊人員、領隊人員考試試題 頁次：8－1 等 別：普通考試 類 科：外語導遊人員（英語） 科 目：外國語（英語） 1 小時20 考試時間： 分 座號： ※注意： The traveling office 10 locations to offer people multiple choices to enjoy the", "opts": ["", "", "", ""], "ans": 0}, {"num": 1, "text": " magnificent sunsets in a relaxing way. criticized prevented recommended warned", "opts": ["[B] [C] [D] Be prepared to your country, because many foreigners will expect you to know a lot", "", "", ""], "ans": 2}, {"num": 2, "text": " about history and culture in your home country. elect govern represent split", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 3, "text": "Birdwatchers in Taiwan are eager to see spoonbills and photographs. shoot pose blow crop", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 4, "text": "Your flight could be for many reasons, such as terrible weather, mechanical issues with the aircraft, and many other reasons. delayed enforced narrated obtained", "opts": ["[B] [C] [D] National Taichung Theater was by the internationally acclaimed Japanese architect, Toyo", "", "", ""], "ans": 0}, {"num": 5, "text": " Ito. assigned designed resigned signed", "opts": ["[B] [C] [D]", "", "", ""], "ans": 1}, {"num": 6, "text": "One of the most things about Taiwan is the overwhelming friendliness of its people. amazing crossing daring guarding", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 7, "text": "In hotel terminology, rooms refer to those which provide two beds. double single trip le twin", "opts": ["[B] [C] [D]", "", "", ""], "ans": 3}, {"num": 8, "text": "Tour guides will meet guests from all over the globe and all walks of life, so the best guides need to be to cultural differences. critical humorous respective sensitive", "opts": ["[B] [C] [D] Taiwan has some fruit that you are not going to see anywhere else, such as pink guava,", "", "", ""], "ans": 3}, {"num": 9, "text": " wax apples, and “Buddha’s head.” plastic precise special straight", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 10, "text": "Always keep one backup credit card and bank card with you in case of . emergencies processes resolutions successes", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 11, "text": "A tour guide needs to be people-friendly, about travel, and able to work in stressful circumstances. adorable favorite lovable passionate", "opts": ["[B] [C] [D] 代號：4201 頁次：8－2 Most people using both verbal and nonverbal communications, so paying attention to", "", "", ""], "ans": 3}, {"num": 12, "text": " facial expressions can help you read a situation. commute inter act spear tangle", "opts": ["[B] [C] [D]", "", "", ""], "ans": 1}, {"num": 13, "text": "Wang Ye and Matsu are two of the most common gods according to folk belief in Taiwan, but the rituals of these gods differ.", "opts": ["praying [B]devoting [C]worshipping [D]appealing", "", "", ""], "ans": 2}, {"num": 14, "text": "Many historical stores and buildings have been into fantastic restaurants.", "opts": ["transformed [B]convinced [C]preserved [D]transported", "", "", ""], "ans": 0}, {"num": 15, "text": "He always keeps promises and never breaks his . ground stride word zone", "opts": ["[B] [C] [D] You can a little before deciding what to buy.", "", "", ""], "ans": 2}, {"num": 16, "text": " fall apart look out pass out shop around", "opts": ["[B] [C] [D] The hot at Guanziling are located on the side of Zhentou Mountain in southern Taiwan,", "", "", ""], "ans": 3}, {"num": 17, "text": " and due to subterranean rocks, their water is abundant in minerals.", "opts": ["mud [B]tubs [C]springs [D]soups Along the routes, you will a number of famous temples.", "", "", ""], "ans": 2}, {"num": 18, "text": " bend over give in hand i n pass by", "opts": ["[B] [C] [D] The forest resource in Taiwan up to around 58 percent of the size of the island.", "", "", ""], "ans": 3}, {"num": 19, "text": " adds beats looks pulls", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 20, "text": "You will have to plan where the tour goes and what is seen by the passengers if you are in of the tour. addition charge honor order", "opts": ["[B] [C] [D] No trip to Kaohsiung is complete without the city’s night markets a visit.", "", "", ""], "ans": 1}, {"num": 21, "text": " arriving beginning paying renting", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 22, "text": "Bubble tea has been popular in Taiwan, and the city is tea stores. carried out filled with looked around passed on", "opts": ["[B] [C] [D]", "", "", ""], "ans": 1}, {"num": 23, "text": "Pineapple cake, one of Taiwan's best food souvenirs, is pineapples or winter melon. fed up held on made with paid off", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 24, "text": "Many people have tried to bad habits at some point in their lives. sum up queue up get up give up", "opts": ["[B] [C] [D] Is the luggage yours or ?", "", "", ""], "ans": 3}, {"num": 25, "text": " her mine our their", "opts": ["[B] [C] [D] Taiwan allows visa-free entry for certain passport holders. To be approved for visa-free entry, the", "", "", ""], "ans": 1}, {"num": 26, "text": " passport should have at least six months of remaining.", "opts": ["expiration [B]quality [C]validity [D]activity 代號：4201 頁次：8－3", "", "", ""], "ans": 2}, {"num": 27, "text": "Hualien is a small city, but even , it attracts many tourists. as if though so", "opts": ["[B] [C] [D] Miaoli offers a wide of classic souvenirs ranging from wood craft, Tung blossom art, and", "", "", ""], "ans": 3}, {"num": 28, "text": " Hakka cuisine. account pluralist variety weight", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 29, "text": "A: There are a lot of good restaurants near National Taiwan Museum of Fine Arts. B: Great! How can we the Museum from here? arrive in come at get to depart at", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 30, "text": "A: What time do we have to tomorrow? B: We will have to leave our room by 9 in the morning. check out check in check it check off", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 31, "text": "Customs: ? Tourist: I am on a business trip. How do you like your trip How long is the business", "opts": ["[B] What do you do What is the purpose of your visit", "[D]", "", ""], "ans": 3}, {"num": 32, "text": "A: How long does it take to walk through the National Palace Museum? B: . Around four hours At 2: 00 PM", "opts": ["[B] It's $30 per hour It's right there, next to that park", "[D] A: Where are we headed now?", "", ""], "ans": 0}, {"num": 33, "text": " B: . Let’s break it down Let’s get a head start", "opts": ["[B] We are going to the airport We are headed off at the airport", "[D]", "", ""], "ans": 2}, {"num": 34, "text": "A: Do you know where the nearest washroom is? B: . It’s my pleasure to be here It’s right around the corner", "opts": ["[B] No, I don’t have the process Yes, I have the authority", "[D] A: Are we allowed to take pictures once we get inside the museum?", "", ""], "ans": 1}, {"num": 35, "text": " B: . Yes, you can frame your own pictures there", "opts": [" No, no local museums are displaying pictures", " Pictures in the museum are not allowed to touch", " Taking pictures inside the museum is prohibited", " 代號：4201 頁次：8－4"], "ans": 3}, {"num": 36, "text": "A: What do you do in your spare time? B: . I’ll have a ham sandwich I go hiking with friends", "opts": ["[B] You really love pasta a lo t You shouldn’t swim alone", "[D] A: Are you going to drive all the way to Taitung?", "", ""], "ans": 1}, {"num": 37, "text": " B: . No, we’ll stop by in Kaoshiung for a night No, we’re going to take the highway", "opts": ["[B] Yes, it’s a beautiful sightseeing spot Yes, it’s on my way to Taitung", "[D]", "", ""], "ans": 0}, {"num": 38, "text": "Would you mind around here for a few minutes? waited waiting of wait to wait", "opts": ["[B] [C] [D]", "", "", ""], "ans": 1}, {"num": 39, "text": "I didn’t know what time . the bus would get there would the bus get there", "opts": ["[B] the bus is getting there is the bus getting there", "[D]", "", ""], "ans": 0}, {"num": 40, "text": "All the tour group members are . on upstairs in upstairs at upstairs upstairs", "opts": ["[B] [C] [D]", "", "", ""], "ans": 3}, {"num": 41, "text": "Even if I drive the tour bus, I wouldn’t. Let’s wait for the driver. can shall could will", "opts": ["[B] [C] [D] Let’s call it a day, ?", "", "", ""], "ans": 2}, {"num": 42, "text": " shall we will you isn’t it won’t you", "opts": ["[B] [C] [D] One of the issues that come up in the modern life is people using their electronic devices while", "", "", ""], "ans": 0}, {"num": 43, "text": " walking. When they do so, it is very difficult to be of what is going on around them. filled astonished aware unconscious", "opts": ["[B] [C] [D] The bus service is unavailable eight o’clock on Monday morning.", "", "", ""], "ans": 2}, {"num": 44, "text": " in until while for", "opts": ["[B] [C] [D] The city government legislated an increase in fines for those who do not their seat belts.", "", "", ""], "ans": 1}, {"num": 45, "text": " The new rule becomes effective next month. tie swipe obsess fasten", "opts": ["[B] [C] [D] If all of us travel to Penghu ferry as opposed to flying, we could save up to 10,000", "", "", ""], "ans": 3}, {"num": 46, "text": " dollars. in at by of", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 47, "text": "This website introduces the best travel planning apps which could help you plan your , and make sure your tickets and connections are all lined up. organization itin erary proposal diary", "opts": ["[B] [C] [D] 代號：4201 頁次：8－5", "", "", ""], "ans": 1}, {"num": 48, "text": "The store adjacent to the hotel is a convenience store which provides a range of everyday items such as , snacks, or drinks. groceries techniques glossaries luxuries", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 49, "text": "One between a turtle and a tortoise is that tortoises live only on land. distinction indifference characteristic direction", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 50, "text": "A person whose job is to translate information from one language to another is called an . interviewer counselor interpreter leader", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 51, "text": "When the athlete one of his greatest performances, he received a standing ovation from the audience. referred to pulled off pulled over handed in", "opts": ["[B] [C] [D]", "", "", ""], "ans": 1}, {"num": 52, "text": "The Michelin Guide Taipei, also known as the bible for global fine , will be available in Taiwan in the first quarter of 2018. cruise supper cuisine shopping", "opts": ["[B] [C] [D]", "", "", ""], "ans": 2}, {"num": 53, "text": "Some people spent years saving up money to take a long-term dream trip. in order in tune on duty on top", "opts": ["[B] [C] [D]", "", "", ""], "ans": 0}, {"num": 54, "text": "The National Palace Museum provides a special children’s audio guide to allow children to learn more about the on display.", "opts": ["presentations [B]exhibitions [C]concerts [D]participations", "", "", ""], "ans": 1}, {"num": 55, "text": "The museum audio guide is available in several languages, such as English, Japanese and Spanish, at a cost of NT$150 per . inventor value receipt rental", "opts": ["[B] [C] [D]", "", "", ""], "ans": 3}, {"num": 56, "text": "Even though a rising population and booming economy have brought great benefits to Southeast Asian countries, the major problem of traffic has resulted, leading to pollution and delays. conjunction [B]congestion [C]intersection connection", "opts": ["[D]", "", "", ""], "ans": 1}, {"num": 57, "text": "Located in the northeast part of Chiayi County in Taiwan, Alishan is home to some of Taiwan’s most astonishing natural and landscapes. regard scenery tour shore", "opts": ["[B] [C] [D]", "", "", ""], "ans": 1}, {"num": 58, "text": "Nature are established to protect iconic, special, and endangered species of plants and animals. conserves conventions reserves [D]ligions re", "opts": ["[B] [C]", "", "", ""], "ans": 2}, {"num": 59, "text": "One of the most famous traditional arts in Taiwan is glove . Even though the dummies have no obvious expressions on their wooden heads, professional performers use their hands and voices to embody them with the lively appearance of human actions and emotions. doll weaving puppetry topping", "opts": ["[B] [C] [D] 代號：4201 頁次：8－6 One tip for dealing with difficult customers is to put your emotions aside when listening to", "", "", ""], "ans": 2}, {"num": 60, "text": " their or concerns and sincerely thank them for sharing. complaints [B]compliments [C]supplements commitments", "opts": ["[D]", "", "", ""], "ans": 0}, {"num": 61, "text": "Violators will be for eating or drinking on Taipei MRT trains or platforms. fined encouraged allowed involved", "opts": ["[B] [C] [D] If you want to pay with a credit card, you can directly the card on the device.", "", "", ""], "ans": 0}, {"num": 62, "text": " snipe stripe spike swipe", "opts": ["[B] [C] [D]", "", "", ""], "ans": 3}, {"num": 63, "text": "This historical site was largely rebuilt the years of 1990 and 1995. for since between on", "opts": ["[B] [C] [D] The Hakka town of Meinong in southern Taiwan is famous for its , which not only provide", "", "", ""], "ans": 2}, {"num": 64, "text": " shelter from the sun but also symbolize good fortune. oil paper umbrellas Chinese knots [C]cented s sachets calligraphy", "opts": ["[B] [D]", "", "", ""], "ans": 0}, {"num": 65, "text": "Due to increased competition from foreign travel agencies, local travel agencies were forced to the prices of package tours to attract tourists. rise lower enlarge worsen", "opts": ["[B] [C] [D] This building is renowned for its design. For example, people with injuries or in", "", "", ""], "ans": 1}, {"num": 66, "text": " wheelchairs can use the elevator to reach the observatory. fragile sturdy glorious accessible", "opts": ["[B] [C] [D]", "", "", ""], "ans": 3}, {"num": 67, "text": "If you want to use the hotel service, you need to fill out the attached card indicating which items of clothing have been placed in the bag. laundry entertainment utility accommodation", "opts": ["[B] [C] [D] is considered not just a form of writing, but rather is viewed as the most appreciated visual", "", "", ""], "ans": 0}, {"num": 68, "text": " form of all Chinese art. Drama Calligraphy Sketch Diabolo", "opts": ["[B] [C] [D] Please take the free , which begins its route at North Park Station, so that we can keep the", "", "", ""], "ans": 1}, {"num": 69, "text": " air in the park as clean and pure as possible. shelter butler cabinet shuttle", "opts": ["[B] [C] [D]", "", "", ""], "ans": 3}, {"num": 70, "text": "The meal only costs NT$200 but the receipt shows NT$ 250. I think I was . overcharged underestim ated expected undercharged", "opts": ["[B] [C] [D] Five Swedish designers have worked with artisans in Taiwan to explore different lacquer techniques, and presented their works in an exhibition –“A New Layer.” The exhibition shows contemporary objects made with an ancient technique. Lacquer has been used in East Asia for over 7000 years and encompasses a variety of techniques and applications. The title “A New Layer” refers to how the lacquer is applied in several layers until the desired surface sheen occurs. 代號：4201 頁次：8－7 Historically, China and Japan have been the primary regions for the development of the lacquer art form. Artisans have not only mastered a single method, but developed a variety of ways in which the coating is used, both as a functional and a decorative material. Despite the long history of craftsmanship, it is not tied to tradition but is constantly changing. Taiwan is a geographical and cultural crossroads for China and Japan but also a region with influences from Southeast Asia and Polynesia. This variegated culture is visible in Taiwan's craft traditions and has significantly colored the material that appears in “A New Layer.” The exhibition shows a broad palette of materials such as ceramics, wood, metal, wicker bamboo, fabric, pearl and stone, all of it accompanied by lacquer work applied on the objects in various ways. “A New Layer” is a collaboration between the designers Carina Seth Andersson, Matti Klenell, Stina Löfgren, Gabriella Gustafson, Mattias Ståhlbom, National Taiwan Craft Research and Development Institute (NTCRI) and the Museum of Far Eastern Antiquities.", "", "", ""], "ans": 0}, {"num": 71, "text": "What is this passage mainly about? the beauty of traditional Swedish art", "opts": [" the news about an exhibition", " the history of lacquer art", " the conflict between eastern and western cultures", " What does the title “A New Layer” refer to?"], "ans": 1}, {"num": 72, "text": " how the lacquer is put on in several coatings", "opts": [" how the lacquer is painted by several artisans", " how the lacquer is hidden in several regions", " how the lacquer is approved by several institutes", ""], "ans": 0}, {"num": 73, "text": "Who collaborates to present the exhibition “A New Layer”?", "opts": ["people in China and Japan [B]people in Southeast Asia and Polynesia", "people in Sweden only [D]people in Sweden and Taiwan", "", ""], "ans": 3}, {"num": 74, "text": "According to the passage, which of the following statement is true? Lacquer has been used in East Europe for more than 7000 years.", "opts": [" Lacquer is originated in both Sweden and Taiwan.", " Japan is one of the main regions for the development of the lacquer art form.", " There is only one single application possible for lacquer.", " Where is this passage most likely from?"], "ans": 2}, {"num": 75, "text": " a research journal a news report a science fiction a recipe book", "opts": ["[B] [C] [D] 代號：4201 頁次：8－8 If there is one main characteristics of the modern world that make our lives different from our grandparents’, it is probably speed. We are always on the move, and we don’t have much patience with slow systems of transportation. We want to get there, and we want to do it fast! Car makers, airline owners, and the planners of mass transit systems all share a common goal. They are trying to provide us with faster and faster ways to reach our destinations. Nonetheless, many of us actually want to slow down. Although we complain when our plane isn’t on schedule or when we have to wait in a traffic jam, we also complain about always being in a hurry. Every once in a while, we think of the sound of a train whistle – clear and high in the air – we feel sad. There is a strong sense of nostalgia for other places and other times, when life was slower and, perhaps, better. Why does a train whistle bring on a feeling of nostalgia? Perhaps it’s because many of us remember a favorite novel or movie that took place on a train, and the story told of danger and excitement. There’s a sense of romance about a train that simply doesn’t exist on a modern jet plane. Several railroad companies are taking advantage of the nostalgia for train travel: They are offering unique tours for travelers who aren’t in a hurry and who enjoy the romance of the past.", "", "", ""], "ans": 1}, {"num": 76, "text": "What is the main purpose of this passage? to compare the transportation in the past and the present", "opts": [" to give an overall look at modern transportation systems", " to explain why train travel becomes an option for travelers", " to show why people prefer fast systems of transportation", " According to the passage, what is one main characteristics of the modern world?"], "ans": 2}, {"num": 77, "text": " fast pace bold move major delay much patience", "opts": ["[B] [C] [D] According to the passage, what is the possible reason for the love of train travel?", "", "", ""], "ans": 0}, {"num": 78, "text": " train schedules fond memories high speed luxurious facilities", "opts": ["[B] [C] [D] Which is closest in meaning to the word “nostalgia” in the second paragraph?", "", "", ""], "ans": 1}, {"num": 79, "text": " achievement fantasy satisfaction yearning", "opts": ["[B] [C] [D] According to the passage, which of the following statement is true?", "", "", ""], "ans": 3}, {"num": 80, "text": " Most people want to travel on trains because they are fast.", "opts": [" There is a sense of romance about a modern jet plane.", " Airlines offer tours for those who aren’t in a rush and enjoy the love of the past.", " Many excitin g stories in books and in movies happened on trains.", ""], "ans": 3}];
+const TOTAL_TIME = 4800;
+const KEYS = ['A','B','C','D'];
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let userAnswers = {};
+let submitted = false;
+
+function isCorrect(q, sel) {
+  if (q.ans === -1) return true;
+  if (Array.isArray(q.ans)) return q.ans.includes(sel);
+  return q.ans === sel;
+}
+
+function getCorrectLabel(q) {
+  if (q.ans === -1) return '本題一律給分';
+  if (Array.isArray(q.ans)) return '正確答案：' + q.ans.map(i => KEYS[i]).join(' 或 ');
+  return KEYS[q.ans] + '：' + q.opts[q.ans];
+}
+
+function renderQuestions() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (q.ans === -1 ? ' invalid' : '');
+    card.id = 'card-' + qi;
+    const opts = q.opts.map((opt, i) => {
+      return `<button class="option-btn" id="opt-${qi}-${i}" onclick="selectAnswer(${qi}, ${i})">
+        <span class="opt-label">${KEYS[i]}</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join('');
+    const qtext = q.text.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    card.innerHTML = `
+      <div class="q-num">Q${q.num}${q.ans === -1 ? ' (invalid)' : ''}</div>
+      <div class="q-text">${qtext}</div>
+      <div class="options">${opts}</div>
+      <div class="result-box" id="result-${qi}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, i) {
+  if (submitted) return;
+  userAnswers[qi] = i;
+  for (let k = 0; k < 4; k++) {
+    const btn = document.getElementById(`opt-${qi}-${k}`);
+    if (btn) btn.classList.remove('selected');
+  }
+  const selBtn = document.getElementById(`opt-${qi}-${i}`);
+  if (selBtn) selBtn.classList.add('selected');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progress').textContent = `已答 ${answered} / ${QUESTIONS.length} 題`;
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+
+  let correct = 0, invalid = 0;
+  QUESTIONS.forEach((q, qi) => {
+    const sel = userAnswers[qi];
+    const card = document.getElementById('card-' + qi);
+    const result = document.getElementById('result-' + qi);
+
+    if (q.ans === -1) {
+      invalid++;
+      correct++;
+      result.className = 'result-box correct';
+      result.textContent = 'Invalid question — full credit awarded';
+      card.classList.add('answered-correct');
+    } else if (sel === undefined) {
+      result.className = 'result-box wrong';
+      result.textContent = 'Not answered. ' + getCorrectLabel(q);
+      card.classList.add('answered-wrong');
+    } else if (isCorrect(q, sel)) {
+      correct++;
+      card.classList.add('answered-correct');
+      result.className = 'result-box correct';
+      result.textContent = '✓ Correct!';
+    } else {
+      card.classList.add('answered-wrong');
+      result.className = 'result-box wrong';
+      result.textContent = '✗ Wrong. ' + getCorrectLabel(q);
+    }
+
+    for (let k = 0; k < 4; k++) {
+      const btn = document.getElementById(`opt-${qi}-${k}`);
+      if (!btn) continue;
+      btn.disabled = true;
+      if (q.ans !== -1 && (Array.isArray(q.ans) ? q.ans.includes(k) : q.ans === k)) {
+        btn.classList.add('correct');
+      } else if (sel === k && !isCorrect(q, k)) {
+        btn.classList.add('wrong');
+      }
+    }
+  });
+
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('scoreNum').textContent = `Score: ${correct} / ${total} (${pct}%)`;
+  document.getElementById('scoreDetail').textContent = `(Invalid: ${invalid})`;
+  document.getElementById('scoreBar').style.display = 'block';
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'flex';
+}
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    const sel = userAnswers[qi];
+    let show = true;
+    if (mode === 'wrong') show = card.classList.contains('answered-wrong');
+    else if (mode === 'correct') show = card.classList.contains('answered-correct');
+    else if (mode === 'unanswered') show = sel === undefined;
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (timeLeft <= 300) el.classList.add('warning');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
+  }, 1000);
+}
+
+renderQuestions();
+startTimer();
+</script>
+</body>
+</html>
