@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>115年 外語領隊英語 線上測驗</title>
+<title>115年 領隊英語 線上測驗</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8;min-height:100vh}
@@ -43,7 +43,7 @@ body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8
 .result-badge.err{background:#fff5f5;color:#c53030}
 .correct-note{margin-top:6px;padding:8px 12px;background:#ebf8ff;border-radius:6px;color:#2b6cb0;font-size:.9rem}
 .bottom-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:50}
-.btn-submit{background:#3182ce;color:#fff;border:none;border-radius:8px;padding:12px 40px;font-size:1rem;font-weight:700;cursor:pointer}
+.btn-submit{background:#3182ce;color:#fff;border:none;border-radius:8px;padding:12px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s}
 .btn-submit:hover{background:#2b6cb0}
 #resetBtn{display:none;background:#805ad5;color:#fff;border:none;border-radius:8px;padding:10px 30px;font-size:.95rem;font-weight:700;cursor:pointer}
 .score-panel{display:none;background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;border:2px solid #90cdf4;text-align:center}
@@ -55,7 +55,7 @@ body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8
 .stat-num{font-size:1.4rem;font-weight:700}
 .stat-label{font-size:.75rem;color:#718096}
 .filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #cbd5e0;background:#fff;cursor:pointer;font-size:.85rem}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #cbd5e0;background:#fff;cursor:pointer;font-size:.85rem;transition:all .2s}
 .filter-btn.active{background:#3182ce;border-color:#3182ce;color:#fff}
 @media(max-width:600px){
   .exam-title{font-size:1rem}
@@ -68,20 +68,22 @@ body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8
 <div class="sticky-header">
   <div class="header-top">
     <div>
-      <div class="exam-title">115年 外語領隊英語 模擬測驗</div>
-      <div class="exam-sub">外語領隊人員 ／ 共80題・每題2分・總分100分</div>
+      <div class="exam-title">115年 領隊英語 模擬測驗</div>
+      <div class="exam-sub">外語領隊人員 ／ 共80題・每題1.25分・總分100分</div>
     </div>
     <div class="timer-box" id="timerBox">
       <div class="timer-label">剩餘時間</div>
-      <div class="timer-value" id="timerValue">60:00</div>
+      <div class="timer-value" id="timerValue">80:00</div>
       <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar" style="width:100%"></div></div>
     </div>
   </div>
 </div>
+
 <div class="progress-area">
   <div class="progress-info">已作答：<strong id="answeredCount">0</strong> / 80 題</div>
   <div class="dot-grid" id="dotGrid"></div>
 </div>
+
 <div class="main">
   <div id="score-panel" class="score-panel">
     <div class="score-val" id="scoreVal"></div>
@@ -102,200 +104,276 @@ body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8
   <form id="quizForm"></form>
   <div id="unansMsg"></div>
 </div>
+
 <div class="bottom-bar">
   <button class="btn-submit" onclick="submitQuiz()">交卷對答案</button>
   <button id="resetBtn" onclick="resetQuiz()">🔄 重新作答</button>
 </div>
+
 <script>
 const QUESTIONS = [
-  {q:`Gluten meal does not containanygluten-basedproduct.`, opts:[`accepting`, `indulgent`, `intolerant`, `rich`], ans:2},
-  {q:`Guests checkedinat the hotel before goingtotheirrooms.`, opts:[`conferenceroom`, `elevator`, `reception`, `conciergeservice`], ans:2},
-  {q:`Beforeenteringthecountry, eachvisitormust haveavalid readyforinspection.`, opts:[`travel brochure`, `passport`, `souvenir`, `receipt`], ans:1},
-  {q:`Peter: Judy, Ihopeour at therestaurant is confirmed. Judy: Don’t worry, Ireceivedtheconfirmationemail this morning.`, opts:[`reservation`, `citymap`, `travel guidebook`, `luggagetag`], ans:0},
-  {q:`Ifyouplantotrysome disheswhentravelingtoadifferentcountry,pleasedosomeresearch about what thosedishes are.`, opts:[`exotic`, `instinct`, `contrastive`, `known`], ans:0},
-  {q:`InmanymajorUS cities, peoplecanvisit theshopping theretomakepurchases.`, opts:[`locales`, `hallmarks`, `mansions`, `districts`], ans:3},
-  {q:`Be readyfor the warm-hearted on these streets; theyare super friendlyand always eager to persuade youtobuytheir items.`, opts:[`vendors`, `passersby`, `pedestrians`, `residents`], ans:0},
-  {q:`If youbuysomesouvenirsfromlocalvendorsinThailand,youshouldtryto foragooddeal becausethefirst priceofferedis usuallymuchhigher.`, opts:[`commute`, `disguise`, `strive`, `bargain`], ans:3},
-  {q:`Guest: Thetoilet won’t . Receptionist: We’ll sendarepairperson withinhalfanhour.`, opts:[`block`, `flash`, `flush`, `crush`], ans:2},
-  {q:`This ancient city is a must-visit destination for every tourist to experience the culture and oldtownatmosphere.`, opts:[`modern`, `temporary`, `traditional`, `brief`], ans:2},
-  {q:`Theviewgetsevenmoreromanticatnightascherrytreesalongtheriverarelightedupbycharming paper .`, opts:[`events`, `lanterns`, `festivals`, `rituals`], ans:1},
-  {q:`Hanlein Ladakh,northern India, rates “one”(the darkest)onthe Bortlescalewith 270clearnights; locals switchofflights to splendidstarryskies.`, opts:[`reveal`, `ignore`, `replace`, `block`], ans:0},
-  {q:`Wedon’t recommendexchanging yourmoneyat thehotel because youwon’t get a rate.`, opts:[`limited`, `wrong`, `visible`, `fair`], ans:3},
-  {q:`Tomakegettingaroundthecityeasier,thetourleadersuggestedthateveryonebuya ,which allows unlimitedtravel on buses andtrains for aset period.`, opts:[`brochure`, `transportationpass`, `boardingpass`, `luggagetag`], ans:1},
-  {q:`John: Mary,do weneedtofill anythingout forthe souvenirs webought abroad? Mary:Yes,weneedtocompletethe attheairportforitemsthatmayberestrictedortaxable.`, opts:[`passport`, `travel insurance`, `boardingpass`, `customs declarationform`], ans:3},
-  {q:`As an effort to protect our environment, the hotels in this region do not provide and you needtopreparethoseitems byyourself.`, opts:[`booklets`, `notepads`, `issues`, `amenities`], ans:3},
-  {q:`Tour Leader: Howmuch timeshouldweallowinsidetheBritish Museum? Local Guide: About two hours is ideal toseethe .`, opts:[`highlights`, `tickets`, `staircases`, `restaurants`], ans:0},
-  {q:`Themagnificent waterfall is trulythemost featureofthis national park.`, opts:[`remote`, `average`, `breathtaking`, `boring`], ans:2},
-  {q:`WhentravelingtoEuropeancountries,touristsarehighlyrecommendedtopayattentiontothe hours ofdifferent museums becausetheyvaryalot.`, opts:[`establishing`, `commercial`, `remodeling`, `opening`], ans:3},
-  {q:`Wewillstopatthislocationfortwohours,andyouare towalkaroundandmakesomesmall purchases.`, opts:[`available`, `free`, `pleased`, `surprised`], ans:1},
-  {q:`The Northeast Coast is apopulartouristdestinationthat servesbothas afascinatingnatural classroom andas anenchantingcoastal playground.`, opts:[`spectacular`, `hostile`, `artificial`, `ordinary`], ans:0},
-  {q:`Seriouslyimpactedbyastormlastyear,thistouristsitewasunderamajor foreightmonths.`, opts:[`renovation`, `rejuvenation`, `imposition`, `declaration`], ans:0},
+  {q:`Gluten meal does not contain any gluten-based product.`, opts:[`accepting`, `indulgent`, `intolerant`, `rich`], ans:2},
+  {q:`Guests checked in at the hotel before going to their rooms.`, opts:[`conference room`, `elevator`, `reception`, `concierge service`], ans:2},
+  {q:`Before entering the country, each visitor must have a valid ready for inspection.`, opts:[`travel brochure`, `passport`, `souvenir`, `receipt`], ans:1},
+  {q:`Peter: Judy, I hope our at the restaurant is confirmed. Judy: Don’t worry, I received the confirmation email this morning.`, opts:[`reservation`, `city map`, `travel guidebook`, `luggage tag`], ans:0},
+  {q:`If you plan to try some dishes when traveling to a different country, please do some research about what those dishes are.`, opts:[`exotic`, `instinct`, `contrastive`, `known`], ans:0},
+  {q:`In many major US cities, people can visit the shopping there to make purchases.`, opts:[`locales`, `hallmarks`, `mansions`, `districts`], ans:3},
+  {q:`Be ready for the warm-hearted on these streets; they are super friendly and always eager to persuade you to buy their items.`, opts:[`vendors`, `passersby`, `pedestrians`, `residents`], ans:0},
+  {q:`If you buy some souvenirs from local vendors in Thailand, you should try to for a good deal because the first price offered is usually much higher.`, opts:[`commute`, `disguise`, `strive`, `bargain`], ans:3},
+  {q:`Guest: The toilet won’t . Receptionist: We’ll send a repairperson within half an hour.`, opts:[`block`, `flash`, `flush`, `crush`], ans:2},
+  {q:`This ancient city is a must-visit destination for every tourist to experience the culture and old town atmosphere.`, opts:[`modern`, `temporary`, `traditional`, `brief`], ans:2},
+  {q:`The view gets even more romantic at night as cherry trees along the river are lighted up by charming paper .`, opts:[`events`, `lanterns`, `festivals`, `rituals`], ans:1},
+  {q:`Hanle in Ladakh, northern India, rates “one” (the darkest) on the Bortle scale with 270 clear nights; locals switch off lights to splendid starry skies.`, opts:[`reveal`, `ignore`, `replace`, `block 代號：4201 頁次：8－2`], ans:0},
+  {q:`We don’t recommend exchanging your money at the hotel because you won’t get a rate.`, opts:[`limited`, `wrong`, `visible`, `fair`], ans:3},
+  {q:`To make getting around the city easier, the tour leader suggested that everyone buy a , which allows unlimited travel on buses and trains for a set period.`, opts:[`brochure`, `transportation pass`, `boarding pass`, `luggage tag`], ans:1},
+  {q:`John: Mary, do we need to fill anything out for the souvenirs we bought abroad? Mary: Yes, we need to complete the at the airport for items that may be restricted or taxable.`, opts:[`passport`, `travel insurance`, `boarding pass`, `customs declaration form`], ans:3},
+  {q:`As an effort to protect our environment, the hotels in this region do not provide and you need to prepare those items by yourself.`, opts:[`booklets`, `notepads`, `issues`, `amenities`], ans:3},
+  {q:`Tour Leader: How much time should we allow inside the British Museum? Local Guide: About two hours is ideal to see the .`, opts:[`highlights`, `tickets`, `staircases`, `restaurants`], ans:0},
+  {q:`The magnificent waterfall is truly the most feature of this national park.`, opts:[`remote`, `average`, `breathtaking`, `boring`], ans:2},
+  {q:`When traveling to European countries, tourists are highly recommended to pay attention to the hours of different museums because they vary a lot.`, opts:[`establishing`, `commercial`, `remodeling`, `opening`], ans:3},
+  {q:`We will stop at this location for two hours, and you are to walk around and make some small purchases.`, opts:[`available`, `free`, `pleased`, `surprised`], ans:1},
+  {q:`The Northeast Coast is a popular tourist destination that serves both as a fascinating natural classroom and as an enchanting coastal playground.`, opts:[`spectacular`, `hostile`, `artificial`, `ordinary`], ans:0},
+  {q:`Seriously impacted by a storm last year, this tourist site was under a major for eight months.`, opts:[`renovation`, `rejuvenation`, `imposition`, `declaration`], ans:0},
   {q:`In a tour package with a set content, if you want to an additional service, you might not get it.`, opts:[`advocate`, `suggest`, `request`, `introduce`], ans:2},
-  {q:`When youenterchurches orcathedrals, pleaseremembertoturn yourphone to mode.`, opts:[`quite`, `mobile`, `shared`, `silent`], ans:3},
-  {q:`Wehaveprepared apinfor youtowearon yourbackpack,so themembers inourgroup can oneanotherveryeasily.`, opts:[`recognize`, `witness`, `splash`, `conduct`], ans:0},
-  {q:`Eventhoughthisis anall-you-can-eat restaurant, youshouldstilltryto get onlythe offood that youneedtoprevent unnecessarywaste.`, opts:[`form`, `portion`, `value`, `mass`], ans:1},
-  {q:`If youhavenothingto ,simplywalkthroughtheGreenChannel,stoppingonlyifaskedtodo sobya customs agent.`, opts:[`pay`, `declare`, `hide`, `regret`], ans:1},
-  {q:`Politely andwalkawayif youfeel uncomfortablewithataxi driver’s oravendor’s offer.`, opts:[`hide`, `excite`, `decline`, `struggle`], ans:2},
-  {q:`Passenger: Howlongis myticket goodfor? Stationstaff: It’s gooduntil the datewrittenontheticket.`, opts:[`inspiration`, `deduction`, `depression`, `expiration`], ans:3},
-  {q:`Mary: John,do youknowwhen will start forourflight? John: Yes, it begins at 9:15 A.M. at Gate7.`, opts:[`boarding`, `duty-freeshopping`, `terminal`, `luggage`], ans:0},
-  {q:`When visiting museums and other attractions in Paris, even if you have purchased a museum pass, makinga(n) is still required.`, opts:[`recommendation`, `reservation`, `accommodation`, `assimilation`], ans:1},
-  {q:`Officers at check all passports andvisas beforetravelers can enterthecountry.`, opts:[`baggage claim`, `lounge`, `informationdesk`, `immigration`], ans:3},
-  {q:`Pleasekeep asafe between yourselfandthecliffedgewhiletakingphotos.`, opts:[`vehicle`, `direction`, `guide`, `distance`], ans:3},
-  {q:`Thecrowd waitedanxiouslyat theterminal forthe oftheVIP guests.`, opts:[`preference`, `decoration`, `agony`, `arrival`], ans:3},
-  {q:`Thecity’s urban centeris quitecompact and easyto onfoot orbybike.`, opts:[`permit`, `explore`, `break`, `restore`], ans:1},
-  {q:`Litteringinnatural parks can_____thebeautytourists cometoadmire.`, opts:[`protect`, `repair`, `decorate`, `destroy`], ans:3},
-  {q:`Tourist: TourGuide: Yes,but pleaseturnoffthecamera flash.`, opts:[`Canwetakephotos insidethetemple?`, `Howmuchdoes the entranceticket cost today?`, `Whereis thenearest souvenirshop located?`, `Dowehavelunchincludedintoday’s schedule?`], ans:0},
-  {q:`The destination is a big city with tourist attractions; we plan to visit at least six or more of themost recommendedones.`, opts:[`few`, `limited`, `narrow`, `countless`], ans:3},
-  {q:`InEngland,tax is doneinairports ratherthanintheshops where youmakepurchases.`, opts:[`recharge`, `evasion`, `refund`, `production`], ans:2},
-  {q:`As aresult of causedbytheair-trafficcontrollers’strike,ourflight couldn’tlandin Paris.`, opts:[`disruption`, `construction`, `instruction`, `destination`], ans:0},
-  {q:`Before goingontheadventuretour,thetravel agencyadvisedall participants tochecktheir toensuremedical expenses andtripcancellations areincluded.`, opts:[`hotel booking`, `travel itinerary`, `insurance coverage`, `flight ticket`], ans:2},
-  {q:`Passengerssimplyaddvaluetoasmartcardandswipeitatthegatetoenter.Thefareisautomatically .`, opts:[`deducted`, `increased`, `reduced`, `returned`], ans:0},
-  {q:`the noise from the hallway, the couple decided to call the front desk and file a formal complaint.`, opts:[`Responsiblefor`, `Inlieuof`, `Beingstuckwith`, `Fedup with`], ans:3},
-  {q:`Passenger: Is thereWi-Fi availableonthis flight? Flight Attendant: Yes, youcan aftertakeoffusingtheinstructions provided.`, opts:[`connect`, `sleep`, `stretch`, `clap`], ans:0},
-  {q:`In Japan, if you want to enter a shrine to visit the inner structure and content, you have to pay attentiontoseeif youroutfit is ornot; forexample,sandals arenot suggested.`, opts:[`approximate`, `aggravating`, `accelerated`, `appropriate`], ans:3},
-  {q:`These essential travel will help you avoid common travel mistakes and make the most of yourjourney.`, opts:[`pickpockets`, `tips`, `vouchers`, `peaks`], ans:1},
-  {q:`TourGuide: Everyone,pleaseform a toenterthe galleryin anorderlymanner. TourMember: Okay,we’ll wait ourturn.`, opts:[`path`, `shortcut`, `queue`, `detour`], ans:2},
-  {q:`On the city tour, the guide asked everyone to take a photo in front of the famous that represents thehistoryofthearea.`, opts:[`magnitude`, `landmark`, `brochure`, `souvenir`], ans:1},
-  {q:`Ourhotelisabitfarawayfromthecitycenter;ifyouneedtobuysome ,thereisasmallstore nearby.`, opts:[`groceries`, `categories`, `warnings`, `reminders`], ans:0},
-  {q:`A local travel agencyhungseveral scenic posters in the companywindow to pedestrians to comeinsideandpurchasetheirhistorical tour.`, opts:[`retract`, `attract`, `distract`, `deprive`], ans:1},
-  {q:`Duringacrowdedflight, sherequested toavoid disturbingneighborswhenstandingup.`, opts:[`reclinedseat`, `windowseat`, `middleseat`, `aisleseat`], ans:3},
-  {q:`Passenger: Can Ichange myseat to22K? Flight Attendant: I’ll check andlet youknowimmediately.`, opts:[`luggage`, `availability`, `passport`, `schedule`], ans:1},
-  {q:`Flight Attendant: Sir,pleaseswitchoff yourmobilephoneas weareabout to .`, opts:[`get ridof`, `put off`, `remove`, `takeoff`], ans:3},
-  {q:`Whenyouencountercrowdsinapopulartouristsite,remembertopaymoreattentiontoyour .`, opts:[`locals`, `simulations`, `indications`, `surroundings`], ans:3},
-  {q:`This is anon-smokingrestaurant.Please yourcigaretteat once.`, opts:[`put in`, `put on`, `put out`, `put up`], ans:2},
-  {q:`Intheareasaroundthislake,youcanfindmany sellingrefinedclothesandlocalhandicrafts.`, opts:[`buildings`, `centers`, `cascades`, `boutiques`], ans:3},
-  {q:`Passenger: Could youhelp meplacemybagoverhead? Flight Attendant:`, opts:[`Themoviewill start onthein-flight screenintenminutes.`, `Absolutely,let melift it for yousafely.`, `Would youlikesome waterorjuicewith your meal?`, `Therestroom is locatedat thebackoftheaircraft.`], ans:1},
-  {q:`Findout whycustomers havecomeonholidays, what theywant todo,andthenhelpthem to theirdream.`, opts:[`alternate`, `achieve`, `authorize`, `amend`], ans:1},
-  {q:`Whenourgroupvisitedachurchthismorning,wegotaglimpseofhowthepriestperformedalocal .`, opts:[`holiday`, `contest`, `ritual`, `stanza`], ans:2},
-  {q:`Inmanymuseums,touchingtheexhibiteditems isabehaviorthat is absolutely .`, opts:[`regulated`, `prohibited`, `discussed`, `persecuted`], ans:1},
-  {q:`Let me calculate yourbill for you. It all NT$15,000,Sir.`, opts:[`stands for`, `adds upto`, `checks out`, `brings downto`], ans:1},
-  {q:`Aliens whooverstaytheirvisaswouldbe backtotheircountryofbirth.`, opts:[`deported`, `discharged`, `departed`, `disclaimed`], ans:0},
-  {q:`This artist’s areonexhibitionat themuseum.`, opts:[`workouts`, `presences`, `masterminds`, `masterpieces`], ans:3},
-  {q:`Itiscommonsensethatbeforebookingyourinternationalflight,youshouldalwayscheckthe of yourpassport toensureit meets theentryrequirements for yourdestinationcountry.`, opts:[`effect`, `validity`, `inquiry`, `limit`], ans:1},
-  {q:`Tourists ontheplanewereremindedhowtouseoxygenmasks incaseof .`, opts:[`ambulance`, `emergency`, `evacuation`, `rescue`], ans:1},
-  {q:`Drawingmanypeople’sattention,JurassicWorld:TheExperienceatCloudForestisoneofthemost recentlyadded in Singapore.`, opts:[`enterprises`, `amenities`, `expenses`, `attractions`], ans:3},
-  {q:`That museum is veryoldandnot friendlytotourists whoneedelevator .`, opts:[`access`, `report`, `faculty`, `entrance`], ans:0},
-  {q:`The of this building is typical of the Renaissance age, and manytourists enjoyvisiting this place.`, opts:[`formulation`, `speculation`, `architecture`, `affiliation`], ans:2},
-  {q:`Escort:Couldyoupulloversafelyandswitchonthe warninglights,please?Wehaveaguest whoneeds medical help. Driver: Understood.`, opts:[`hazard`, `headlights`, `turn-signal`, `cabin`], ans:0},
-  {q:`Whileweare toournextdestination,Iwillpointoutthebeautifulbeachandthefamousgolf coursefor yourreference.`, opts:[`enroute`, `scheduling`, `declining`, `digressive 請依下文回答第71題至第75題： When people travel to other parts of the world, their footprints often leave effects on the visited places. One of the most immediate and visible effects brought bytourism onto local communities can be seen in the aspect of economic growth. Tourism is often a primary source of income for many regions, especiallythoserichinnaturalbeauty,historicalimportance,orculturalheritage.Whenmosttouristsvisit a location, they spend money on accommodation, food, transportation, and entertainment, all directly contributing to the local economy. This influx of capital also creates many job opportunities, not onlyin tourism-relatedindustrieslikehotels,restaurants,andtravelagenciesbutalsoinothersectorsthatsupport tourism,suchasconstructionandretailbusiness.However,somenegativeeffectsalsoexist.Forexample, the economic benefits of tourism are not always equitably distributed. In some cases, the majority of profits go to large, foreign-owned companies, leaving local businesses and workers with only a small percentage of the generated income. In other cases, tourism leads to inflation and drives up the cost of living for local residents, particularly in areas where the demand for goods and services rises sharply duringpeaktouristseasons.Clearly,whenpromotingtourism,boththepositiveandnegativeeffectsmust betakenintoconsideration.`], ans:0},
-  {q:`What is asuitabletitleforthis passage?`, opts:[`MakingPlans for Traveling`, `Benefits Brought byTourism`, `Effects CausedbyTourism`, `Tips onTourism Development`], ans:2},
-  {q:`Whichofthefollowingstatements is NOTtrue?`, opts:[`Foran arearichinnatural beauty,tourism oftenbecomesaprimarysourceofincome.`, `Tourism-relatedindustries aretheonlyones benefitingfrom thevisits oftourists.`, `Themoneybrought in bytourism development cancreatejobopportunities.`, `Onenegative effect of tourism is that themoneygeneratedis not equallydistributed.`], ans:1},
-  {q:`Basedontheinformation presentedinthis passage,what canbeinferred?`, opts:[`Towns aroundnational parks oftenbenefit from tourism development.`, `Most revenues generatedfrom tourism development gotothecompanies ownedbylocals.`, `Citygovernments benefit alot from theincome generatedbytourism development.`, `Thebenefits brought bytourism development outweighthedisadvantages.`], ans:0},
-  {q:`According to this article, why is the money generated from tourism development not equitably distributed?`, opts:[`There aretoomanyparties involvedinthedevelopment oftourism.`, `Themoneygenerated oftengoestothelocal companies ratherthanlocal communities.`, `Themoneygenerated mostlygoes tolarge and foreign-ownedcompanies, not tothesmall local businesses.`, `Most moneyfrom tourism development has gonetothecentral government.`], ans:2},
-  {q:`What canbedescribedas thepurposeofthis passage?`, opts:[`Remindingreaders the merits andconcernsabout tourism development`, `Warningreaders about theexistenceofforeign-ownedcompanies`, `Explainingwhytourism development shouldbeencouraged`, `Emphasizingtheinterventionofgovernment agencies 請依下文回答第76題至第80題： Whileprogress towards decarbonisationhas been made,this researchhighlights thediversitywithin the sector, differences in context as well as variety in commitments across industries and companies in Travel & Tourism. The sector must continue developing long-term strategies and targets consistent with the Paris Agreement and latest scientific recommendations, aligned to relevant national and international policies and strategies, to achieve net zero emissions goals. The analysis showed that 53% of the Travel & Tourism businesses analysed currentlyhave publiclyannounced climate targets. Though manytargets are not yet based on the latest science, it is promising to see that many businesses are currently in the process of revisingand adaptingtheir targets to reach standards like those set bySBTi, and manyothers, puttingclimateactionmuchhigherontheirprioritylists. Ofcourse,keyformonitoringthis progress will also be the transparent sharing of these activities through more harmonised methodologies. Overall, the Travel & Tourism sector has made progress since the 2021 edition of Net Zero Roadmap but still needs to accelerate efforts to meet the 2050 target. More businesses have climate targets, but implementation and execution have been slower than what is needed. A strong volume recovery highlights the need for continuedfocus ondecarbonisation,particularlyincertaingeographiesexperiencingstronggrowth.New target frameworks and net zero pathways have been established, but challenges remain in carbon data measurement,regulation, andinfrastructure. Movingforward, progress will depend onaddressingvarious challenges, some common to all focus industries and some more specific to individual ones. These include emission measurement, especially Scope 3 emissions, the fragmented regulatory landscape, inconsistencies in reporting standards and insufficientbudgetsremainsissues.Moreover,thespecialchallengesforSMEsinthesector,whichmake up the majority of Travel & Tourism businesses, will require strong commitments from all stakeholders toincrease collaboration andensureinclusiveness. There are clear opportunities for Travel & Tourism to achieve net zero inmanyareas and industries even before 2050. However, as businesses define their commitments based on their respective corridors, they will require support, particularly for those businesses with hard-to-abate emissions. As the sector pushes for the highest ambitions and an acceleration of climate action overall, it will have to join forces to strengthen the innovation needed for new technologies and alternative fuels to decouple Travel & Tourism growthratesfrom resourceuseand emissions fora net zero future.Thereis no doubt,timeis of theessenceandour actions oftodaydefineourworld oftomorrow.`], ans:0},
-  {q:`What is themainfocus ofthis passage?`, opts:[`Theeconomic growth ofTravel &Tourism`, `Thechallenges andprogress towards net zeroinTravel &Tourism`, `ThedeclineofSMEs inglobal industries`, `Thedevelopment ofnewluxurytravel destinations`], ans:1},
-  {q:`What does thearticlesayabout manybusinesses’ climatetargets?`, opts:[`Theyarealreadyfullyaligned withthelatest science.`, `Theyarenot yet based onthelatest science,but manyare revisingthem.`, `Theyaremostlyfocusedonreducingplastic waste.`, `Theyareunnecessarybecauseofstrongrecoveryintourism.`], ans:1},
-  {q:`What does the word “fragmented” in the phrase “fragmented regulatory landscape” most nearly mean?`, opts:[`Well-organized`, `Strongandunited`, `Brokenintoparts`, `Easytomanage`], ans:2},
-  {q:`Which of the following is NOT mentioned as a challenge to the environment-friendly goal of the Travel &Tourism sector?`, opts:[`Scope3emissionmeasurement`, `Inconsistencies inreportingstandards`, `Insufficient budgets`, `Lackoftourist interest`], ans:3},
-  {q:`Accordingtothetext,whichofthefollowingis necessarytoachievenet zerobefore2050?`, opts:[`Increasingtheuseofnewtechnologies and alternativefuels`, `Reducinginternational travel completely`, `ClosingSMEstoreduceemissions`, `Stoppingvolumerecoveryintourism`], ans:0}
+  {q:`When you enter churches or cathedrals, please remember to turn your phone to mode.`, opts:[`quite`, `mobile`, `shared`, `silent`], ans:3},
+  {q:`We have prepared a pin for you to wear on your backpack, so the members in our group can one another very easily.`, opts:[`recognize`, `witness`, `splash`, `conduct 代號：4201 頁次：8－3`], ans:0},
+  {q:`Even though this is an all-you-can-eat restaurant, you should still try to get only the of food that you need to prevent unnecessary waste.`, opts:[`form`, `portion`, `value`, `mass`], ans:1},
+  {q:`If you have nothing to , simply walk through the Green Channel, stopping only if asked to do so by a customs agent.`, opts:[`pay`, `declare`, `hide`, `regret`], ans:1},
+  {q:`Politely and walk away if you feel uncomfortable with a taxi driver’s or a vendor’s offer.`, opts:[`hide`, `excite`, `decline`, `struggle`], ans:2},
+  {q:`Passenger: How long is my ticket good for? Station staff: It’s good until the date written on the ticket.`, opts:[`inspiration`, `deduction`, `depression`, `expiration`], ans:3},
+  {q:`Mary: John, do you know when will start for our flight? John: Yes, it begins at 9:15 A.M. at Gate 7.`, opts:[`boarding`, `duty-free shopping`, `terminal`, `luggage`], ans:0},
+  {q:`When visiting museums and other attractions in Paris, even if you have purchased a museum pass, making a(n) is still required.`, opts:[`recommendation`, `reservation`, `accommodation`, `assimilation`], ans:1},
+  {q:`Officers at check all passports and visas before travelers can enter the country.`, opts:[`baggage claim`, `lounge`, `information desk`, `immigration`], ans:3},
+  {q:`Please keep a safe between yourself and the cliff edge while taking photos.`, opts:[`vehicle`, `direction`, `guide`, `distance`], ans:3},
+  {q:`The crowd waited anxiously at the terminal for the of the VIP guests.`, opts:[`preference`, `decoration`, `agony`, `arrival`], ans:3},
+  {q:`The city’s urban center is quite compact and easy to on foot or by bike.`, opts:[`permit`, `explore`, `break`, `restore`], ans:1},
+  {q:`Littering in natural parks can _____ the beauty tourists come to admire.`, opts:[`protect`, `repair`, `decorate`, `destroy`], ans:3},
+  {q:`Tourist: Tour Guide: Yes, but please turn off the camera flash.`, opts:[`Can we take photos inside the temple?`, `How much does the entrance ticket cost today?`, `Where is the nearest souvenir shop located?`, `Do we have lunch included in today’s schedule?`], ans:0},
+  {q:`The destination is a big city with tourist attractions; we plan to visit at least six or more of the most recommended ones.`, opts:[`few`, `limited`, `narrow`, `countless 代號：4201 頁次：8－4`], ans:3},
+  {q:`In England, tax is done in airports rather than in the shops where you make purchases.`, opts:[`recharge`, `evasion`, `refund`, `production`], ans:2},
+  {q:`As a result of caused by the air-traffic controllers’ strike, our flight couldn’t land in Paris.`, opts:[`disruption`, `construction`, `instruction`, `destination`], ans:0},
+  {q:`Before going on the adventure tour, the travel agency advised all participants to check their to ensure medical expenses and trip cancellations are included.`, opts:[`hotel booking`, `travel itinerary`, `insurance coverage`, `flight ticket`], ans:2},
+  {q:`Passengers simply add value to a smart card and swipe it at the gate to enter. The fare is automatically .`, opts:[`deducted`, `increased`, `reduced`, `returned`], ans:0},
+  {q:`the noise from the hallway, the couple decided to call the front desk and file a formal complaint.`, opts:[`Responsible for`, `In lieu of`, `Being stuck with`, `Fed up with`], ans:3},
+  {q:`Passenger: Is there Wi-Fi available on this flight? Flight Attendant: Yes, you can after takeoff using the instructions provided.`, opts:[`connect`, `sleep`, `stretch`, `clap`], ans:0},
+  {q:`In Japan, if you want to enter a shrine to visit the inner structure and content, you have to pay attention to see if your outfit is or not; for example, sandals are not suggested.`, opts:[`approximate`, `aggravating`, `accelerated`, `appropriate`], ans:3},
+  {q:`These essential travel will help you avoid common travel mistakes and make the most of your journey.`, opts:[`pickpockets`, `tips`, `vouchers`, `peaks`], ans:1},
+  {q:`Tour Guide: Everyone, please form a to enter the gallery in an orderly manner. Tour Member: Okay, we’ll wait our turn.`, opts:[`path`, `shortcut`, `queue`, `detour`], ans:2},
+  {q:`On the city tour, the guide asked everyone to take a photo in front of the famous that represents the history of the area.`, opts:[`magnitude`, `landmark`, `brochure`, `souvenir`], ans:1},
+  {q:`Our hotel is a bit far away from the city center; if you need to buy some , there is a small store nearby.`, opts:[`groceries`, `categories`, `warnings`, `reminders`], ans:0},
+  {q:`A local travel agency hung several scenic posters in the company window to pedestrians to come inside and purchase their historical tour.`, opts:[`retract`, `attract`, `distract`, `deprive`], ans:1},
+  {q:`During a crowded flight, she requested to avoid disturbing neighbors when standing up.`, opts:[`reclined seat`, `window seat`, `middle seat`, `aisle seat 代號：4201 頁次：8－5`], ans:3},
+  {q:`Passenger: Can I change my seat to 22K? Flight Attendant: I’ll check and let you know immediately.`, opts:[`luggage`, `availability`, `passport`, `schedule`], ans:1},
+  {q:`Flight Attendant: Sir, please switch off your mobile phone as we are about to .`, opts:[`get rid of`, `put off`, `remove`, `take off`], ans:3},
+  {q:`When you encounter crowds in a popular tourist site, remember to pay more attention to your .`, opts:[`locals`, `simulations`, `indications`, `surroundings`], ans:3},
+  {q:`This is a non-smoking restaurant. Please your cigarette at once.`, opts:[`put in`, `put on`, `put out`, `put up`], ans:2},
+  {q:`In the areas around this lake, you can find many selling refined clothes and local handicrafts.`, opts:[`buildings`, `centers`, `cascades`, `boutiques`], ans:3},
+  {q:`Passenger: Could you help me place my bag overhead? Flight Attendant:`, opts:[`The movie will start on the in-flight screen in ten minutes.`, `Absolutely, let me lift it for you safely.`, `Would you like some water or juice with your meal?`, `The restroom is located at the back of the aircraft.`], ans:1},
+  {q:`Find out why customers have come on holidays, what they want to do, and then help them to their dream.`, opts:[`alternate`, `achieve`, `authorize`, `amend`], ans:1},
+  {q:`When our group visited a church this morning, we got a glimpse of how the priest performed a local .`, opts:[`holiday`, `contest`, `ritual`, `stanza`], ans:2},
+  {q:`In many museums, touching the exhibited items is a behavior that is absolutely .`, opts:[`regulated`, `prohibited`, `discussed`, `persecuted`], ans:1},
+  {q:`Let me calculate your bill for you. It all NT$15,000, Sir.`, opts:[`stands for`, `adds up to`, `checks out`, `brings down to`], ans:1},
+  {q:`Aliens who overstay their visas would be back to their country of birth.`, opts:[`deported`, `discharged`, `departed`, `disclaimed`], ans:0},
+  {q:`This artist’s are on exhibition at the museum.`, opts:[`workouts`, `presences`, `masterminds`, `masterpieces`], ans:3},
+  {q:`It is common sense that before booking your international flight, you should always check the of your passport to ensure it meets the entry requirements for your destination country.`, opts:[`effect`, `validity`, `inquiry`, `limit`], ans:1},
+  {q:`Tourists on the plane were reminded how to use oxygen masks in case of .`, opts:[`ambulance`, `emergency`, `evacuation`, `rescue 代號：4201 頁次：8－6`], ans:1},
+  {q:`Drawing many people’s attention, Jurassic World: The Experience at Cloud Forest is one of the most recently added in Singapore.`, opts:[`enterprises`, `amenities`, `expenses`, `attractions`], ans:3},
+  {q:`That museum is very old and not friendly to tourists who need elevator .`, opts:[`access`, `report`, `faculty`, `entrance`], ans:0},
+  {q:`The of this building is typical of the Renaissance age, and many tourists enjoy visiting this place.`, opts:[`formulation`, `speculation`, `architecture`, `affiliation`], ans:2},
+  {q:`Escort: Could you pull over safely and switch on the warning lights, please? We have a guest who needs medical help. Driver: Understood.`, opts:[`hazard`, `headlights`, `turn-signal`, `cabin`], ans:0},
+  {q:`While we are to our next destination, I will point out the beautiful beach and the famous golf course for your reference.`, opts:[`en route`, `scheduling`, `declining`, `digressive 請依下文回答第71 題至第75 題： When people travel to other parts of the world, their footprints often leave effects on the visited places. One of the most immediate and visible effects brought by tourism onto local communities can be seen in the aspect of economic growth. Tourism is often a primary source of income for many regions, especially those rich in natural beauty, historical importance, or cultural heritage. When most tourists visit a location, they spend money on accommodation, food, transportation, and entertainment, all directly contributing to the local economy. This influx of capital also creates many job opportunities, not only in tourism-related industries like hotels, restaurants, and travel agencies but also in other sectors that support tourism, such as construction and retail business. However, some negative effects also exist. For example, the economic benefits of tourism are not always equitably distributed. In some cases, the majority of profits go to large, foreign-owned companies, leaving local businesses and workers with only a small percentage of the generated income. In other cases, tourism leads to inflation and drives up the cost of living for local residents, particularly in areas where the demand for goods and services rises sharply during peak tourist seasons. Clearly, when promoting tourism, both the positive and negative effects must be taken into consideration.`], ans:0},
+  {q:`What is a suitable title for this passage?`, opts:[`Making Plans for Traveling`, `Benefits Brought by Tourism`, `Effects Caused by Tourism`, `Tips on Tourism Development`], ans:2},
+  {q:`Which of the following statements is NOT true?`, opts:[`For an area rich in natural beauty, tourism often becomes a primary source of income.`, `Tourism-related industries are the only ones benefiting from the visits of tourists.`, `The money brought in by tourism development can create job opportunities.`, `One negative effect of tourism is that the money generated is not equally distributed. 代號：4201 頁次：8－7`], ans:1},
+  {q:`Based on the information presented in this passage, what can be inferred?`, opts:[`Towns around national parks often benefit from tourism development.`, `Most revenues generated from tourism development go to the companies owned by locals.`, `City governments benefit a lot from the income generated by tourism development.`, `The benefits brought by tourism development outweigh the disadvantages.`], ans:0},
+  {q:`According to this article, why is the money generated from tourism development not equitably distributed?`, opts:[`There are too many parties involved in the development of tourism.`, `The money generated often goes to the local companies rather than local communities.`, `The money generated mostly goes to large and foreign-owned companies, not to the small local businesses.`, `Most money from tourism development has gone to the central government.`], ans:2},
+  {q:`What can be described as the purpose of this passage?`, opts:[`Reminding readers the merits and concerns about tourism development`, `Warning readers about the existence of foreign-owned companies`, `Explaining why tourism development should be encouraged`, `Emphasizing the intervention of government agencies 請依下文回答第76 題至第80 題： While progress towards decarbonisation has been made, this research highlights the diversity within the sector, differences in context as well as variety in commitments across industries and companies in Travel & Tourism. The sector must continue developing long-term strategies and targets consistent with the Paris Agreement and latest scientific recommendations, aligned to relevant national and international policies and strategies, to achieve net zero emissions goals. The analysis showed that 53% of the Travel & Tourism businesses analysed currently have publicly announced climate targets. Though many targets are not yet based on the latest science, it is promising to see that many businesses are currently in the process of revising and adapting their targets to reach standards like those set by SBTi, and many others, putting climate action much higher on their priority lists. Of course, key for monitoring this progress will also be the transparent sharing of these activities through more harmonised methodologies. Overall, the Travel & Tourism sector has made progress since the 2021 edition of Net Zero Roadmap but still needs to accelerate efforts to meet the 2050 target. More businesses have climate targets, but implementation and execution have been slower than what is needed. A strong volume recovery highlights the need for continued focus on decarbonisation, particularly in certain geographies experiencing strong growth. New target frameworks and net zero pathways have been established, but challenges remain in carbon data measurement, regulation, and infrastructure. 代號：4201 頁次：8－8 Moving forward, progress will depend on addressing various challenges, some common to all focus industries and some more specific to individual ones. These include emission measurement, especially Scope 3 emissions, the fragmented regulatory landscape, inconsistencies in reporting standards and insufficient budgets remains issues. Moreover, the special challenges for SMEs in the sector, which make up the majority of Travel & Tourism businesses, will require strong commitments from all stakeholders to increase collaboration and ensure inclusiveness. There are clear opportunities for Travel & Tourism to achieve net zero in many areas and industries even before 2050. However, as businesses define their commitments based on their respective corridors, they will require support, particularly for those businesses with hard-to-abate emissions. As the sector pushes for the highest ambitions and an acceleration of climate action overall, it will have to join forces to strengthen the innovation needed for new technologies and alternative fuels to decouple Travel & Tourism growth rates from resource use and emissions for a net zero future. There is no doubt, time is of the essence and our actions of today define our world of tomorrow.`], ans:0},
+  {q:`What is the main focus of this passage?`, opts:[`The economic growth of Travel & Tourism`, `The challenges and progress towards net zero in Travel & Tourism`, `The decline of SMEs in global industries`, `The development of new luxury travel destinations`], ans:1},
+  {q:`What does the article say about many businesses’ climate targets?`, opts:[`They are already fully aligned with the latest science.`, `They are not yet based on the latest science, but many are revising them.`, `They are mostly focused on reducing plastic waste.`, `They are unnecessary because of strong recovery in tourism.`], ans:1},
+  {q:`What does the word “fragmented” in the phrase “fragmented regulatory landscape” most nearly mean?`, opts:[`Well-organized`, `Strong and united`, `Broken into parts`, `Easy to manage`], ans:2},
+  {q:`Which of the following is NOT mentioned as a challenge to the environment-friendly goal of the Travel & Tourism sector?`, opts:[`Scope 3 emission measurement`, `Inconsistencies in reporting standards`, `Insufficient budgets`, `Lack of tourist interest`], ans:3},
+  {q:`According to the text, which of the following is necessary to achieve net zero before 2050?`, opts:[`Increasing the use of new technologies and alternative fuels`, `Reducing international travel completely`, `Closing SMEs to reduce emissions`, `Stopping volume recovery in tourism`], ans:0}
 ];
-const KEYS=['A','B','C','D'];
-const TOTAL_TIME=3600;
-let timeLeft=TOTAL_TIME,timerInterval,userAnswers=new Array(QUESTIONS.length).fill(-1),submitted=false,startTime=Date.now();
-function buildQuiz(){
-  const form=document.getElementById('quizForm'),dg=document.getElementById('dotGrid');
-  form.innerHTML='';dg.innerHTML='';
-  QUESTIONS.forEach((q,i)=>{
-    const dot=document.createElement('div');
-    dot.className='dot';dot.id=`dot${i}`;dot.textContent=i+1;
-    dot.onclick=()=>document.getElementById(`q${i}`).scrollIntoView({behavior:'smooth',block:'center'});
-    dg.appendChild(dot);
-    const card=document.createElement('div');
-    card.className='q-card';card.id=`q${i}`;
-    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div><div class="q-text">${q.q}</div><div class="options" id="opts${i}">${q.opts.map((opt,j)=>`<label class="option-label" id="lbl${i}_${j}" onclick="selectOption(${i},${j})"><input type="radio" name="q${i}" value="${j}"><span class="option-key">${KEYS[j]}</span><span>${opt}</span></label>`).join('')}</div>`;
+
+const KEYS = ['A','B','C','D'];
+const TOTAL_TIME = 4800;
+let timeLeft = TOTAL_TIME;
+let timerInterval;
+let userAnswers = new Array(QUESTIONS.length).fill(-1);
+let submitted = false;
+let startTime = Date.now();
+
+function buildQuiz() {
+  const form = document.getElementById('quizForm');
+  const dotGrid = document.getElementById('dotGrid');
+  form.innerHTML = '';
+  dotGrid.innerHTML = '';
+
+  QUESTIONS.forEach((q, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.id = `dot${i}`;
+    dot.textContent = i+1;
+    dot.onclick = () => document.getElementById(`q${i}`).scrollIntoView({behavior:'smooth', block:'center'});
+    dotGrid.appendChild(dot);
+
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `q${i}`;
+    card.innerHTML = `
+      <div class="q-num">第 ${i+1} 題</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options" id="opts${i}">
+        ${q.opts.map((opt, j) => `
+          <label class="option-label" id="lbl${i}_${j}" onclick="selectOption(${i},${j})">
+            <input type="radio" name="q${i}" value="${j}">
+            <span class="option-key">${KEYS[j]}</span>
+            <span>${opt}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
     form.appendChild(card);
   });
 }
-function selectOption(qi,oi){
-  if(submitted)return;
-  userAnswers[qi]=oi;
-  for(let j=0;j<4;j++)document.getElementById(`lbl${qi}_${j}`).classList.toggle('selected',j===oi);
+
+function selectOption(qi, oi) {
+  if (submitted) return;
+  userAnswers[qi] = oi;
+  for (let j = 0; j < 4; j++) {
+    document.getElementById(`lbl${qi}_${j}`).classList.toggle('selected', j === oi);
+  }
   document.getElementById(`q${qi}`).classList.add('answered');
   document.getElementById(`dot${qi}`).classList.add('done');
-  document.getElementById('answeredCount').textContent=userAnswers.filter(a=>a!==-1).length;
+  updateCount();
 }
-function startTimer(){
-  timerInterval=setInterval(()=>{
+
+function updateCount() {
+  document.getElementById('answeredCount').textContent = userAnswers.filter(a => a !== -1).length;
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
     timeLeft--;
-    const m=Math.floor(timeLeft/60),s=timeLeft%60;
-    document.getElementById('timerValue').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-    document.getElementById('timerBar').style.width=(timeLeft/TOTAL_TIME*100)+'%';
-    const box=document.getElementById('timerBox');
-    if(timeLeft<=300)box.className='timer-box danger';
-    else if(timeLeft<=600)box.className='timer-box warning';
-    if(timeLeft<=0){clearInterval(timerInterval);if(!submitted){alert('⏰ 時間到！自動交卷。');submitQuiz(true);}}
-  },1000);
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    document.getElementById('timerValue').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    document.getElementById('timerBar').style.width = (timeLeft / TOTAL_TIME * 100) + '%';
+    const box = document.getElementById('timerBox');
+    if (timeLeft <= 300) box.className = 'timer-box danger';
+    else if (timeLeft <= 600) box.className = 'timer-box warning';
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!submitted) { alert('⏰ 時間到！自動交卷。'); submitQuiz(true); }
+    }
+  }, 1000);
 }
-function submitQuiz(forced=false){
-  const unanswered=userAnswers.filter(a=>a===-1).length;
-  if(!forced&&unanswered>0){
-    document.getElementById('unansMsg').innerHTML=`<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？<br><button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button><button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button></div>`;
+
+function submitQuiz(forced=false) {
+  const unanswered = userAnswers.filter(a => a === -1).length;
+  if (!forced && unanswered > 0) {
+    const msg = document.getElementById('unansMsg');
+    msg.innerHTML = `<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">
+      ⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？<br>
+      <button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button>
+      <button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button>
+    </div>`;
     return;
   }
-  submitted=true;clearInterval(timerInterval);
-  const elapsed=Math.round((Date.now()-startTime)/1000),em=Math.floor(elapsed/60),es=elapsed%60;
-  let correct=0;
-  QUESTIONS.forEach((q,i)=>{
-    const card=document.getElementById(`q${i}`);
-    if(userAnswers[i]===q.ans){
-      correct++;card.className='q-card result-correct';
-      const b=document.createElement('div');b.className='result-badge ok';b.innerHTML='✅ 答對';card.querySelector('.options').after(b);
-    }else{
-      card.className='q-card result-wrong';
-      const b=document.createElement('div');b.className='result-badge err';b.innerHTML='❌ 答錯';card.querySelector('.options').after(b);
-      const n=document.createElement('div');n.className='correct-note';n.innerHTML=`✔ 正確答案：<strong>${KEYS[q.ans]}：${q.opts[q.ans]}</strong>`;b.after(n);
+
+  submitted = true;
+  clearInterval(timerInterval);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const em = Math.floor(elapsed / 60), es = elapsed % 60;
+
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const card = document.getElementById(`q${i}`);
+    if (userAnswers[i] === q.ans) {
+      correct++;
+      card.className = 'q-card result-correct';
+      const badge = document.createElement('div');
+      badge.className = 'result-badge ok';
+      badge.innerHTML = '✅ 答對';
+      card.querySelector('.options').after(badge);
+    } else {
+      card.className = 'q-card result-wrong';
+      const badge = document.createElement('div');
+      badge.className = 'result-badge err';
+      badge.innerHTML = '❌ 答錯';
+      card.querySelector('.options').after(badge);
+      const note = document.createElement('div');
+      note.className = 'correct-note';
+      note.innerHTML = `✔ 正確答案：<strong>${KEYS[q.ans]}：${q.opts[q.ans]}</strong>`;
+      badge.after(note);
     }
-    for(let j=0;j<4;j++){
-      const lbl=document.getElementById(`lbl${i}_${j}`);
-      lbl.style.cursor='default';
-      if(j===q.ans)lbl.classList.add('correct-ans');
-      else if(j===userAnswers[i]&&userAnswers[i]!==q.ans)lbl.classList.add('wrong-ans');
+    for (let j = 0; j < 4; j++) {
+      const lbl = document.getElementById(`lbl${i}_${j}`);
+      lbl.style.cursor = 'default';
+      if (j === q.ans) lbl.classList.add('correct-ans');
+      else if (j === userAnswers[i] && userAnswers[i] !== q.ans) lbl.classList.add('wrong-ans');
     }
   });
-  const score=Math.round(correct*100/QUESTIONS.length);
-  const wrong=QUESTIONS.length-correct-userAnswers.filter(a=>a===-1).length;
-  const skip=userAnswers.filter(a=>a===-1).length;
-  let grade,gc;
-  if(score>=80){grade='🏆 優秀';gc='#276749';}else if(score>=60){grade='✅ 及格';gc='#2b6cb0';}else{grade='❌ 未及格';gc='#c53030';}
-  document.getElementById('scoreVal').textContent=score+' 分';
-  document.getElementById('scoreDetail').textContent=`共 ${QUESTIONS.length} 題・每題 ${(100/QUESTIONS.length).toFixed(1)} 分`;
-  const ge=document.getElementById('scoreGrade');ge.textContent=grade;ge.style.background=gc+'22';ge.style.color=gc;
-  document.getElementById('statCorrect').textContent=correct;
-  document.getElementById('statWrong').textContent=wrong;
-  document.getElementById('statSkip').textContent=skip;
-  document.getElementById('statTime').textContent=String(em).padStart(2,'0')+':'+String(es).padStart(2,'0');
-  document.getElementById('score-panel').style.display='block';
-  document.getElementById('unansMsg').innerHTML='';
-  document.querySelector('.btn-submit').style.display='none';
-  document.getElementById('resetBtn').style.display='inline-block';
+
+  const score = correct * (100 / QUESTIONS.length);
+  const wrong = QUESTIONS.length - correct - userAnswers.filter(a=>a===-1).length;
+  const skip = userAnswers.filter(a=>a===-1).length;
+  let grade, gradeColor;
+  if (score >= 80) { grade = '🏆 優秀'; gradeColor = '#276749'; }
+  else if (score >= 60) { grade = '✅ 及格'; gradeColor = '#2b6cb0'; }
+  else { grade = '❌ 未及格'; gradeColor = '#c53030'; }
+
+  document.getElementById('scoreVal').textContent = score.toFixed(0) + ' 分';
+  document.getElementById('scoreDetail').textContent = `共 ${QUESTIONS.length} 題・每題 ${(100/QUESTIONS.length).toFixed(2)} 分`;
+  const gradeEl = document.getElementById('scoreGrade');
+  gradeEl.textContent = grade;
+  gradeEl.style.background = gradeColor + '22';
+  gradeEl.style.color = gradeColor;
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('statSkip').textContent = skip;
+  document.getElementById('statTime').textContent = String(em).padStart(2,'0') + ':' + String(es).padStart(2,'0');
+
+  document.getElementById('score-panel').style.display = 'block';
+  document.getElementById('unansMsg').innerHTML = '';
+  document.querySelector('.btn-submit').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'inline-block';
   document.getElementById('score-panel').scrollIntoView({behavior:'smooth'});
 }
-function filterQ(mode){
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+
+function filterQ(mode) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
-  QUESTIONS.forEach((q,i)=>{
-    const card=document.getElementById(`q${i}`);
-    if(mode==='all')card.style.display='';
-    else if(mode==='wrong')card.style.display=(userAnswers[i]!==q.ans)?'':'none';
-    else card.style.display=(userAnswers[i]===q.ans)?'':'none';
+  QUESTIONS.forEach((q, i) => {
+    const card = document.getElementById(`q${i}`);
+    if (mode === 'all') card.style.display = '';
+    else if (mode === 'wrong') card.style.display = (userAnswers[i] !== q.ans) ? '' : 'none';
+    else if (mode === 'correct') card.style.display = (userAnswers[i] === q.ans) ? '' : 'none';
   });
 }
-function resetQuiz(){
-  submitted=false;userAnswers=new Array(QUESTIONS.length).fill(-1);
-  timeLeft=TOTAL_TIME;startTime=Date.now();clearInterval(timerInterval);
-  document.getElementById('timerBox').className='timer-box';
-  document.getElementById('timerValue').textContent='60:00';
-  document.getElementById('timerBar').style.width='100%';
-  document.getElementById('score-panel').style.display='none';
-  document.querySelector('.btn-submit').style.display='inline-block';
-  document.getElementById('resetBtn').style.display='none';
-  document.getElementById('unansMsg').innerHTML='';
-  document.getElementById('answeredCount').textContent='0';
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+
+function resetQuiz() {
+  submitted = false;
+  userAnswers = new Array(QUESTIONS.length).fill(-1);
+  timeLeft = TOTAL_TIME;
+  startTime = Date.now();
+  clearInterval(timerInterval);
+  document.getElementById('timerBox').className = 'timer-box';
+  document.getElementById('timerValue').textContent = '80:00';
+  document.getElementById('timerBar').style.width = '100%';
+  document.getElementById('score-panel').style.display = 'none';
+  document.querySelector('.btn-submit').style.display = 'inline-block';
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('unansMsg').innerHTML = '';
+  document.getElementById('answeredCount').textContent = '0';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.filter-btn').classList.add('active');
-  buildQuiz();startTimer();window.scrollTo({top:0,behavior:'smooth'});
+  buildQuiz();
+  startTimer();
+  window.scrollTo({top:0, behavior:'smooth'});
 }
-buildQuiz();startTimer();
+
+buildQuiz();
+startTimer();
 </script>
 </body>
 </html>
