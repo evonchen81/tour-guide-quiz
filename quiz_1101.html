@@ -194,7 +194,7 @@ function submitQuiz(timeout=false){
   if(submitted)return;
   const unanswered=answers.filter(a=>a===-1).length;
   if(!timeout&&unanswered>0){
-    if(!confirm(`還有 ${unanswered} 題未作答，確定要交卷？`))return;
+    if(!confirm(`還有 ${unanswered} 題未作答，確定要交卷？`)){document.querySelector('.btn-submit').scrollIntoView({ behavior: 'smooth' });return;}
   }
   clearInterval(timerInterval);submitted=true;
   document.getElementById('submit-wrap').classList.add('hidden');
