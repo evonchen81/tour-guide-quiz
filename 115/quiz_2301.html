@@ -7,7 +7,9 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8;min-height:100vh}
-.sticky-header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:12px 20px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.fixed-top{position:sticky;top:0;z-index:100}
+@media(max-width:600px){.progress-area{padding:6px 12px}.dot-grid{max-height:56px;overflow-y:auto}}
+.sticky-header{position:relative;background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:12px 20px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .header-top{display:flex;justify-content:space-between;align-items:flex-start}
 .exam-title{font-size:1.2rem;font-weight:700}
 .exam-sub{font-size:.8rem;opacity:.85;margin-top:2px}
@@ -94,6 +96,7 @@ body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8
 </style>
 </head>
 <body>
+<div class="fixed-top">
 <div class="sticky-header">
   <div class="header-top">
     <div>
@@ -110,6 +113,7 @@ body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8
 <div class="progress-area">
   <div class="progress-info">已作答：<strong id="answeredCount">0</strong> / 50 題</div>
   <div class="dot-grid" id="dotGrid"></div>
+</div>
 </div>
 <div class="main">
   <div id="score-panel" class="score-panel">
@@ -312,11 +316,12 @@ function startTimer(){
 }
 function submitQuiz(forced=false){
   const unanswered=userAnswers.filter(a=>a===-1).length;
-  if(!forced&&unanswered>0){
-    document.getElementById('unansMsg').innerHTML=`<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？<br><button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button><button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button></div>`;
+  if(!forced){
+    document.getElementById('unansMsg').innerHTML=`<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">${unanswered>0?`⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？`:'✅ 已全部作答，確定要交卷嗎？'}<br><button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button><button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button></div>`;
+    const box=document.getElementById('unansMsg');box.style.scrollMarginBottom='90px';box.scrollIntoView({behavior:'smooth',block:'end'});
     return;
   }
-  submitted=true;clearInterval(timerInterval);
+  submitted=true;document.getElementById('unansMsg').innerHTML='';clearInterval(timerInterval);
   const elapsed=Math.round((Date.now()-startTime)/1000),em=Math.floor(elapsed/60),es=elapsed%60;
   let correct=0;
   QUESTIONS.forEach((q,i)=>{
