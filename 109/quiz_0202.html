@@ -3,226 +3,308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>109年 華語導遊 導遊執業法規</title>
+<title>109年 導遊執業法規 線上測驗</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Microsoft JhengHei",Arial,sans-serif;background:#f0f4f8;color:#333}
-.header{background:linear-gradient(135deg deg,#1a4a70,#2c5f8a);color:#fff;padding:16px 20px}
-.header h1{font-size:1.2rem;font-weight:700}
-.header .meta{font-size:.85rem;opacity:.9;margin-top:4px}
-.timer-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:8px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
-.timer{font-size:1.4rem;font-weight:700;color:#1a4a70;font-variant-numeric:tabular-nums}
-.timer.warning{color:#e74c3c}
-.progress-text{font-size:.85rem;color:#666}
-.container{max-width:860px;margin:0 auto;padding:20px 16px}
-.question-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.question-card.answered-correct{border-left:4px solid #27ae60}
-.question-card.answered-wrong{border-left:4px solid #e74c3c}
-.question-card.invalid{border-left:4px solid #95a5a6;opacity:.7}
-.q-num{font-size:.8rem;color:#888;margin-bottom:6px}
-.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
-.q-blank{display:inline-block;border-bottom:2px solid #333;min-width:60px;margin:0 2px}
+body{font-family:'Noto Sans TC',Microsoft JhengHei,sans-serif;background:#f0f4f8;min-height:100vh}
+.fixed-top{position:sticky;top:0;z-index:100}
+@media(max-width:600px){.progress-area{padding:6px 12px}.dot-grid{max-height:56px;overflow-y:auto}}
+.sticky-header{position:relative;background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:12px 20px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start}
+.exam-title{font-size:1.2rem;font-weight:700}
+.exam-sub{font-size:.8rem;opacity:.85;margin-top:2px}
+.timer-box{text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:6px 14px;min-width:100px}
+.timer-box.warning{background:rgba(255,200,0,.3)}
+.timer-box.danger{background:rgba(255,80,80,.4)}
+.timer-label{font-size:.65rem;opacity:.8}
+.timer-value{font-size:1.5rem;font-weight:700;letter-spacing:2px}
+.timer-bar-wrap{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:4px}
+.timer-bar{height:100%;background:#68d391;border-radius:2px;transition:width .5s}
+.progress-area{background:#fff;padding:10px 20px;border-bottom:1px solid #e2e8f0}
+.progress-info{font-size:.85rem;color:#4a5568;margin-bottom:6px}
+.dot-grid{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:22px;height:22px;border-radius:50%;background:#e2e8f0;border:1.5px solid #cbd5e0;font-size:.65rem;display:flex;align-items:center;justify-content:center;color:#718096;cursor:pointer;transition:all .2s}
+.dot.done{background:#3182ce;border-color:#2b6cb0;color:#fff}
+.main{max-width:800px;margin:0 auto;padding:16px}
+.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:2px solid #e2e8f0;transition:border-color .2s}
+.q-card.answered{border-color:#90cdf4}
+.q-card.result-correct{border-color:#68d391;background:#f0fff4}
+.q-card.result-wrong{border-color:#fc8181;background:#fff5f5}
+.q-num{font-size:.8rem;color:#718096;margin-bottom:6px;font-weight:600}
+.q-text{font-size:1rem;color:#2d3748;margin-bottom:14px;line-height:1.6}
 .options{display:flex;flex-direction:column;gap:8px}
-.option-btn{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;text-align:left;background:#fff;font-size:.95rem;line-height:1.5;transition:.15s}
-.option-btn:hover:not(:disabled){border-color:#2c5f8a;background:#f0f4f8}
-.option-btn.selected{border-color:#2c5f8a;background:#e8f0f8}
-.option-btn.correct{border-color:#27ae60;background:#e8f8ed;color:#1a6b3d}
-.option-btn.wrong{border-color:#e74c3c;background:#fdecea;color:#c0392b}
-.option-btn:disabled{cursor:default}
-.opt-label{font-weight:700;min-width:20px}
-.result-box{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;display:none}
-.result-box.correct{background:#e8f8ed;color:#1a6b3d;display:block}
-.result-box.wrong{background:#fdecea;color:#c0392b;display:block}
-.submit-area{text-align:center;padding:20px 0 40px}
-.submit-btn{background:#2c5f8a;color:#fff;border:none;padding:14px 40px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer}
-.submit-btn:hover{background:#1a4a70}
-.score-bar{background:#fff;border-top:2px solid #e0e0e0;padding:16px 20px;text-align:center;display:none;position:sticky;bottom:0}
-.score-num{font-size:1.6rem;font-weight:700;color:#1a4a70}
-.back-btn{display:inline-block;margin-top:8px;color:#2c5f8a;text-decoration:none;font-size:.9rem}
-.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.filter-btn{padding:6px 14px;border:2px solid #e0e0e0;border-radius:20px;cursor:pointer;font-size:.85rem;background:#fff}
-.filter-btn.active{border-color:#2c5f8a;background:#2c5f8a;color:#fff}
+.option-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all .2s;line-height:1.5}
+.option-label:hover{background:#ebf8ff;border-color:#90cdf4}
+.option-label.selected{background:#ebf8ff;border-color:#3182ce}
+.option-label.correct-ans{background:#f0fff4;border-color:#38a169!important}
+.option-label.wrong-ans{background:#fff5f5;border-color:#e53e3e!important}
+.option-key{font-weight:700;color:#3182ce;min-width:20px}
+.option-label input{display:none}
+.result-badge{padding:6px 12px;border-radius:6px;font-weight:700;margin-top:8px;font-size:.9rem}
+.result-badge.ok{background:#f0fff4;color:#276749}
+.result-badge.err{background:#fff5f5;color:#c53030}
+.correct-note{margin-top:6px;padding:8px 12px;background:#ebf8ff;border-radius:6px;color:#2b6cb0;font-size:.9rem}
+.bottom-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:50}
+.btn-submit{background:#3182ce;color:#fff;border:none;border-radius:8px;padding:12px 40px;font-size:1rem;font-weight:700;cursor:pointer}
+.btn-submit:hover{background:#2b6cb0}
+#resetBtn{display:none;background:#805ad5;color:#fff;border:none;border-radius:8px;padding:10px 30px;font-size:.95rem;font-weight:700;cursor:pointer}
+.score-panel{display:none;background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;border:2px solid #90cdf4;text-align:center}
+.score-val{font-size:3rem;font-weight:900;color:#2b6cb0}
+.score-grade{display:inline-block;padding:4px 16px;border-radius:20px;font-size:1rem;font-weight:700;margin:8px 0}
+.score-detail{color:#718096;font-size:.85rem}
+.stats{display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-size:1.4rem;font-weight:700}
+.stat-label{font-size:.75rem;color:#718096}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #cbd5e0;background:#fff;cursor:pointer;font-size:.85rem}
+.filter-btn.active{background:#3182ce;border-color:#3182ce;color:#fff}
+@media(max-width:600px){
+  .exam-title{font-size:1rem}
+  .timer-value{font-size:1.2rem}
+  .dot{width:18px;height:18px;font-size:.55rem}
+}
+
+/* Explanation panel */
+.explanation-panel {
+  display: none;
+  margin-top: 12px;
+  background: #EBF8FF;
+  border-left: 4px solid #3182CE;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #2D3748;
+  white-space: pre-wrap;
+}
+.explanation-panel.visible { display: block; }
+.explanation-panel strong { color: #1a365d; }
+.btn-explain {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 14px;
+  background: #3182CE;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+.btn-explain:hover { background: #2b6cb0; }
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>109年 華語導遊｜導遊執業法規</h1>
-  <div class="meta">共50題｜60分鐘</div>
-</div>
-<div class="timer-bar">
-  <div class="timer" id="timer">60:00</div>
-  <div class="progress-text" id="progress">已答 0 / 50 題</div>
-</div>
-<div class="container">
-  <div class="filter-bar" id="filterBar" style="display:none">
-    <button class="filter-btn active" onclick="filterQ('all')">全部</button>
-    <button class="filter-btn" onclick="filterQ('wrong')">答錯</button>
-    <button class="filter-btn" onclick="filterQ('correct')">答對</button>
-    <button class="filter-btn" onclick="filterQ('unanswered')">未答</button>
-  </div>
-  <div id="quizContainer"></div>
-  <div class="submit-area" id="submitArea">
-    <button class="submit-btn" onclick="submitQuiz()">交卷</button>
+<div class="fixed-top">
+<div class="sticky-header">
+  <div class="header-top">
+    <div>
+      <div class="exam-title">109年 導遊執業法規 模擬測驗</div>
+      <div class="exam-sub">華語導遊人員 ／ 共50題・每題2分・總分100分</div>
+    </div>
+    <div class="timer-box" id="timerBox">
+      <div class="timer-label">剩餘時間</div>
+      <div class="timer-value" id="timerValue">60:00</div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar" style="width:100%"></div></div>
+    </div>
   </div>
 </div>
-<div class="score-bar" id="scoreBar">
-  <div class="score-num" id="scoreNum"></div>
-  <div id="scoreDetail"></div>
-  <a href="../index.html" class="back-btn">← 回首頁</a>
+<div class="progress-area">
+  <div class="progress-info">已作答：<strong id="answeredCount">0</strong> / 50 題</div>
+  <div class="dot-grid" id="dotGrid"></div>
+</div>
+</div>
+<div class="main">
+  <div id="score-panel" class="score-panel">
+    <div class="score-val" id="scoreVal"></div>
+    <div class="score-grade" id="scoreGrade"></div>
+    <div class="score-detail" id="scoreDetail"></div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num" id="statCorrect" style="color:#38a169"></div><div class="stat-label">答對</div></div>
+      <div class="stat-item"><div class="stat-num" id="statWrong" style="color:#e53e3e"></div><div class="stat-label">答錯</div></div>
+      <div class="stat-item"><div class="stat-num" id="statSkip" style="color:#718096"></div><div class="stat-label">未作答</div></div>
+      <div class="stat-item"><div class="stat-num" id="statTime" style="color:#805ad5"></div><div class="stat-label">用時</div></div>
+    </div>
+    <div class="filter-bar" style="justify-content:center;margin-top:16px">
+      <button class="filter-btn active" onclick="filterQ('all')">全部題目</button>
+      <button class="filter-btn" onclick="filterQ('wrong')">只看錯題</button>
+      <button class="filter-btn" onclick="filterQ('correct')">只看對題</button>
+    </div>
+  </div>
+  <form id="quizForm"></form>
+  <div id="unansMsg"></div>
+</div>
+<div class="bottom-bar">
+  <button class="btn-submit" onclick="submitQuiz()">交卷對答案</button>
+  <button id="resetBtn" onclick="resetQuiz()">🔄 重新作答</button>
 </div>
 <script>
-const QUESTIONS = [{"num": 1, "text": "依發展觀光條例規定，為保障旅遊消費者權益，旅行業有下列何種情事者，中央主管機關得公告之？ ①履約保證保險金或責任保險金被法院扣押或執行者 ②受停業處分或廢止旅行業執照者 ③經票據交 換所公告為拒絕往來戶者 ④未依規定辦理履約保證保險或責任保險者", "opts": ["①②③", "①②④", "①③④", "②③④"], "ans": 3}, {"num": 2, "text": "依發展觀光條例規定，下列那些產業經營者應懸掛主管機關發給之觀光專用標識？①觀光旅館業 ②旅 館業 ③觀光遊樂業 ④民宿 ⑤旅行業", "opts": ["①②③④", "①②④⑤", "①③④⑤", "②③④⑤"], "ans": 0}, {"num": 3, "text": "依據發展觀光條例第 2 條所指之風景特定區定義，下列敘述何者正確？", "opts": ["公園綠地皆屬之", "指依規定程序劃定之風景或名勝地區", "自行劃定之風景區皆屬之", "國家公園"], "ans": 1}, {"num": 4, "text": "交通部觀光局推廣國際慢城組織認證的國際慢城，包括下列那些鄉鎮？①苗栗三義鄉 ②苗栗南庄鄉 ③嘉義大林鎮 ④花蓮鳳林鎮 ⑤屏東竹田鄉", "opts": ["①②③④", "①②④⑤", "①②③⑤", "②③④⑤"], "ans": 0}, {"num": 5, "text": "交通部觀光局設置駐外辦事處有那些位於亞洲城市？", "opts": ["東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、河內等地", "東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、澳門等地", "東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、胡志明市等地", "東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、福岡等地"], "ans": 2}, {"num": 6, "text": "交通部觀光局 2020 觀光永續發展方案中，對於各觀光旅遊市場所採取的戰略為何？", "opts": ["南向主攻、歐美深化、日韓布局、大陸為守", "歐美主攻、南向深化、日韓布局、大陸為守", "南向主攻、日韓深化、歐美布局、大陸為守", "日韓主攻、歐美深化、南向布局、大陸為守"], "ans": 3}, {"num": 7, "text": "臺北市一家掛有觀光旅館專用標章之旅館員工向某住宿客人媒介色情陪宿，依觀光相關法令該員工會受 到何種處罰？", "opts": ["應接受旅館業從業人員再教育", "罰鍰", "解僱", "移送警察機關"], "ans": 1}, {"num": 8, "text": "發展觀光條例規定，有關觀光產業之國際宣傳及推廣事宜，下列敘述何者錯誤？", "opts": ["由交通部會同外交部綜理", "中央主管機關得將辦理國際觀光行銷業務，委託法人團體辦理", "中央主管機關得與外國觀光機構或授權觀光機構與外國觀光機構簽訂觀光合作協定", "民間團體辦理涉及國際觀光宣傳事務，除依有關法律規定外，應受中央主管機關之輔導"], "ans": 0}, {"num": 9, "text": "依發展觀光條例規定，下列何者不是申請經營旅館業者必須辦妥事項？", "opts": ["依法辦妥公司或商業登記", "向地方主管機關申請登記", "領取登記證及專用標識", "向中央主管機關申請核准"], "ans": 3}, {"num": 10, "text": "依發展觀光條例規定，有關旅行業暫停營業之規定，下列何者錯誤？", "opts": ["暫停營業 1 個月以上者，應於停止營業之日起 15 日內備具股東會議事錄或股東同意書，並詳述理由， 報請主管機關備查", "申請暫停營業期間，最長不得超過 1 年，其有正當理由者，得申請展延 1 次，期間以 1 年為限，並應 於期間屆滿前 15 日內提出", "暫停營業期限屆滿後，應於 15 日內向該管主管機關申報復業", "暫停營業未依規定報請備查，達 3 個月以上者，主管機關得廢止其營業執照"], "ans": 3}, {"num": 11, "text": "依發展觀光條例規定，在宜蘭縣的民宿經營者應向何機關申請登記，領取民宿登記證及專用標識後，始 得經營？", "opts": ["宜蘭縣政府", "交通部觀光局", "行政院農業委員會", "內政部營建署"], "ans": 0}, {"num": 12, "text": "依發展觀光條例之規定，得對區內建築物之造形、構造、色彩等及廣告物、攤位之設置實施規劃限制之 地區為何？", "opts": ["自然人文生態景觀區", "休閒農業區", "風景特定區", "生態保護區"], "ans": 2}, {"num": 13, "text": "依發展觀光條例規定，於風景特定區或觀光地區內有下列行為之一者，由其目的事業主管機關處新臺幣 一萬元以上，五萬元以下罰鍰？①擅自經營固定或流動攤販 ②任意拋棄、焚燒垃圾或廢棄物 ③強行 向旅客拍照並收取費用 ④強行向旅客推銷物品 ⑤其他騷擾旅客或影響旅客安全之行為", "opts": ["①②③④", "①②④⑤", "①③④⑤", "②③④⑤"], "ans": 2}, {"num": 14, "text": "依發展觀光條例規定，導遊人員及領隊人員之敘述，下列那幾項正確？①應經考試主管機關或其委託之 有關機關考試及訓練合格 ②應經中央主管機關發給執業證，並受旅行業僱用或受政府機關、團體之臨 時招請，始得執行業務 ③導遊人員及領隊人員取得結業證書或執業證後連續二年未執行各該業務者， 應重行參加訓練結業，領取或換領執業證後，始得執行業務", "opts": ["①②", "①③", "②③", "①②③"], "ans": 0}, {"num": 15, "text": "旅行業為預防因財務問題，致其安排之旅遊活動一部或全部無法完成時，在保險金額範圍內可給付旅客 之費用，指的是下列何種保險？", "opts": ["旅行業責任保險", "旅行業醫療及意外保險", "旅遊平安保險", "履約保證保險"], "ans": 3}, {"num": 16, "text": "綜合旅行業舉辦團體旅遊業務，其履約保證保險之最低投保金額為新臺幣多少元？", "opts": ["2,000 萬元", "4,000 萬元", "6,000 萬元", "8,000 萬元"], "ans": 2}, {"num": 17, "text": "關於旅行業依規定所投保的責任保險，下列敘述何者正確？", "opts": ["適用於隨旅行社出團之旅客及隨團服務人員", "旅客向旅行社購買航空公司自由行產品者亦適用", "旅客因疾病或意外死亡皆可獲新臺幣 200 萬元理賠", "旅客家屬前往處理善後所必須支出之費用新臺幣 40 萬元"], "ans": 0}, {"num": 18, "text": "旅行業辦理個別、團體旅遊應投保責任保險，投保每一旅客旅行證件遺失之損害賠償費用為多少？", "opts": ["新臺幣 1,000 元", "新臺幣 1,500 元", "新臺幣 2,000 元", "新臺幣 3,000 元"], "ans": 2}, {"num": 19, "text": "旅遊業指派或僱用導遊人員、領隊人員執行接待或引導觀光旅客旅遊業務，未與該等人員簽訂書面契約； 與該等人員簽訂契約之內容違反交通部觀光局公告之契約不得記載事項，應處罰鍰之範圍為何？", "opts": ["新臺幣二萬元以上，五萬元以下罰鍰", "新臺幣一萬元以上，四萬元以下罰鍰", "新臺幣一萬元以上，五萬元以下罰鍰", "新臺幣一千元以上，五萬元以下罰鍰"], "ans": 2}, {"num": 20, "text": "關於導遊人員申請換發執業證、繳納證照費之規定，下列敘述何者錯誤？", "opts": ["申請於執業證上加註其他外語，所檢附符合教育部對外華語教學能力認證考試外語能力合格認定基準 所定基準以上之證書，須為提出加註該語言別之日前 5 年內取得者", "經交通部觀光局或其委託團體舉辦之其他外語訓練合格，得申請於執業證上加註該其他外語，繳納證 照費換發新證", "導遊人員執業證 3 年效期期滿前，應向交通部觀光局或其委託之團體申請換發", "執業證若遺失，應以書面敘明理由申請補換發，須再繳納證照費"], "ans": 0}, {"num": 21, "text": "依導遊人員管理規則規定，導遊人員連續執行導遊業務多少年以上，成績優良者，由交通部觀光局予以 獎勵或表揚？", "opts": ["3 年", "5 年", "10 年", "15 年"], "ans": 3}, {"num": 22, "text": "依導遊人員管理規則規定，導遊人員職前訓練期間因產假、重病，經核准延期測驗者，最長應於多久期 間補行測驗一次？", "opts": ["3 個月內", "6 個月內", "9 個月內", "1 年內"], "ans": 3}, {"num": 23, "text": "依旅行業管理規則規定，外國旅行業在中華民國設立分公司時，應先向下列何者申請核准？", "opts": ["交通部觀光局", "經濟部國際貿易局", "經濟部商業司", "外交部"], "ans": 0}, {"num": 24, "text": "觀光遊樂業園區內舉辦特定活動者，依據觀光遊樂業管理規則之規定，業者應於幾日前檢附安全管理計 畫，報經地方主管機關核准？", "opts": ["十日", "十五日", "二十日", "三十日"], "ans": 3}, {"num": 25, "text": "林大仁在參觀臺北國際旅展時，向某一旅館攤位買了兩張旅館住宿券，依據旅館業商品（服務）禮券定 型化契約應記載及不得記載事項，下列那一事項不應該記載在住宿券上？", "opts": ["發行人名稱、地址、統一編號及負責人姓名", "商品（服務）券之面額或使用之項目、次數", "商品（服務）禮券發售編號", "使用期限"], "ans": 3}, {"num": 26, "text": "在某觀光旅館中，導遊發現警察人員在房間內檢查其旅行團員身分，依觀光相關法令規定，警察不得將 下列何種旅客帶至警察局進行盤查？", "opts": ["犯罪嫌疑人", "經受臨檢團員同意", "妨害安寧者", "已確定受臨檢團員身分者"], "ans": 3}, {"num": 27, "text": "依據民宿管理辦法，位於原住民族地區、經農業主管機關核發許可登記證之休閒農場、經農業主管機關 劃定之休閒農業區、觀光地區、偏遠地區及離島地區之民宿，得以客房數幾間以下，且客房總樓地板面 積四百平方公尺以下之規模經營之？", "opts": ["8 間", "10 間", "12 間", "15 間"], "ans": 3}, {"num": 28, "text": "小琉球位於下列何處之範圍？", "opts": ["海洋國家公園", "澎湖國家風景區", "墾丁國家公園", "大鵬灣國家風景區"], "ans": 3}, {"num": 29, "text": "下列那個風景區不在參山國家風景區內？", "opts": ["獅頭山", "八卦山", "梨山", "觀音山"], "ans": 3}, {"num": 30, "text": "依水域遊憩活動管理辦法規定，從事水肺潛水活動者，下列敘述何者錯誤？", "opts": ["應具有國內外潛水機構發給之能力證明", "在潛水區域中設置潛水活動旗幟並攜帶潛水標位浮標", "由合格之潛水教練每人每次指導水肺潛水活動者 10 人為限", "由合格之潛水教練告知潛水水域的情況"], "ans": 2}, {"num": 31, "text": "國內報紙刊登下列那一個廣告，不會違反臺灣地區與大陸地區人民關係條例及相關法令之規定？", "opts": ["招攬臺灣地區人民赴福建投資建設鐵路", "出售位於浙江省杭州市的綠野香波別墅", "我愛甜心婚友社媒合兩岸婚姻", "聯想筆記型電腦周年慶大促銷"], "ans": 3}, {"num": 32, "text": "大陸地區人民於一課稅年度內在臺灣地區居留、停留合計滿多久時間，應就其臺灣地區來源所得，準用 臺灣地區人民適用之課稅規定，課徵綜合所得稅？", "opts": ["90 天", "180 天", "183 天", "275 天"], "ans": 2}, {"num": 33, "text": "某艘大陸船舶未經許可進入臺灣地區限制水域從事走私行為，海洋委員會海巡署依法相關處置，下列敘 述何者錯誤？", "opts": ["得扣留其船舶、物品及留置其人員", "有拒絕停船或抗拒扣留之行為者，得予警告射擊", "經警告無效而企圖逃離者，得直接擊燬", "經主管機關查證該船有被扣留二次以上紀錄，得沒入"], "ans": 2}, {"num": 34, "text": "大陸地區人民來臺觀光，符合下列何種條件，始得向內政部移民署申請發給逐次加簽或一年多次臺灣地 區入出境許可證？", "opts": ["曾就讀之大學為臺灣地區大學之合作學校", "最近 12 個月內曾依規定來臺從事個人旅遊 2 次以上，且無違規情形", "最近 6 個月內曾依規定來臺從事個人旅遊 1 次", "年滿 20 歲且有相當新臺幣 20 萬元以上存款"], "ans": 1}, {"num": 35, "text": "大陸地區人民來臺觀光入境後，隨團導遊人員如果發現大陸旅客未依原訂行程旅遊而脫團時，應就近通 報警察機關，並應通報下列那一機關？", "opts": ["交通部觀光局", "內政部移民署", "旅行業所在地之同業公會", "旅行業所在地之地方政府"], "ans": 0}, {"num": 36, "text": "臺灣旅行業者辦理大陸地區人民來臺從事觀光活動業務，在臺旅遊行程應避開下列那個地方？", "opts": ["國家實驗研究院臺灣半導體研究中心", "東北角鼻頭國小", "龍山寺", "國家人權博物館"], "ans": 0}, {"num": 37, "text": "如兩岸發生重大意外事件，下列何項協議訂有傷病者的緊急救治措施、資訊交換及傷病者轉送等交流合 作之規定？", "opts": ["「海峽兩岸投資保障和促進協議」人身自由與安全保障共識", "海峽兩岸關於大陸居民赴臺灣旅遊協議", "海峽兩岸醫藥衛生合作協議", "海峽兩岸空運協議"], "ans": 2}, {"num": 38, "text": "中國大陸以黨領政，雖然目前國家主席習近平集權一身，但中國共產黨的最高決策單位中央政治局常委 會仍具體運作。下列那位人士不是中共第十九屆中央政治局常委？", "opts": ["劉鶴", "習近平", "栗戰書", "李克強"], "ans": 0}, {"num": 39, "text": "2019 年 6 月以來，香港反送中運動遍地開花，鄰接的中國大陸深圳等地亦加強邊境檢查，國人若赴該二 地旅遊，應關注是否發布旅遊警示。大陸地區、香港、澳門旅遊警示機制的發布機關是那個部門？", "opts": ["交通部", "大陸委員會", "財團法人海峽交流基金會", "外交部"], "ans": 1}, {"num": 40, "text": "2018 年中國大陸第十三屆「全國人民代表大會」通過憲法修正案，下列敘述何者錯誤？", "opts": ["設立國家監察機關", "刪除中共總書記連任限制", "取消國家主席任期限制", "載入習近平新時代中國特色社會主義思想"], "ans": 1}, {"num": 41, "text": "下列何者非護照資料頁記載事項？", "opts": ["出生地", "中文別名", "發照機關", "國籍"], "ans": 1}, {"num": 42, "text": "關於役男出境現行規定，下列敘述何者錯誤？", "opts": ["現役役男應向服役（勤）單位申請出境核准後，再行出國", "擬短期出境之役男應至外交部領事事務局網站申請出國核准後，再行出國", "退伍後短期內要出境，應攜帶相關證明文件正本，以備國境人員查驗", "已退伍（役）、免役或免除兵役義務者，出國不須申請核准程序"], "ans": 1}, {"num": 43, "text": "志玲的 15 歲女兒日前取得日本永久居留權，志玲想為女兒申請我國護照僑居身分加簽，下列何者不是志 玲的女兒必須準備的申請文件？", "opts": ["外國護照正本", "外國居留證件正本", "護照加簽申請書，且須經法定代理人簽名同意", "入出國日期證明書"], "ans": 0}, {"num": 44, "text": "阿信原為旅居英國的海外僑民，現已持有我國駐外館處所核發之護照返國定居，且在我國領有國民身分 證。阿信如果想在原護照上增列身分證的統一編號，應如何辦理？", "opts": ["向外交部申請護照加簽", "向內政部申請護照加註", "向外交部申請換發新護照", "向外交部申請護照資料修正"], "ans": 2}, {"num": 45, "text": "關於我國簽證效期之敘述，下列何者正確？", "opts": ["簽證效期為持用該簽證入境之最後日期，效期屆滿則為失效，無法持憑入境我國", "在臺期間若未能於簽證效期屆滿前準時離境，應向外交部領事事務局或各辦事處重新申請簽證", "在臺期間若未能於簽證效期屆滿前準時離境，應向交通部觀光局重新申請簽證", "停留簽證及居留簽證的效期都是固定不變的，且居留簽證之簽證效期原則上較停留簽證長"], "ans": 0}, {"num": 46, "text": "下列何種人士不適用申請依親類別的來臺簽證？", "opts": ["國人之外籍配偶", "國人之外籍尊親屬", "國人之未成年子女", "在臺合法居留外籍人士之配偶"], "ans": 1}, {"num": 47, "text": "關於我國電子簽證之敘述，下列何者錯誤？", "opts": ["適用我國電子簽證待遇之國家國民，申請電子簽證來臺前無須經過中央目的事業主管機關核准", "申請電子簽證可透過線上刷卡付款", "申獲電子簽證後應列印電子簽證紙本並持憑入境我國", "電子簽證通常是多次簽證，且停留期限可分為 14 天、 30 天、 60 天及 90 天等四類"], "ans": 3}, {"num": 48, "text": "香港或澳門居民入國，除應備有效入出境許可證外，請問香港或澳門居民入國短期停留時，所持之護照 效期至少應該要多久？", "opts": ["有效即可", "1 個月以上", "3 個月以上", "6 個月以上"], "ans": 2}, {"num": 49, "text": "假設旅客攜帶新臺幣 50 萬元現鈔出入境，經查獲未依規定向海關申報，將受到何種處分？", "opts": ["超額 40 萬元退運", "超額 40 萬元由海關沒入", "50 萬元全額退運", "50 萬元全額由海關沒入"], "ans": 1}, {"num": 50, "text": "依管理外匯條例規定，掌理外匯業務機關為：", "opts": ["財政部", "金融監督管理委員會", "中央銀行", "經濟部"], "ans": 2}];
-const TOTAL_TIME = 3600;
-const KEYS = ['A','B','C','D'];
-let timeLeft = TOTAL_TIME;
-let timerInterval = null;
-let userAnswers = {};
-let submitted = false;
-
-function isCorrect(q, sel) {
-  if (q.ans === -1) return true;
-  if (Array.isArray(q.ans)) return q.ans.includes(sel);
-  return q.ans === sel;
-}
-
-function getCorrectLabel(q) {
-  if (q.ans === -1) return '本題一律給分';
-  if (Array.isArray(q.ans)) return '正確答案：' + q.ans.map(i => KEYS[i]).join(' 或 ');
-  return KEYS[q.ans] + '：' + q.opts[q.ans];
-}
-
-function renderQuestions() {
-  const container = document.getElementById('quizContainer');
-  container.innerHTML = '';
-  QUESTIONS.forEach((q, qi) => {
-    const card = document.createElement('div');
-    card.className = 'question-card' + (q.ans === -1 ? ' invalid' : '');
-    card.id = 'card-' + qi;
-    const opts = q.opts.map((opt, i) => {
-      const blank_rendered = q.text.includes('______');
-      return `<button class="option-btn" id="opt-${qi}-${i}" onclick="selectAnswer(${qi}, ${i})" data-qi="${qi}" data-i="${i}">
-        <span class="opt-label">${KEYS[i]}</span>
-        <span>${opt}</span>
-      </button>`;
-    }).join('');
-    const qtext = q.text.replace(/______/g, '<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
-    card.innerHTML = `
-      <div class="q-num">第 ${q.num} 題${q.ans === -1 ? '（本題無效）' : ''}</div>
-      <div class="q-text">${qtext}</div>
-      <div class="options">${opts}</div>
-      <div class="result-box" id="result-${qi}"></div>
-    `;
-    container.appendChild(card);
+const QUESTIONS = [
+  {q:`依發展觀光條例規定，為保障旅遊消費者權益，旅行業有下列何種情事者，中央主管機關得公告之？ ①履約保證保險金或責任保險金被法院扣押或執行者 ②受停業處分或廢止旅行業執照者 ③經票據交換所公告為拒絕往來戶者 ④未依規定辦理履約保證保險或責任保險者`, opts:[`①②③`, `①②④`, `①③④`, `②③④`], ans:3, exp:`解析製作中`},
+  {q:`依發展觀光條例規定，下列那些產業經營者應懸掛主管機關發給之觀光專用標識？①觀光旅館業 ②旅館業 ③觀光遊樂業 ④民宿 ⑤旅行業`, opts:[`①②③④`, `①②④⑤`, `①③④⑤`, `②③④⑤`], ans:0, exp:`解析製作中`},
+  {q:`依據發展觀光條例第 2 條所指之風景特定區定義，下列敘述何者正確？`, opts:[`公園綠地皆屬之`, `指依規定程序劃定之風景或名勝地區`, `自行劃定之風景區皆屬之`, `國家公園`], ans:1, exp:`解析製作中`},
+  {q:`交通部觀光局推廣國際慢城組織認證的國際慢城，包括下列那些鄉鎮？①苗栗三義鄉 ②苗栗南庄鄉 ③嘉義大林鎮 ④花蓮鳳林鎮 ⑤屏東竹田鄉`, opts:[`①②③④`, `①②④⑤`, `①②③⑤`, `②③④⑤`], ans:0, exp:`解析製作中`},
+  {q:`交通部觀光局設置駐外辦事處有那些位於亞洲城市？`, opts:[`東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、河內等地`, `東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、澳門等地`, `東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、胡志明市等地`, `東京、大阪、首爾、新加坡、吉隆坡、曼谷、香港、北京、上海（福州）、福岡等地`], ans:2, exp:`解析製作中`},
+  {q:`交通部觀光局 2020 觀光永續發展方案中，對於各觀光旅遊市場所採取的戰略為何？`, opts:[`南向主攻、歐美深化、日韓布局、大陸為守`, `歐美主攻、南向深化、日韓布局、大陸為守`, `南向主攻、日韓深化、歐美布局、大陸為守`, `日韓主攻、歐美深化、南向布局、大陸為守`], ans:3, exp:`解析製作中`},
+  {q:`臺北市一家掛有觀光旅館專用標章之旅館員工向某住宿客人媒介色情陪宿，依觀光相關法令該員工會受到何種處罰？`, opts:[`應接受旅館業從業人員再教育`, `罰鍰`, `解僱`, `移送警察機關`], ans:1, exp:`解析製作中`},
+  {q:`發展觀光條例規定，有關觀光產業之國際宣傳及推廣事宜，下列敘述何者錯誤？`, opts:[`由交通部會同外交部綜理`, `中央主管機關得將辦理國際觀光行銷業務，委託法人團體辦理`, `中央主管機關得與外國觀光機構或授權觀光機構與外國觀光機構簽訂觀光合作協定`, `民間團體辦理涉及國際觀光宣傳事務，除依有關法律規定外，應受中央主管機關之輔導`], ans:0, exp:`解析製作中`},
+  {q:`依發展觀光條例規定，下列何者不是申請經營旅館業者必須辦妥事項？`, opts:[`依法辦妥公司或商業登記`, `向地方主管機關申請登記`, `領取登記證及專用標識`, `向中央主管機關申請核准`], ans:3, exp:`解析製作中`},
+  {q:`依發展觀光條例規定，有關旅行業暫停營業之規定，下列何者錯誤？`, opts:[`暫停營業 1 個月以上者，應於停止營業之日起 15 日內備具股東會議事錄或股東同意書，並詳述理由，報請主管機關備查`, `申請暫停營業期間，最長不得超過 1 年，其有正當理由者，得申請展延 1 次，期間以 1 年為限，並應於期間屆滿前 15 日內提出`, `暫停營業期限屆滿後，應於 15 日內向該管主管機關申報復業`, `暫停營業未依規定報請備查，達 3 個月以上者，主管機關得廢止其營業執照`], ans:3, exp:`解析製作中`},
+  {q:`依發展觀光條例規定，在宜蘭縣的民宿經營者應向何機關申請登記，領取民宿登記證及專用標識後，始得經營？`, opts:[`宜蘭縣政府`, `交通部觀光局`, `行政院農業委員會`, `內政部營建署`], ans:0, exp:`解析製作中`},
+  {q:`依發展觀光條例之規定，得對區內建築物之造形、構造、色彩等及廣告物、攤位之設置實施規劃限制之地區為何？`, opts:[`自然人文生態景觀區`, `休閒農業區`, `風景特定區`, `生態保護區`], ans:2, exp:`解析製作中`},
+  {q:`依發展觀光條例規定，於風景特定區或觀光地區內有下列行為之一者，由其目的事業主管機關處新臺幣一萬元以上，五萬元以下罰鍰？①擅自經營固定或流動攤販 ②任意拋棄、焚燒垃圾或廢棄物 ③強行向旅客拍照並收取費用 ④強行向旅客推銷物品 ⑤其他騷擾旅客或影響旅客安全之行為`, opts:[`①②③④`, `①②④⑤`, `①③④⑤`, `②③④⑤`], ans:2, exp:`解析製作中`},
+  {q:`依發展觀光條例規定，導遊人員及領隊人員之敘述，下列那幾項正確？①應經考試主管機關或其委託之有關機關考試及訓練合格 ②應經中央主管機關發給執業證，並受旅行業僱用或受政府機關、團體之臨時招請，始得執行業務 ③導遊人員及領隊人員取得結業證書或執業證後連續二年未執行各該業務者，應重行參加訓練結業，領取或換領執業證後，始得執行業務`, opts:[`①②`, `①③`, `②③`, `①②③`], ans:0, exp:`解析製作中`},
+  {q:`旅行業為預防因財務問題，致其安排之旅遊活動一部或全部無法完成時，在保險金額範圍內可給付旅客之費用，指的是下列何種保險？`, opts:[`旅行業責任保險`, `旅行業醫療及意外保險`, `旅遊平安保險`, `履約保證保險`], ans:3, exp:`解析製作中`},
+  {q:`綜合旅行業舉辦團體旅遊業務，其履約保證保險之最低投保金額為新臺幣多少元？`, opts:[`2,000 萬元`, `4,000 萬元`, `6,000 萬元`, `8,000 萬元`], ans:2, exp:`解析製作中`},
+  {q:`關於旅行業依規定所投保的責任保險，下列敘述何者正確？`, opts:[`適用於隨旅行社出團之旅客及隨團服務人員`, `旅客向旅行社購買航空公司自由行產品者亦適用`, `旅客因疾病或意外死亡皆可獲新臺幣 200 萬元理賠`, `旅客家屬前往處理善後所必須支出之費用新臺幣 40 萬元`], ans:0, exp:`解析製作中`},
+  {q:`旅行業辦理個別、團體旅遊應投保責任保險，投保每一旅客旅行證件遺失之損害賠償費用為多少？`, opts:[`新臺幣 1,000 元`, `新臺幣 1,500 元`, `新臺幣 2,000 元`, `新臺幣 3,000 元`], ans:2, exp:`解析製作中`},
+  {q:`旅遊業指派或僱用導遊人員、領隊人員執行接待或引導觀光旅客旅遊業務，未與該等人員簽訂書面契約；與該等人員簽訂契約之內容違反交通部觀光局公告之契約不得記載事項，應處罰鍰之範圍為何？`, opts:[`新臺幣二萬元以上，五萬元以下罰鍰`, `新臺幣一萬元以上，四萬元以下罰鍰`, `新臺幣一萬元以上，五萬元以下罰鍰`, `新臺幣一千元以上，五萬元以下罰鍰`], ans:2, exp:`解析製作中`},
+  {q:`關於導遊人員申請換發執業證、繳納證照費之規定，下列敘述何者錯誤？`, opts:[`申請於執業證上加註其他外語，所檢附符合教育部對外華語教學能力認證考試外語能力合格認定基準所定基準以上之證書，須為提出加註該語言別之日前 5 年內取得者`, `經交通部觀光局或其委託團體舉辦之其他外語訓練合格，得申請於執業證上加註該其他外語，繳納證照費換發新證`, `導遊人員執業證 3 年效期期滿前，應向交通部觀光局或其委託之團體申請換發`, `執業證若遺失，應以書面敘明理由申請補換發，須再繳納證照費`], ans:0, exp:`解析製作中`},
+  {q:`依導遊人員管理規則規定，導遊人員連續執行導遊業務多少年以上，成績優良者，由交通部觀光局予以獎勵或表揚？`, opts:[`3 年`, `5 年`, `10 年`, `15 年`], ans:3, exp:`解析製作中`},
+  {q:`依導遊人員管理規則規定，導遊人員職前訓練期間因產假、重病，經核准延期測驗者，最長應於多久期間補行測驗一次？`, opts:[`3 個月內`, `6 個月內`, `9 個月內`, `1 年內`], ans:3, exp:`解析製作中`},
+  {q:`依旅行業管理規則規定，外國旅行業在中華民國設立分公司時，應先向下列何者申請核准？`, opts:[`交通部觀光局`, `經濟部國際貿易局`, `經濟部商業司`, `外交部`], ans:0, exp:`解析製作中`},
+  {q:`觀光遊樂業園區內舉辦特定活動者，依據觀光遊樂業管理規則之規定，業者應於幾日前檢附安全管理計畫，報經地方主管機關核准？`, opts:[`十日`, `十五日`, `二十日`, `三十日`], ans:3, exp:`解析製作中`},
+  {q:`林大仁在參觀臺北國際旅展時，向某一旅館攤位買了兩張旅館住宿券，依據旅館業商品（服務）禮券定型化契約應記載及不得記載事項，下列那一事項不應該記載在住宿券上？`, opts:[`發行人名稱、地址、統一編號及負責人姓名`, `商品（服務）券之面額或使用之項目、次數`, `商品（服務）禮券發售編號`, `使用期限`], ans:3, exp:`解析製作中`},
+  {q:`在某觀光旅館中，導遊發現警察人員在房間內檢查其旅行團員身分，依觀光相關法令規定，警察不得將下列何種旅客帶至警察局進行盤查？`, opts:[`犯罪嫌疑人`, `經受臨檢團員同意`, `妨害安寧者`, `已確定受臨檢團員身分者`], ans:3, exp:`解析製作中`},
+  {q:`依據民宿管理辦法，位於原住民族地區、經農業主管機關核發許可登記證之休閒農場、經農業主管機關劃定之休閒農業區、觀光地區、偏遠地區及離島地區之民宿，得以客房數幾間以下，且客房總樓地板面積四百平方公尺以下之規模經營之？`, opts:[`8 間`, `10 間`, `12 間`, `15 間`], ans:3, exp:`解析製作中`},
+  {q:`小琉球位於下列何處之範圍？`, opts:[`海洋國家公園`, `澎湖國家風景區`, `墾丁國家公園`, `大鵬灣國家風景區`], ans:3, exp:`解析製作中`},
+  {q:`下列那個風景區不在參山國家風景區內？`, opts:[`獅頭山`, `八卦山`, `梨山`, `觀音山`], ans:3, exp:`解析製作中`},
+  {q:`依水域遊憩活動管理辦法規定，從事水肺潛水活動者，下列敘述何者錯誤？`, opts:[`應具有國內外潛水機構發給之能力證明`, `在潛水區域中設置潛水活動旗幟並攜帶潛水標位浮標`, `由合格之潛水教練每人每次指導水肺潛水活動者 10 人為限`, `由合格之潛水教練告知潛水水域的情況`], ans:2, exp:`解析製作中`},
+  {q:`國內報紙刊登下列那一個廣告，不會違反臺灣地區與大陸地區人民關係條例及相關法令之規定？`, opts:[`招攬臺灣地區人民赴福建投資建設鐵路`, `出售位於浙江省杭州市的綠野香波別墅`, `我愛甜心婚友社媒合兩岸婚姻`, `聯想筆記型電腦周年慶大促銷`], ans:3, exp:`解析製作中`},
+  {q:`大陸地區人民於一課稅年度內在臺灣地區居留、停留合計滿多久時間，應就其臺灣地區來源所得，準用臺灣地區人民適用之課稅規定，課徵綜合所得稅？`, opts:[`90 天`, `180 天`, `183 天`, `275 天`], ans:2, exp:`解析製作中`},
+  {q:`某艘大陸船舶未經許可進入臺灣地區限制水域從事走私行為，海洋委員會海巡署依法相關處置，下列敘述何者錯誤？`, opts:[`得扣留其船舶、物品及留置其人員`, `有拒絕停船或抗拒扣留之行為者，得予警告射擊`, `經警告無效而企圖逃離者，得直接擊燬`, `經主管機關查證該船有被扣留二次以上紀錄，得沒入`], ans:2, exp:`解析製作中`},
+  {q:`大陸地區人民來臺觀光，符合下列何種條件，始得向內政部移民署申請發給逐次加簽或一年多次臺灣地區入出境許可證？`, opts:[`曾就讀之大學為臺灣地區大學之合作學校`, `最近 12 個月內曾依規定來臺從事個人旅遊 2 次以上，且無違規情形`, `最近 6 個月內曾依規定來臺從事個人旅遊 1 次`, `年滿 20 歲且有相當新臺幣 20 萬元以上存款`], ans:1, exp:`解析製作中`},
+  {q:`大陸地區人民來臺觀光入境後，隨團導遊人員如果發現大陸旅客未依原訂行程旅遊而脫團時，應就近通報警察機關，並應通報下列那一機關？`, opts:[`交通部觀光局`, `內政部移民署`, `旅行業所在地之同業公會`, `旅行業所在地之地方政府`], ans:0, exp:`解析製作中`},
+  {q:`臺灣旅行業者辦理大陸地區人民來臺從事觀光活動業務，在臺旅遊行程應避開下列那個地方？`, opts:[`國家實驗研究院臺灣半導體研究中心`, `東北角鼻頭國小`, `龍山寺`, `國家人權博物館`], ans:0, exp:`解析製作中`},
+  {q:`如兩岸發生重大意外事件，下列何項協議訂有傷病者的緊急救治措施、資訊交換及傷病者轉送等交流合作之規定？`, opts:[`「海峽兩岸投資保障和促進協議」人身自由與安全保障共識`, `海峽兩岸關於大陸居民赴臺灣旅遊協議`, `海峽兩岸醫藥衛生合作協議`, `海峽兩岸空運協議`], ans:2, exp:`解析製作中`},
+  {q:`中國大陸以黨領政，雖然目前國家主席習近平集權一身，但中國共產黨的最高決策單位中央政治局常委會仍具體運作。下列那位人士不是中共第十九屆中央政治局常委？`, opts:[`劉鶴`, `習近平`, `栗戰書`, `李克強`], ans:0, exp:`解析製作中`},
+  {q:`2019 年 6 月以來，香港反送中運動遍地開花，鄰接的中國大陸深圳等地亦加強邊境檢查，國人若赴該二地旅遊，應關注是否發布旅遊警示。大陸地區、香港、澳門旅遊警示機制的發布機關是那個部門？`, opts:[`交通部`, `大陸委員會`, `財團法人海峽交流基金會`, `外交部`], ans:1, exp:`解析製作中`},
+  {q:`2018 年中國大陸第十三屆「全國人民代表大會」通過憲法修正案，下列敘述何者錯誤？`, opts:[`設立國家監察機關`, `刪除中共總書記連任限制`, `取消國家主席任期限制`, `載入習近平新時代中國特色社會主義思想`], ans:1, exp:`解析製作中`},
+  {q:`下列何者非護照資料頁記載事項？`, opts:[`出生地`, `中文別名`, `發照機關`, `國籍`], ans:1, exp:`解析製作中`},
+  {q:`關於役男出境現行規定，下列敘述何者錯誤？`, opts:[`現役役男應向服役（勤）單位申請出境核准後，再行出國`, `擬短期出境之役男應至外交部領事事務局網站申請出國核准後，再行出國`, `退伍後短期內要出境，應攜帶相關證明文件正本，以備國境人員查驗`, `已退伍（役）、免役或免除兵役義務者，出國不須申請核准程序`], ans:1, exp:`解析製作中`},
+  {q:`志玲的 15 歲女兒日前取得日本永久居留權，志玲想為女兒申請我國護照僑居身分加簽，下列何者不是志玲的女兒必須準備的申請文件？`, opts:[`外國護照正本`, `外國居留證件正本`, `護照加簽申請書，且須經法定代理人簽名同意`, `入出國日期證明書`], ans:0, exp:`解析製作中`},
+  {q:`阿信原為旅居英國的海外僑民，現已持有我國駐外館處所核發之護照返國定居，且在我國領有國民身分證。阿信如果想在原護照上增列身分證的統一編號，應如何辦理？`, opts:[`向外交部申請護照加簽`, `向內政部申請護照加註`, `向外交部申請換發新護照`, `向外交部申請護照資料修正`], ans:2, exp:`解析製作中`},
+  {q:`關於我國簽證效期之敘述，下列何者正確？`, opts:[`簽證效期為持用該簽證入境之最後日期，效期屆滿則為失效，無法持憑入境我國`, `在臺期間若未能於簽證效期屆滿前準時離境，應向外交部領事事務局或各辦事處重新申請簽證`, `在臺期間若未能於簽證效期屆滿前準時離境，應向交通部觀光局重新申請簽證`, `停留簽證及居留簽證的效期都是固定不變的，且居留簽證之簽證效期原則上較停留簽證長`], ans:0, exp:`解析製作中`},
+  {q:`下列何種人士不適用申請依親類別的來臺簽證？`, opts:[`國人之外籍配偶`, `國人之外籍尊親屬`, `國人之未成年子女`, `在臺合法居留外籍人士之配偶`], ans:1, exp:`解析製作中`},
+  {q:`關於我國電子簽證之敘述，下列何者錯誤？`, opts:[`適用我國電子簽證待遇之國家國民，申請電子簽證來臺前無須經過中央目的事業主管機關核准`, `申請電子簽證可透過線上刷卡付款`, `申獲電子簽證後應列印電子簽證紙本並持憑入境我國`, `電子簽證通常是多次簽證，且停留期限可分為 14 天、 30 天、 60 天及 90 天等四類`], ans:3, exp:`解析製作中`},
+  {q:`香港或澳門居民入國，除應備有效入出境許可證外，請問香港或澳門居民入國短期停留時，所持之護照效期至少應該要多久？`, opts:[`有效即可`, `1 個月以上`, `3 個月以上`, `6 個月以上`], ans:2, exp:`解析製作中`},
+  {q:`假設旅客攜帶新臺幣 50 萬元現鈔出入境，經查獲未依規定向海關申報，將受到何種處分？`, opts:[`超額 40 萬元退運`, `超額 40 萬元由海關沒入`, `50 萬元全額退運`, `50 萬元全額由海關沒入`], ans:1, exp:`解析製作中`},
+  {q:`依管理外匯條例規定，掌理外匯業務機關為：`, opts:[`財政部`, `金融監督管理委員會`, `中央銀行`, `經濟部`], ans:2, exp:`解析製作中`}
+];
+const KEYS=['A','B','C','D'];
+const ansArr=q=>[].concat(q.ans);
+const isOk=(q,a)=>a!==-1&&ansArr(q).includes(a);
+const ansText=q=>ansArr(q).map(k=>KEYS[k]+'：'+q.opts[k]).join('；或 ');
+const TOTAL_TIME=3600;
+let timeLeft=TOTAL_TIME,timerInterval,userAnswers=new Array(QUESTIONS.length).fill(-1),submitted=false,startTime=Date.now();
+function buildQuiz(){
+  const form=document.getElementById('quizForm'),dg=document.getElementById('dotGrid');
+  form.innerHTML='';dg.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const dot=document.createElement('div');
+    dot.className='dot';dot.id=`dot${i}`;dot.textContent=i+1;
+    dot.onclick=()=>document.getElementById(`q${i}`).scrollIntoView({behavior:'smooth',block:'center'});
+    dg.appendChild(dot);
+    const card=document.createElement('div');
+    card.className='q-card';card.id=`q${i}`;
+    card.innerHTML=`<div class="q-num">第 ${i+1} 題</div><div class="q-text">${q.q}</div><div class="options" id="opts${i}">${q.opts.map((opt,j)=>`<label class="option-label" id="lbl${i}_${j}" onclick="selectOption(${i},${j})"><input type="radio" name="q${i}" value="${j}"><span class="option-key">${KEYS[j]}</span><span>${opt}</span></label>`).join('')}</div>`;
+    form.appendChild(card);
   });
 }
-
-function selectAnswer(qi, i) {
-  if (submitted) return;
-  const q = QUESTIONS[qi];
-  userAnswers[qi] = i;
-  // Update UI
-  for (let k = 0; k < 4; k++) {
-    const btn = document.getElementById(`opt-${qi}-${k}`);
-    if (btn) btn.classList.remove('selected');
-  }
-  const selBtn = document.getElementById(`opt-${qi}-${i}`);
-  if (selBtn) selBtn.classList.add('selected');
-  updateProgress();
+function selectOption(qi,oi){
+  if(submitted)return;
+  userAnswers[qi]=oi;
+  for(let j=0;j<4;j++)document.getElementById(`lbl${qi}_${j}`).classList.toggle('selected',j===oi);
+  document.getElementById(`q${qi}`).classList.add('answered');
+  document.getElementById(`dot${qi}`).classList.add('done');
+  document.getElementById('answeredCount').textContent=userAnswers.filter(a=>a!==-1).length;
 }
-
-function updateProgress() {
-  const answered = Object.keys(userAnswers).length;
-  document.getElementById('progress').textContent = `已答 ${answered} / ${QUESTIONS.length} 題`;
-}
-
-function submitQuiz() {
-  if (submitted) return;
-  submitted = true;
-  clearInterval(timerInterval);
-
-  let correct = 0, invalid = 0;
-  QUESTIONS.forEach((q, qi) => {
-    const sel = userAnswers[qi];
-    const card = document.getElementById('card-' + qi);
-    const result = document.getElementById('result-' + qi);
-
-    if (q.ans === -1) {
-      invalid++;
-      result.className = 'result-box correct';
-      result.textContent = '本題無效，一律給分';
-      card.classList.add('answered-correct');
-      correct++;
-    } else if (sel === undefined) {
-      result.className = 'result-box wrong';
-      result.textContent = '未作答。' + getCorrectLabel(q);
-      card.classList.add('answered-wrong');
-    } else if (isCorrect(q, sel)) {
-      correct++;
-      card.classList.add('answered-correct');
-      result.className = 'result-box correct';
-      result.textContent = '✓ 答對了！';
-    } else {
-      card.classList.add('answered-wrong');
-      result.className = 'result-box wrong';
-      result.textContent = '✗ 答錯了。' + getCorrectLabel(q);
-    }
-
-    // Disable all options & show correct
-    for (let k = 0; k < 4; k++) {
-      const btn = document.getElementById(`opt-${qi}-${k}`);
-      if (!btn) continue;
-      btn.disabled = true;
-      if (q.ans !== -1 && (Array.isArray(q.ans) ? q.ans.includes(k) : q.ans === k)) {
-        btn.classList.add('correct');
-      } else if (sel === k && !isCorrect(q, k)) {
-        btn.classList.add('wrong');
-      }
-    }
-  });
-
-  const total = QUESTIONS.length;
-  const pct = Math.round(correct / total * 100);
-  document.getElementById('scoreNum').textContent = `得分：${correct} / ${total} 題（${pct}%）`;
-  document.getElementById('scoreDetail').textContent = `（無效題：${invalid} 題）`;
-  document.getElementById('scoreBar').style.display = 'block';
-  document.getElementById('submitArea').style.display = 'none';
-  document.getElementById('filterBar').style.display = 'flex';
-}
-
-function filterQ(mode) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  QUESTIONS.forEach((q, qi) => {
-    const card = document.getElementById('card-' + qi);
-    const sel = userAnswers[qi];
-    let show = true;
-    if (mode === 'wrong') {
-      show = card.classList.contains('answered-wrong') || (!submitted && sel === undefined);
-      if (!submitted) show = false;
-      show = card.classList.contains('answered-wrong');
-    } else if (mode === 'correct') {
-      show = card.classList.contains('answered-correct');
-    } else if (mode === 'unanswered') {
-      show = sel === undefined;
-    }
-    card.style.display = show ? '' : 'none';
-  });
-}
-
-function startTimer() {
-  timerInterval = setInterval(() => {
+function startTimer(){
+  timerInterval=setInterval(()=>{
     timeLeft--;
-    const m = Math.floor(timeLeft / 60);
-    const s = timeLeft % 60;
-    const el = document.getElementById('timer');
-    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-    if (timeLeft <= 300) el.classList.add('warning');
-    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); }
-  }, 1000);
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    document.getElementById('timerValue').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    document.getElementById('timerBar').style.width=(timeLeft/TOTAL_TIME*100)+'%';
+    const box=document.getElementById('timerBox');
+    if(timeLeft<=300)box.className='timer-box danger';
+    else if(timeLeft<=600)box.className='timer-box warning';
+    if(timeLeft<=0){clearInterval(timerInterval);if(!submitted){alert('⏰ 時間到！自動交卷。');submitQuiz(true);}}
+  },1000);
 }
-
-renderQuestions();
-startTimer();
+function submitQuiz(forced=false){
+  const unanswered=userAnswers.filter(a=>a===-1).length;
+  if(!forced){
+    document.getElementById('unansMsg').innerHTML=`<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:12px;text-align:center;margin:8px 0">${unanswered>0?`⚠️ 尚有 <strong>${unanswered}</strong> 題未作答，確定要交卷嗎？`:'✅ 已全部作答，確定要交卷嗎？'}<br><button style="margin-top:8px;padding:6px 16px;background:#e53e3e;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="submitQuiz(true)">確定交卷</button><button style="margin-top:8px;margin-left:8px;padding:6px 16px;background:white;border:1.5px solid #cbd5e0;border-radius:6px;cursor:pointer" onclick="document.getElementById('unansMsg').innerHTML=''">繼續作答</button></div>`;
+    const box=document.getElementById('unansMsg');box.style.scrollMarginBottom='90px';box.scrollIntoView({behavior:'smooth',block:'end'});
+    return;
+  }
+  submitted=true;document.getElementById('unansMsg').innerHTML='';clearInterval(timerInterval);
+  const elapsed=Math.round((Date.now()-startTime)/1000),em=Math.floor(elapsed/60),es=elapsed%60;
+  let correct=0;
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById(`q${i}`);
+    if(isOk(q,userAnswers[i])){
+      correct++;card.className='q-card result-correct';
+      const b=document.createElement('div');b.className='result-badge ok';b.innerHTML='✅ 答對';card.querySelector('.options').after(b);
+      if(q.exp){const ep=document.createElement('div');ep.className='explanation-panel';ep.textContent=q.exp;const bt=document.createElement('button');bt.className='btn-explain';bt.type='button';bt.textContent='查看解析';bt.onclick=function(){ep.classList.toggle('visible');bt.textContent=ep.classList.contains('visible')?'收起解析':'查看解析';};b.after(bt);bt.after(ep);}
+    }else{
+      card.className='q-card result-wrong';
+      const b=document.createElement('div');b.className='result-badge err';b.innerHTML='❌ 答錯';card.querySelector('.options').after(b);
+      const n=document.createElement('div');n.className='correct-note';n.innerHTML=`✔ 正確答案：<strong>${ansText(q)}</strong>`;b.after(n);
+      if(q.exp){const ep=document.createElement('div');ep.className='explanation-panel';ep.textContent=q.exp;const bt=document.createElement('button');bt.className='btn-explain';bt.type='button';bt.textContent='查看解析';bt.onclick=function(){ep.classList.toggle('visible');bt.textContent=ep.classList.contains('visible')?'收起解析':'查看解析';};n.after(bt);bt.after(ep);}
+    }
+    for(let j=0;j<4;j++){
+      const lbl=document.getElementById(`lbl${i}_${j}`);
+      lbl.style.cursor='default';
+      if(ansArr(q).includes(j))lbl.classList.add('correct-ans');
+      else if(j===userAnswers[i]&&!isOk(q,userAnswers[i]))lbl.classList.add('wrong-ans');
+    }
+  });
+  const score=Math.round(correct*100/QUESTIONS.length);
+  const wrong=QUESTIONS.length-correct-userAnswers.filter(a=>a===-1).length;
+  const skip=userAnswers.filter(a=>a===-1).length;
+  let grade,gc;
+  if(score>=80){grade='🏆 優秀';gc='#276749';}else if(score>=60){grade='✅ 及格';gc='#2b6cb0';}else{grade='❌ 未及格';gc='#c53030';}
+  document.getElementById('scoreVal').textContent=score+' 分';
+  document.getElementById('scoreDetail').textContent=`共 ${QUESTIONS.length} 題・每題 ${(100/QUESTIONS.length).toFixed(1)} 分`;
+  const ge=document.getElementById('scoreGrade');ge.textContent=grade;ge.style.background=gc+'22';ge.style.color=gc;
+  document.getElementById('statCorrect').textContent=correct;
+  document.getElementById('statWrong').textContent=wrong;
+  document.getElementById('statSkip').textContent=skip;
+  document.getElementById('statTime').textContent=String(em).padStart(2,'0')+':'+String(es).padStart(2,'0');
+  document.getElementById('score-panel').style.display='block';
+  document.getElementById('unansMsg').innerHTML='';
+  document.querySelector('.btn-submit').style.display='none';
+  document.getElementById('resetBtn').style.display='inline-block';
+  document.getElementById('score-panel').scrollIntoView({behavior:'smooth'});
+}
+function filterQ(mode){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  QUESTIONS.forEach((q,i)=>{
+    const card=document.getElementById(`q${i}`);
+    if(mode==='all')card.style.display='';
+    else if(mode==='wrong')card.style.display=(!isOk(q,userAnswers[i]))?'':'none';
+    else card.style.display=(isOk(q,userAnswers[i]))?'':'none';
+  });
+}
+function resetQuiz(){
+  submitted=false;userAnswers=new Array(QUESTIONS.length).fill(-1);
+  timeLeft=TOTAL_TIME;startTime=Date.now();clearInterval(timerInterval);
+  document.getElementById('timerBox').className='timer-box';
+  document.getElementById('timerValue').textContent='60:00';
+  document.getElementById('timerBar').style.width='100%';
+  document.getElementById('score-panel').style.display='none';
+  document.querySelector('.btn-submit').style.display='inline-block';
+  document.getElementById('resetBtn').style.display='none';
+  document.getElementById('unansMsg').innerHTML='';
+  document.getElementById('answeredCount').textContent='0';
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.filter-btn').classList.add('active');
+  buildQuiz();startTimer();window.scrollTo({top:0,behavior:'smooth'});
+}
+buildQuiz();startTimer();
 </script>
 </body>
 </html>
